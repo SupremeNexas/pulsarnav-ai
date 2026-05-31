@@ -1,0 +1,107 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+virtualenv/
+
+# Node.js dependencies and package managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Next.js / React build artifacts
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Tailwind / frontend generated artifacts
+.turbo/
+.vercel/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# VS Code and editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Logs
+logs/
+*.log
+
+# Large NANOGrav datasets and generated science outputs
+NANOGrav_12yv4/
+dataset/
+data/
+datasets/
+output/
+outputs/
+
+# Keep lightweight sample data in Git
+!sample_data/
+!sample_data/**
+!docs/
+!docs/**
+
+# Common large scientific data products
+*.h5
+*.hdf5
+*.fits
+*.fit
+*.parquet
+*.feather
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+
+# Local notebooks and scratch work
+.ipynb_checkpoints/
+scratch/
+tmp/
+temp/
