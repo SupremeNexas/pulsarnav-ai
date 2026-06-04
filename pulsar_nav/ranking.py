@@ -55,6 +55,8 @@ def rank_pulsars(catalog: pd.DataFrame, vectors: pd.DataFrame, toa_stats: pd.Dat
         "x",
         "y",
         "z",
+        "dm",
+        "median_freq_mhz",
     ]
     return df[cols].sort_values("score", ascending=False).reset_index(drop=True)
 

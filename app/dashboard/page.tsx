@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -38,6 +38,7 @@ const navItems = [
   { id: "catalog", label: "Pulsar Catalog", icon: Database },
   { id: "toa", label: "TOA Database", icon: CircleDot },
   { id: "simulator", label: "Navigation Simulator", icon: Rocket },
+  { id: "lab", label: "Navigation Lab", icon: Gauge },
   { id: "selection", label: "Pulsar Selection", icon: Radar },
   { id: "errors", label: "Error Analysis", icon: BarChart3 },
   { id: "ai", label: "AI Insights", icon: BrainCircuit },
@@ -118,6 +119,7 @@ function DashboardContent() {
             {active === "catalog" && <CatalogPage />}
             {active === "toa" && <ToaPage />}
             {active === "simulator" && <SimulatorPage />}
+            {active === "lab" && <NavigationLabPage />}
             {active === "selection" && <SelectionPage />}
             {active === "errors" && <ErrorAnalysisPage />}
             {active === "ai" && <AiInsightsPage />}
@@ -338,6 +340,152 @@ function SimulatorPage() {
         <div className="border-b border-slate-800 p-5"><SectionTitle title="3D Space Visualization" action="Earth • Moon • Spacecraft • Pulsar vectors" /></div>
         <SpaceScene />
       </Panel>
+    </div>
+  );
+}
+
+type NavigationLabResult = {
+  config: { trials: number; pulsars: number; noiseNs: number; region: string; seed: number };
+  pulsars: string[];
+  summary: { meanErrorKm: number; medianErrorKm: number; p95ErrorKm: number; maxErrorKm: number };
+  distribution: { bin: string; count: number }[];
+};
+
+function NavigationLabPage() {
+  const [trials, setTrials] = useState(1000);
+  const [pulsars, setPulsars] = useState(6);
+  const [noise, setNoise] = useState(100);
+  const [region, setRegion] = useState("earth_moon");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<NavigationLabResult | null>(null);
+
+  async function runSimulation() {
+    setLoading(true);
+    const params = new URLSearchParams({
+      trials: String(trials),
+      pulsars: String(pulsars),
+      noise: String(noise),
+      region,
+    });
+    const response = await fetch(`/api/navigation-lab?${params.toString()}`);
+    const payload = (await response.json()) as NavigationLabResult;
+    setResult(payload);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    runSimulation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const maxBin = Math.max(...(result?.distribution.map((item) => item.count) ?? [1]));
+
+  return (
+    <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
+      <Panel>
+        <SectionTitle title="Navigation Lab Controls" action="Monte Carlo engine" />
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Monte Carlo Trials</span>
+          <input
+            type="number"
+            min={100}
+            max={5000}
+            step={100}
+            value={trials}
+            onChange={(event) => setTrials(Number(event.target.value))}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Number of Pulsars</span>
+          <input
+            type="range"
+            min={4}
+            max={8}
+            value={pulsars}
+            onChange={(event) => setPulsars(Number(event.target.value))}
+            className="mt-3 w-full"
+          />
+          <div className="mt-1 text-sm text-cyan-100">{pulsars} pulsars</div>
+        </label>
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Timing Noise</span>
+          <select
+            value={noise}
+            onChange={(event) => setNoise(Number(event.target.value))}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            {[10, 50, 100, 500, 1000].map((value) => (
+              <option key={value} value={value}>{value} ns</option>
+            ))}
+          </select>
+        </label>
+        <label className="mb-5 block">
+          <span className="text-sm text-slate-400">Spacecraft Region</span>
+          <select
+            value={region}
+            onChange={(event) => setRegion(event.target.value)}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            <option value="earth_orbit">Earth orbit</option>
+            <option value="earth_moon">Earth-Moon space</option>
+            <option value="deep_space">Deep space</option>
+          </select>
+        </label>
+        <Button onClick={runSimulation} disabled={loading} className="w-full bg-primary text-slate-950 hover:bg-secondary">
+          <Play className="h-4 w-4" />
+          {loading ? "Running..." : "Run Simulation"}
+        </Button>
+        <div className="mt-5 rounded-md border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-100">
+          API: <span className="font-mono">/api/navigation-lab</span>
+        </div>
+      </Panel>
+
+      <div className="space-y-5">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Mean Error", result?.summary.meanErrorKm],
+            ["Median Error", result?.summary.medianErrorKm],
+            ["95% Error", result?.summary.p95ErrorKm],
+            ["Max Error", result?.summary.maxErrorKm],
+          ].map(([label, value]) => (
+            <Panel key={label as string}>
+              <p className="text-sm text-slate-400">{label}</p>
+              {loading || value === undefined ? (
+                <Skeleton className="mt-4 h-9" />
+              ) : (
+                <p className="mt-3 text-3xl font-semibold text-cyan-100">{Number(value).toFixed(4)} km</p>
+              )}
+            </Panel>
+          ))}
+        </div>
+        <Panel>
+          <SectionTitle title="Position Error Distribution" action={`${result?.config.trials ?? trials} trials`} />
+          <div className="flex h-[320px] items-end gap-2 rounded-lg border border-slate-700/70 bg-slate-950/50 p-4">
+            {(result?.distribution ?? Array.from({ length: 16 }, (_, index) => ({ bin: String(index), count: 0 }))).map((bin) => (
+              <div key={bin.bin} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                <div
+                  className="w-full rounded-t bg-gradient-to-t from-cyan-500 to-sky-200"
+                  style={{ height: `${Math.max(4, (bin.count / maxBin) * 260)}px` }}
+                  title={`${bin.bin}: ${bin.count}`}
+                />
+              </div>
+            ))}
+          </div>
+        </Panel>
+        <Panel>
+          <SectionTitle title="Selected Pulsar Geometry" action="4-8 source least-squares solver" />
+          <div className="flex flex-wrap gap-2">
+            {(result?.pulsars ?? topPulsars.slice(0, pulsars).map((item) => item.name)).map((name) => (
+              <Badge key={name} className="border-primary/30 bg-primary/10 text-cyan-100">{name}</Badge>
+            ))}
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-400">
+            The lab estimates spacecraft position from synthetic pulsar delays generated with delta_t = r dot n / c,
+            then reports Euclidean position error between true and recovered position.
+          </p>
+        </Panel>
+      </div>
     </div>
   );
 }

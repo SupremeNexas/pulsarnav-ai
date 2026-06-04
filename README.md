@@ -16,6 +16,7 @@ The current implementation is designed for academic demonstrations, SAC/ISRO-sty
 - Pulse propagation delay model using `delay = r dot n / c`
 - Least-squares and weighted least-squares position estimation
 - Monte Carlo error analysis across timing noise levels and pulsar counts
+- Navigation Lab engine with 1000+ trial simulation runs, CSV exports, plots, and API access
 - Pulsar selection optimization using geometry dilution of precision
 - Research dashboard with dark aerospace mission-control UI
 - 3D space visualization using Three.js and React Three Fiber
@@ -179,6 +180,39 @@ output/final_report.md
 
 `output/` is excluded from Git because generated science products can be large.
 
+### Run the Core Navigation Lab Engine
+
+Use the existing `output/ranked_pulsars.csv` produced by the pipeline:
+
+```bash
+python3 scripts/run_navigation_lab.py \
+  --vectors output/ranked_pulsars.csv \
+  --output-dir output \
+  --trials 1000
+```
+
+This generates:
+
+```text
+output/navigation_lab_results.csv
+output/navigation_lab_summary.csv
+output/navigation_lab_positions.csv
+output/position_error_vs_timing_noise.svg
+output/position_error_distribution.svg
+output/position_error_vs_pulsar_count.svg
+```
+
+You can customize the simulation:
+
+```bash
+python3 scripts/run_navigation_lab.py \
+  --vectors output/ranked_pulsars.csv \
+  --output-dir output \
+  --trials 1500 \
+  --noise-ns 10 50 100 500 1000 \
+  --pulsar-counts 4 5 6 7 8
+```
+
 ### Run the Web UI
 
 ```bash
@@ -195,6 +229,12 @@ Dashboard:
 
 ```text
 http://localhost:3000/dashboard
+```
+
+Navigation Lab API:
+
+```text
+http://localhost:3000/api/navigation-lab?trials=1000&pulsars=6&noise=100&region=earth_moon
 ```
 
 ### Build the Web UI

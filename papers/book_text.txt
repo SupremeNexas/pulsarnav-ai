@@ -1,0 +1,7460 @@
+
+
+========== PAGE 1 ==========
+
+
+
+========== PAGE 2 ==========
+
+Navigation in Space by X-ray Pulsars
+
+
+========== PAGE 3 ==========
+
+
+
+========== PAGE 4 ==========
+
+Amir Abbas Emadzadeh
+• Jason Lee Speyer
+Navigation in Space by X-ray
+Pulsars
+ABC
+
+
+========== PAGE 5 ==========
+
+Amir Abbas Emadzadeh
+University of California, Los Angeles
+420 Westwood Plaza, 44-139-D1
+Los Angeles, CA 90095-1597
+USA
+amire@ee.ucla.edu
+Jason Lee Speyer
+University of California, Los Angeles
+420 Westwood Plaza, 38-1370
+Los Angeles, CA 90095-1597
+USA
+speyer@seas.ucla.edu
+ISBN 978-1-4419-8016-8
+e-ISBN 978-1-4419-8017-5
+DOI 10.1007/978-1-4419-8017-5
+Springer New York Dordrecht Heidelberg London
+Library of Congress Control Number: 2011921257
+c⃝Springer Science+Business Media, LLC 2011
+All rights reserved. This work may not be translated or copied in whole or in part without the written
+permission of the publisher (Springer Science+Business Media, LLC, 233 Spring Street, New York,
+NY 10013, USA), except for brief excerpts in connection with reviews or scholarly analysis. Use in
+connection with any form of information storage and retrieval, electronic adaptation, computer software,
+or by similar or dissimilar methodology now known or hereafter developed is forbidden.
+The use in this publication of trade names, trademarks, service marks, and similar terms, even if they are
+not identiﬁed as such, is not to be taken as an expression of opinion as to whether or not they are subject
+to proprietary rights.
+Printed on acid-free paper
+Springer is part of Springer Science+Business Media (www.springer.com)
+
+
+========== PAGE 6 ==========
+
+To my mom and dad, Batoul and
+MohammadKazem, my two sisters, Ensieh
+and Maryam, and Minoo, whom all I love so
+much (AAE)
+To my wife Barbara, my children Gil,
+Gavriel, Rakhel, and Joseph, and my
+grandchildren Noa, Alon, Oliver, Isaac,
+Donovan, Vivian, and Sylvia for giving me so
+much love and joy (JLS)
+
+
+========== PAGE 7 ==========
+
+
+
+========== PAGE 8 ==========
+
+Preface
+This monograph, which is an extension of Dr. Emadzadeh’s doctoral thesis, investi-
+gates the different aspects of utilization of X-ray pulsars for navigation of spacecraft
+in space. In our view, the monograph possesses two unique features. First, it pro-
+vides a solid mathematical formulation for the absolute and relative navigation
+problems based on the use of X-ray pulsar measurements. Second, it presents a
+comprehensive framework for the signal processing techniques needed to obtain the
+navigation solution.
+We had several readers in mind when writing this monograph. One such group is
+the body of university students and researchers who work on new space navigation
+techniques. Using X-ray pulsars for navigation is an interesting ﬁeld in which there
+are many new challenging problems that need to be addressed. Another target group
+comprises people from the industry. Deep space navigation missions, especially the
+ones directed beyond the solar system, have attracted a lot of attention in recent
+years. Employing new space navigation techniques will deﬁnitely play a key role
+in making such missions successful. We hope that the monograph will encourage
+more researchers in the area of space navigation to work on X-ray pulsar-based
+navigation.
+The subject matter requires some familiarity with linear systems, probability,
+and estimation theory. The knowledge is generally assumed to be of advanced un-
+dergraduate and graduate level. It will be more beneﬁcial, if the reader proceeds
+through the chapters in sequence. We ﬁrst provide some basic background knowl-
+edge on pulsars and a literature review on pulsar-based navigation in Chap. 2. Then,
+we present the navigation problems, and develop the X-ray pulsar signal models in
+Chap. 3. Using these models, we formulate and analyze the pulse delay estimation
+problem in Chap. 3. Different pulse delay estimators are proposed in Chaps. 4, 5,
+and 6. Using the presented estimators, Chap. 7 provides a recursive algorithm to ob-
+tain the navigation solution. Concluding remarks and suggestions for future work
+are given in Chap. 8.
+Finally, we acknowledge Dr. A. Robert Golshan for his valuable comments and
+suggestions, which helped us greatly improve the monograph.
+Los Angeles, CA
+Amir A. Emadzadeh
+October 2010
+Jason L. Speyer
+vii
+
+
+========== PAGE 9 ==========
+
+
+
+========== PAGE 10 ==========
+
+Contents
+1
+Introduction ....................................................................
+1
+2
+Celestial-Based Navigation: An Overview ..................................
+3
+2.1
+Introduction ..............................................................
+3
+2.2
+Current Spacecraft Navigation Systems ................................
+3
+2.3
+Pulsar-Based Navigation ................................................
+5
+2.3.1
+Why Celestial-Based Systems? .................................
+5
+2.3.2
+Pulsars ...........................................................
+6
+2.3.3
+Why Use X-ray Pulsars for Navigation? ....................... 10
+2.3.4
+History of Pulsar-Based Navigation ............................ 10
+2.4
+Summary ................................................................. 12
+3
+Signal Modeling ................................................................ 13
+3.1
+Introduction .............................................................. 13
+3.2
+Proposed Navigation System Structure ................................. 13
+3.3
+X-ray Detectors .......................................................... 15
+3.4
+X-ray Pulsar Signal ...................................................... 16
+3.4.1
+Constant-Frequency Model ..................................... 20
+3.4.2
+Time-Dependent-Frequency Model ............................ 20
+3.5
+Discussion................................................................ 21
+3.6
+Epoch Folding ........................................................... 22
+3.7
+Epoch Folding in Presence of Velocity Errors ......................... 25
+3.8
+Generating Photon TOAs................................................ 28
+3.9
+Numerical Examples .................................................... 30
+3.10
+Summary ................................................................. 33
+4
+Pulse Delay Estimation ........................................................ 35
+4.1
+Introduction .............................................................. 35
+4.2
+Pulse Delay Estimation .................................................. 35
+4.3
+CRLB .................................................................... 36
+4.4
+Discussion................................................................ 44
+4.5
+Numerical Examples .................................................... 44
+4.6
+Summary ................................................................. 47
+ix
+
+
+========== PAGE 11 ==========
+
+x
+Contents
+5
+Pulse Delay Estimation Using Epoch Folding............................... 49
+5.1
+Introduction .............................................................. 49
+5.2
+Cross Correlation Technique ............................................ 49
+5.3
+Nonlinear Least Squares Technique .................................... 55
+5.4
+Discussion................................................................ 57
+5.5
+Absolute Velocity Errors ................................................ 58
+5.6
+Computational Complexity Analysis ................................... 59
+5.6.1
+Epoch Folding ................................................... 59
+5.6.2
+CC Estimator .................................................... 59
+5.6.3
+NLS Estimator ................................................... 61
+5.7
+Numerical Examples .................................................... 61
+5.7.1
+Initial Phase Estimators ......................................... 61
+5.7.2
+Pulse Delay Estimators.......................................... 64
+5.8
+Summary ................................................................. 70
+6
+Pulse Delay Estimation via Direct Use of TOAs ............................ 73
+6.1
+Introduction .............................................................. 73
+6.2
+Maximum-Likelihood Estimator........................................ 73
+6.3
+Numerical Determination of the MLE .................................. 77
+6.4
+ML Computational Complexity Analysis .............................. 78
+6.5
+Computational Complexity: Summary ................................. 78
+6.6
+Absolute Velocity Errors ................................................ 79
+6.7
+Numerical Examples .................................................... 79
+6.7.1
+ML Phase Estimator............................................. 80
+6.7.2
+Pulse Delay Estimator........................................... 81
+6.7.3
+Computational Cost ............................................. 82
+6.8
+Summary ................................................................. 85
+7
+Recursive Estimation .......................................................... 87
+7.1
+Introduction .............................................................. 87
+7.2
+System Dynamics........................................................ 87
+7.3
+Measurements............................................................ 90
+7.4
+Discrete Time Estimation Process ...................................... 92
+7.5
+Discussion................................................................ 93
+7.6
+Absolute Navigation ..................................................... 94
+7.7
+A Geometric Approach for Estimation of Absolute Velocities ........ 94
+7.8
+Numerical Examples .................................................... 95
+7.9
+Summary .................................................................110
+8
+Epilog............................................................................111
+References...........................................................................113
+Index .................................................................................117
+
+
+========== PAGE 12 ==========
+
+Acronyms
+ARGOS
+Advanced Research and Global Observation Satellite
+CC
+Cross correlation
+CRLB
+Cram´er Rao lower bound
+DARPA
+Defense Advanced Research Projects Agency
+DGPS
+Differential Global Positioning System
+DSN
+Deep Space Network
+EKF
+Extended Kalman ﬁlter
+GPS
+Global Positioning System
+IMU
+Inertial measurement unit
+JPL
+Jet Propulsion Laboratory
+ML
+Maximum-likelihood
+MLE
+Maximum-likelihood estimator
+MSE
+Mean square error
+NASA
+National Aeronautics and Space Administration
+NHPP
+Non-homogeneous Poisson process
+NLS
+Nonlinear least squares
+NRAO
+National Radio Astronomy Observatory
+NRL
+Naval Research Laboratory
+PSD
+Power spectral density
+RMS
+Root mean square
+SNR
+Signal to noise ratio
+SSB
+Solar system barycenter
+STD
+Standard deviation
+TOA
+Time of arrival
+VLBI
+Very Long Baseline Interferometer
+XNAV
+X-ray Navigation
+xi
+
+
+========== PAGE 13 ==========
+
+
+
+========== PAGE 14 ==========
+
+Chapter 1
+Introduction
+One of the main requirements for any space mission is to navigate the spacecraft.
+Current space navigation methods highly depend on ground-based operations.
+To achieve more autonomy and also to augment the current available navigation so-
+lutions, we are interested in utilization of celestial-based navigation systems. Such
+systems use signals emitted from celestial sources located at great distances from
+Earth. Because of their special characteristics, X-ray pulsars are potential celestial
+candidates for navigation.
+The purpose of this book is to provide a concise treatment of utilizing a new
+navigation system for space missions, which is based on employing X-ray signals
+emitted from pulsars. Speciﬁcally, the book starts with reviewing current navigation
+methods being used for space missions. We provide motivations for adopting new
+space navigation approaches, and we suggest employing X-ray pulsars. We present
+the navigation system structure and provide the mathematical tools required to study
+and analyze different parts of the system. We also develop different signal process-
+ing techniques, which are essential to obtain the pulsar-based navigation solution.
+Chapter 2 begins with an overview of current space navigation systems. It ex-
+plains why utilizing celestial-based navigation systems is an interesting option for
+space missions. It shows why, of all available celestial sources, X-ray pulsars are
+suggested to be employed for space navigation. It also provides a brief treatment of
+pulsars and the history of pulsar-based space navigation.
+In Chap. 3, the structure of the proposed X-ray pulsar-based navigation system is
+explained. Mathematical models describing the X-ray pulsar signals are developed.
+The time of arrival (TOA) of received photons is modeled as a non-homogeneous
+Poisson process (NHPP), and the probability density function of the TOAs is pre-
+sented. Also, an effective algorithm is presented for simulation of the TOAs for any
+given pulsar with a known rate function. Additionally, it is explained how using
+epoch folding, photon intensity function can be retrieved by measurement of the
+TOAs. The noise associated with the procedure is also analyzed. Furthermore, the
+effect of imprecise spacecraft velocity information on epoch folding is studied.
+Chapter 4 focuses on mathematical formulation of the pulse delay estimation
+problem. It employs models of the pulsar photon intensity functions on each detec-
+tor. It also shows how to model the differential time between the spacecraft clocks.
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 1, c⃝Springer Science+Business Media, LLC 2011
+1
+
+
+========== PAGE 15 ==========
+
+2
+1 Introduction
+Depending on available spacecraft data, the Cram´er–Rao lower bound (CRLB) is
+provided for estimation of the unknown parameters. Some numerical examples are
+also presented.
+In Chap.5, it is proposed to ﬁrst recover the pulsar photon intensity functions
+through the epoch folding procedure, and then estimate the pulse delay using the
+recovered photon intensities. Based on epoch folding, two different methods are pro-
+posed for the estimation of the pulse delay: (1) Using the cross correlation function
+between the empirical rate function and the true rate function and (2) Minimizing
+the difference between the empirical rate function and the true one through solving
+a nonlinear least squares problem. Asymptotic behavior of the proposed estimators
+and the effect of spacecraft velocity errors on their performance are also studied.
+Computational complexity of the estimators is investigated as well. Finally, analyt-
+ical results are veriﬁed via numerical simulations.
+Based on maximum-likelihood (ML) criterion and direct utilization of the mea-
+sured photon time tags, another pulse delay estimator is proposed in Chap. 6. The
+estimator’s asymptotic behavior, and the effect of imprecise spacecraft velocity data
+on its performance is studied. Computational complexity of the proposed estima-
+tor is investigated. And to assess the analytical results, numerical simulations are
+performed.
+In Chap. 7, the dynamics models of inertial measurement unit (IMU) and space-
+craft motion are employed by a Kalman ﬁlter to obtain the three-dimensional
+navigation solution. The effect of different navigation system parameters on achiev-
+able estimation accuracies is investigated. In particular, the effects of different
+values of IMU uncertainty, measurement noise variance, the number of pulsars used
+for measurement, their geometric dispersion in the sky map, and imprecise space-
+craft velocity data are considered.
+Finally, concluding remarks and suggestions for future work are provided in
+Chap. 8.
+
+
+========== PAGE 16 ==========
+
+Chapter 2
+Celestial-Based Navigation: An Overview
+2.1
+Introduction
+In this chapter, we present an overview of spacecraft navigation using X-ray pulsars.
+In Sect. 2.2, we present a concise treatment of current navigation methods being
+utilized for space missions. Section 2.3.1 describes why employing celestial-based
+navigation techniques is desirable for space missions. We introduce different types
+of pulsars in Sect. 2.3.2. Section 2.3.3 explains why X-ray pulsars are interesting
+candidates to be used for navigation purposes. A short history of pulsar-based navi-
+gation is given in Sect. 2.3.4.
+2.2
+Current Spacecraft Navigation Systems
+Most of space vehicle operations, thus far, have relied widely on Earth-based nav-
+igation methods for absolute position determination [1, 2]. Methods such as radar
+range and optical tracking are widely used for this purpose [3]. Although a ground-
+based tracking system has the advantage of not requiring an active hardware on
+the spacecraft itself, it does need extensive ground operations and careful analy-
+sis of the measured data in an electromagnetically noisy background environment.
+Also, as a spacecraft moves further away from Earth, its position estimation error
+increases if a radar-based navigation system is used. To achieve the necessary range
+determination, the radar system needs to know the observation station’s position
+on Earth accurately. Another limitation is that such a system requires the knowl-
+edge of positional information of the solar system objects [1]. However, even if
+precise information of the radar station and solar system objects is available, the
+vehicle position estimation can only be accurate to a ﬁnite angular accuracy. The
+transmitted radar beam, along with the reﬂected signal, travels in a cone of uncer-
+tainty. This uncertainty degrades the position knowledge of the vehicle as a linear
+function of distance. Alternatively, many space vehicles, traveling into deep space
+or on interplanetary missions, employ active transmitters for orbit determination
+purposes [1]. The spacecraft receives a ping from an observation station on Earth
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 2, c⃝Springer Science+Business Media, LLC 2011
+3
+
+
+========== PAGE 17 ==========
+
+4
+2 Celestial-Based Navigation: An Overview
+and retransmits the signal back to Earth. Then, the radial velocity is measured at
+the receiving station by measuring the Doppler frequency of the transmitted signal.
+Although some improvements are achieved in spacecraft navigation utilizing such
+systems, this method still has errors that increase with distance. Early experiments
+using these tracking systems on the Viking spacecraft showed accuracies to about
+50 km in position estimation error for missions to Mars and positional accuracies on
+the order of hundreds of kilometers at the outer planets [2].
+Another navigation approach is optical tracking. Spacecraft navigation based on
+optical tracking measurements is performed in a similar way as radar tracking [4].
+This technique is based on the use of the visible light reﬂected from a vehicle to
+determine its location. For some optical measurements, a photograph needs to be
+taken and the vehicle’s position is calculated after analysis of the photograph and
+comparison to a ﬁxed star background. Therefore, real-time measurements using
+such systems typically are not achieved easily. Furthermore, optical measurements
+are limited by environmental conditions.
+As many missions have concentrated on planetary observations, spacecraft navi-
+gation can be done by taking video images of the planet and comparing them to the
+known planetary parameters such as diameter and position relative to the other ce-
+lestial objects. Throughout this procedure, the position of the spacecraft relative to
+the planet can be determined [5]. This requires the vehicle to be within the vicinity
+of the investigated planet.
+To obtain accurate absolute navigation solutions for deep space missions, a com-
+bination of Earth-based radar ranging and on-vehicle planet imaging is typically
+required. This approach still requires human interaction and interpretation of data.
+Furthermore, as radar-ranging errors increase as the vehicle’s distance from Earth
+increases, accurate navigation becomes more complex because of the required ﬁner
+pointing accuracy of ground antennas. Additionally, the vehicles that process video
+images for navigation purposes need to have complicated onboard systems, which
+increase their cost. The imaging process also requires the vehicles to be sufﬁciently
+close to the planets. Therefore, it is necessary to investigate alternative methods that
+could provide a complete, accurate absolute navigation solution throughout the solar
+system, and perhaps eventually the intergalactic regimes.
+For vehicles operating in space close to the Earth, the current Global Position-
+ing System (GPS) can provide a complete autonomous navigation solution [6]. The
+GPS uses a constellation of between 24 and 32 medium Earth orbit satellites that
+transmit precise microwave signals, enable GPS receivers to determine their loca-
+tion, speed, direction, and time. However, these satellite systems have limited scope
+for the operation of vehicles relatively far from Earth.
+For deep space missions, many spacecraft utilize the Deep Space Network
+(DSN). This system is an international network of antennas that supports inter-
+planetary spacecraft missions, and radio and radar astronomy observations for the
+exploration of the solar system and the universe [7]. The network also supports
+selected Earth-orbiting missions. The DSN currently consists of three deep space
+communications facilities placed ∼120◦apart around the world: at Goldstone,
+in California’s Mojave desert; near Madrid, Spain; and near Canberra, Australia.
+
+
+========== PAGE 18 ==========
+
+2.3 Pulsar-Based Navigation
+5
+This strategic placement permits constant observation of spacecraft as the Earth
+rotates and helps to make the DSN the largest and most sensitive scientiﬁc telecom-
+munications system in the world.
+Although accurate radial position can be determined using DSN, it requires
+extensive ground operations and scheduling to coordinate the observations. Even
+utilizing interferometry, the angular uncertainty still can increase signiﬁcantly with
+distance. Position accuracies in the order of 1–10 km per astronomical unit (AU) of
+distance from Earth are achievable using interferometric measurements of the Very
+Long Baseline Interferometer (VLBI) through the DSN [1]. The VLBI is a type of
+astronomical interferometry used in radio astronomy. It allows observations of an
+object that are made simultaneously by many telescopes to be combined, emulating
+a telescope with a size equal to the maximum separation between the telescopes.
+Data received at each antenna in the array is paired with timing information, usually
+from a local atomic clock, and then stored for later analysis on magnetic tape or hard
+disk. At a later time, the data is correlated with data from other antennas similarly
+recorded to produce the resulting image. The resolution achievable using interfer-
+ometry is proportional to the observing frequency and the distance between the
+antennas farthest apart in the array. The VLBI technique enables this distance to
+be much greater than that possible with conventional interferometry, which requires
+antennas to be physically connected by coaxial cable, waveguide, optical ﬁber, or
+other types of transmission line.
+2.3
+Pulsar-Based Navigation
+2.3.1
+Why Celestial-Based Systems?
+Autonomous formation ﬂying of multiple spacecraft is an important technology for
+both deep-space and near-Earth applications [8, 9]. One of the main requirements
+of a formation ﬂight is accurate knowledge of the relative position and velocities
+between the vehicles. The spacecraft absolute navigation solution is also needed for
+any space mission. Several researchers have shown that the navigation solution for
+aerial and low-Earth-orbit applications can be obtained by utilizing differential GPS
+(DGPS). DGPS is an enhancement to Global Positioning System that uses a net-
+work of ﬁxed, ground-based reference stations to broadcast the difference between
+the positions indicated by the satellite systems and known ﬁxed positions. These sta-
+tions broadcast the difference between measured satellite pseudoranges and actual
+(internally computed) pseudoranges, with receiver stations correcting their pseudo-
+ranges by the same amount. However, for deep space missions or situations where
+GPS is not available, an alternative approach is needed. Employing Earth-based
+navigation systems, such as DSN, is a possibility. But, as mentioned in Sect. 2.2,
+such systems suffer from low performance in situations where long range naviga-
+tion is required. Furthermore, they are highly based on communicating with Earth
+to analyze their data.
+
+
+========== PAGE 19 ==========
+
+6
+2 Celestial-Based Navigation: An Overview
+Because of the aforementioned problems, the need for higher accuracy, and
+the continuing increase in cost of vehicle operations, spacecraft navigation is
+evolving from Earth-based solutions toward more autonomous methods [10, 11].
+Autonomous operation means determination of a complete navigation solution by
+the spacecraft to guide itself toward its destination without human interaction or
+assistance. An autonomous navigation system internally computes its own naviga-
+tion and guidance information by using onboard sensors. Any deviation from its
+planned path is detected, reported, and corrected without input from the ground
+mission control. These autonomous operations reduce the dependence of space mis-
+sions on human interaction and communication with Earth. To reduce dependence
+of navigation systems on ground-based operations and achieve more autonomy,
+utilizing celestial-based navigation systems is desirable. Another reason for devel-
+oping such novel navigation methods is to augment current systems by employing
+additional measurements to improve their performance. Celestial-based systems
+use signals emitted from celestial sources located at great distances from Earth.
+Of various celestial sources, X-ray pulsars are interesting candidates for use in both
+absolute and relative navigation systems because of their special characteristics.
+These characteristics are explained in detail in the following.
+2.3.2
+Pulsars
+Celestial sources have played signiﬁcant roles in navigation throughout history,
+although the majority of sources used have been ﬁxed, persistent stars with visi-
+ble radiation. Sources that produce signals with variable intensity are referred to
+as variable celestial sources. There are several classes of variable celestial objects
+emitting signals whose intensities vary from radio signals to gamma-ray over the
+electromagnetic spectrum. Of the different variable source types, ones producing
+a uniquely identiﬁable signal that is periodic and predictable can be utilized in a
+speciﬁc manner for navigation purposes. One particular class of variable celestial
+sources having this property is pulsars. Pulsars are rapidly rotating, highly magne-
+tized neutron stars [12]. As the neutron star spins, charged particles are accelerated
+out along magnetic ﬁeld lines in the magnetosphere. This acceleration causes the
+particle to emit electromagnetic radiation as a sequence of pulses produced and as
+the magnetic axis (and hence, the radiation beam) crosses the observer’s line of sight
+in each rotation (see Fig. 2.1). The repetition period of the pulses is simply the rota-
+tion period of the neutron star. Pulsars are observed in the radio, visible, X-ray, and
+gamma-ray bands of the electromagnetic spectrum [13].
+Radio pulsars are broadband, stellar pulsating radio sources powered by the ro-
+tation of a neutron star, resulting in a great stability in the pulsar period [14]. Over
+1,300 pulsars are known [13], and more are being discovered through new research.
+In some pulsars, irregularities (glitches) in their rotational frequency are observed
+every few years, ranging from the order of 10−6 s for the Vela pulsar to only 10−8 s
+for the Crab pulsar. Although individually emitted pulses from the pulsars vary over
+
+
+========== PAGE 20 ==========
+
+2.3 Pulsar-Based Navigation
+7
+Fig. 2.1 Diagram of a pulsar. Photo courtesy of National Radio Astronomy Observatory (NRAO)
+time, the average pulse shape is stable and characterizes the pulsar. Very precise
+models are established for the mean arrival time of pulsars, whose stability out-
+performs even the most precise artiﬁcial time bases. Of all pulsars, the most stable
+ones are the millisecond pulsars. Joseph Taylor and collaborators have demonstrated
+that the timing stability of millisecond pulsars is comparable with terrestrial atomic
+clocks [15]. Millisecond pulsars have been detected in the radio, X-ray, and gamma-
+ray portions of the electromagnetic spectrum. Currently, there are 130 millisecond
+pulsars known in globular clusters. Unfortunately, their signal to noise ratio (SNR)
+is considerably lower than that of longer period pulsars.
+X-ray pulsars are grouped in two different categories according to the source
+of energy that powers the radiation: accretion-powered and rotation-powered
+pulsars [17].
+1. Accretion-powered pulsars are a class of astronomical objects that are X-ray
+sources displaying strict periodic variations in X-ray intensity. The X-ray pe-
+riods range from as little as a fraction of a second to as much as several minutes.
+An X-ray pulsar consists of a magnetized neutron star in orbit with a normal stel-
+lar companion and is a type of binary star system. The magnetic ﬁeld strength at
+the surface of the neutron star is typically about 1012 Gauss, over a trillion times
+stronger than the strength of the magnetic ﬁeld measured at the surface of the
+
+
+========== PAGE 21 ==========
+
+8
+2 Celestial-Based Navigation: An Overview
+Earth (0.6 Gauss). If the magnetic ﬁeld and rotation axes of the neutron star are
+misaligned then X-ray pulsations are observed. Accretion pulsars are not stable
+timing sources because their period changes over time. More than 30 accretion-
+powered X-ray pulsars have been discovered with periods from 0.069 to 1,413 s.
+2. Rotation-powered pulsars are rapidly rotating neutron stars whose electromag-
+netic radiation is observed in regularly spaced intervals, or pulses. They differ
+from other types of pulsars in that the source of power for the production of ra-
+diation is the loss of rotational energy. For a long time, the Crab pulsar, the most
+luminous rotation-powered pulsar, had been the only pulsar detected at X-ray
+energies. More than 20 rotation-powered X-ray pulsars have since been detected
+[18,19]. Figure 2.2 depicts a Chandra X-ray image of the Vela rotation-powered
+pulsar (PSR B083345) [20].
+Pulsars are the original gamma-ray celestial sources. A few years after the dis-
+covery of radio pulsars by astronomers, the Crab and Vela pulsars were detected at
+the gamma-ray band of the electromagnetic spectrum. Pulsars accelerate particles
+with tremendous energies in their magnetospheres. These particles are ultimately
+responsible for the gamma-ray emission seen from pulsars. The Vela pulsar, which
+spins 11 times a second, is the brightest persistent source of gamma rays in the sky.
+Yet gamma rays, the most energetic form of light, are few and far between. Even
+Fermi’s Large Area Telescope sees only about one gamma-ray photon from Vela
+every 2 min. As opposed to a pulsar’s radio beams which only content a few parts
+per million of its total power, gamma-rays represent 10% or more.
+Fig. 2.2 Vela Pulsar (PSR
+B083345) X-ray image taken
+by Chandra X-ray
+observatory (Credit:
+The National Aeronautics
+and Space Administration
+(NASA)/PSU/G. Pavlov
+et al.)
+
+
+========== PAGE 22 ==========
+
+2.3 Pulsar-Based Navigation
+9
+By the end of 2004 there were about 1,500 radio pulsars known, but only seven
+had been detected in the gamma-ray band. Pulsars tend to have large magnetic
+ﬁelds and to be spinning rapidly. The loss of the pulsar’s spin energy eventually
+appears as radiation across the electromagnetic spectrum, including gamma-rays.
+Both observations and models indicate that pulsars eventually lose the ability to
+emit gamma-rays as the pulsar’s rotational speed slows down.
+With NASA’s Fermi gamma-ray space telescope, astronomers can now have a
+better look at pulsars. In two studies published in the July 2, 2009 edition of Science
+Express, international scientists have analyzed gamma-rays from two dozen pul-
+sars, including 16 discovered by Fermi (see Fig. 2.3). Fermi is the ﬁrst spacecraft
+able to identify pulsars by their gamma-ray emission alone [21]. The new pulsars
+were discovered as part of a comprehensive search for periodic gamma-ray ﬂuctu-
+ations using 5 months of Fermi Large Area Telescope data and new computational
+techniques. In another part of the study, Fermi team examined gamma-rays from
+eight pulsars, all of which were previously discovered at radio wavelengths. Before
+Fermi launched, it was not clear that pulsars with millisecond periods could emit
+gamma rays. Now it is cleared that they do. It has also become clear that, despite
+their differences, both normal and millisecond pulsars share similar mechanisms for
+emitting gamma-rays.
+NASA’s Fermi Gamma-ray Space Telescope is an astrophysics and particle
+physics partnership, developed in collaboration with the U.S. Department of En-
+ergy, along with important contributions from academic institutions and partners in
+France, Germany, Italy, Japan, Sweden, and the U.S. [21].
+Fig. 2.3 This gamma-ray all-sky map, which is aligned with the plane of the Milky Way Galaxy,
+shows the pulsar positions, with the 16 new pulsars, detected by Fermi Gamma-ray Space
+Telescope, circled in yellow (eight previously known radio pulsars are in magenta) (Credit: NASA/
+DOE/Fermi LAT Collaboration)
+
+
+========== PAGE 23 ==========
+
+10
+2 Celestial-Based Navigation: An Overview
+2.3.3
+Why Use X-ray Pulsars for Navigation?
+Variable sources emitting signals in the radio band are certainly one potential
+candidate that can be used in a navigation system. However, at the radio frequencies
+that these sources emit, i.e., from 100 MHz to a few GHz, antennas with 20 m in
+diameter or larger are required to detect their signals [22,23]. At these wavelengths,
+“dish” style radio telescopes predominate. The angular resolution of a dish style an-
+tenna is a function of the diameter of the dish in proportion to the wavelength of
+the electromagnetic radiation being observed. This dictates the size of the dish that
+a radio telescope needs to have a useful resolution.
+For most space missions, large antennas highly impact the design and cost of
+the operation [24]. Furthermore, because of neighboring sources that emit in ra-
+dio bands and also low signal intensity of radio pulsars, long integration times are
+needed to obtain a signal with acceptable SNR, suitable for use in a navigation sys-
+tem. Similar limitations exist for the visible variable sources. Additionally, there
+are only ﬁve isolated pulsars known to emit in the visible band, and all are faint.
+There are also a only few pulsars discovered which emit in the gamma-ray wave-
+lengths. This is another limitation for utilizing the visible and gamma-ray pulsars in
+a navigation system.
+The disadvantages of the radio and visible sources diminish for sources that emit
+in X-ray band. The main advantage of spacecraft navigation using X-ray sources is
+that small sized detectors can be employed [25]. This provides savings in power and
+mass for spacecraft operations. Another advantage of using X-ray sources is that
+they are widely distributed. The geometric dispersion of pulsars in the sky is impor-
+tant to enhance accuracy of three-dimensional position estimation since the observ-
+ability of the source is an important issue. An important complication that must be
+addressed in utilizing an X-ray source in a navigation system is the timing glitches
+in its rotation rates. Of X-ray pulsars, ones that are bright and have extremely stable
+and predictable rotation rates are suitable candidates for the purpose of navigation.
+These sources are usually older pulsars that have rotation periods on the order of
+several milliseconds. Figure 2.4 provides an image of the Crab Nebula and its pulsar
+(PSR B0531+21), which is the brightest rotation-powered pulsar within the X-ray
+band. The Crab pulsar shows high-ﬂux X-ray emissions with known stable period.
+Hence, it can be considered a suitable candidate for use in navigation.
+2.3.4
+History of Pulsar-Based Navigation
+The ﬁrst pulsar was observed in July 1967 by Bell and Hewish. In 1971, Reichley,
+Downs, and Morris proposed using pulsar signals as a clock for Earth-based systems
+[26]. In 1980, details of methods to determine pulse time of arrivals from pulsar
+signals were provided by Downs and Reichley [27]. In the 1980s and 1990s, it was
+demonstrated that several pulsars matched the quality of atomic clocks [12, 15, 16,
+28]. Because of their stability, pulsars were considered as accurate celestial clocks,
+suitable for navigation.
+
+
+========== PAGE 24 ==========
+
+2.3 Pulsar-Based Navigation
+11
+Fig. 2.4 Composite optical/X-ray image of the Crab Nebula pulsar showing surrounding nebular
+gasses stirred by the pulsar’s magnetic ﬁeld and radiation. Photo courtesy of NASA
+In 1974, Downs, a member of the telecommunication division of the Jet
+Propulsion Laboratory (JPL), proposed a spacecraft navigation method based upon
+employing radio signals from a pulsar [29]. Using 27 radio pulsars for navigation
+over an integration time of 24 h, in [29], he showed that an absolute position ac-
+curacy on the order of 150 km was attainable. This introductory paper on pulsar
+navigation serves as the original basis for the work of other researchers in the ﬁeld.
+During the 1970s, pulsars with X-ray signature were discovered that emit sig-
+nals within the X-ray band of 1–20 keV (2.5e17−4.8e18 Hz). In 1981, Chester and
+Butman proposed using X-ray pulsars as an option to enhance Earth satellite navi-
+gation [30]. Their research showed that by comparing the arrival times of pulses at a
+spacecraft and at the Earth (via an Earth orbiting satellite), a three-dimensional po-
+sition of the spacecraft can be determined. They reported that a day’s worth of data
+from a small onboard X-ray detector yielded a three-dimensional absolute position
+accurate to ∼150 km.
+In 1988, Wallace studied the issues related to using celestial sources that emit ra-
+dio emission, including pulsars, for navigation applications on Earth [31]. He stated
+that the existence of other celestial radio sources obscured weak pulsar signals. As
+expected, radio-based systems require large antennas to detect sources, which make
+them impractical tools for spacecraft. Furthermore, the low signal intensity of ra-
+dio sources requires long integration time to achieve an acceptable SNR. Also, the
+small population of radio pulsars in the optical band of the spectrum severely limits
+an optical pulsar-based navigation system.
+
+
+========== PAGE 25 ==========
+
+12
+2 Celestial-Based Navigation: An Overview
+In 1993, as a part of the NRL-801 experiment for the Advanced Research and
+Global Observation Satellite (ARGOS), Wood proposed a comprehensive approach
+to X-ray navigation covering attitude, position, and time. This study employed X-ray
+sources other than pulsars. As a part of the Naval Research Laboratory (NRL)
+development of this study, Hanson produced a Ph.D. thesis in the ﬁeld of X-ray
+navigation in 1996 [32]. In his work, he studied attitude determination of spacecraft
+using X-ray pulsars. He used practical data from the HEAO-A1 spacecraft. His ap-
+proach was based on counting the number of received photons, ﬁtting the data to
+preknown curves and minimizing the Chi-squared error. He obtained roll estimates
+with error bias equal to 0.32 deg and standard deviation of 0.030◦using a single
+detector and an error bias value equal to 0.012◦with 0.0075◦of standard deviation.
+He also suggested autonomous timekeeping using X-ray sources by employing a
+phase-locked-loop (PLL).
+In 2004, a research group in Spain revealed a study on the feasibility of an abso-
+lute navigation system based on radio and X-ray pulsars [33]. The group developed
+some models of radio and X-ray pulsar signals, it proposed different algorithms for
+timing estimation of these two categories of celestial sources, studied their perfor-
+mance, and reported the possibility of obtaining absolute position accuracies on the
+order of 106 meters [33].
+In 2005, Sheikh, a member of NRL, produced his Ph.D. thesis in the ﬁeld of
+X-ray navigation [19, 34, 35]. His work was a part of a research called the X-ray
+Navigation (XNAV), which was directed by the Defense Advanced Research
+Projects Agency (DARPA). He proposed a navigation system based on X-ray
+measurements used by an extended Kalman ﬁlter (EKF) for three-dimensional
+position estimation [36,37].
+Woodfork suggested the use of X-ray pulsars for aiding GPS satellite orbit deter-
+mination in his M.Sc. thesis in 2005 [38].
+In 2009, Emadzadeh proposed a relative navigation algorithm based on use of
+X-ray pulsar measurements in his Ph.D. thesis [39]. He has studied different aspects
+of the signal processing techniques needed to obtain the X-ray pulsar measurements.
+His dissertation is the main reference of the current book.
+2.4
+Summary
+This chapter presents a concise overview of current space navigation methods.
+It provides an introduction on different types of pulsars and their characteristics.
+It suggest using X-ray pulsars to navigate in space for situations where current sys-
+tems are not available or it is desirable to augment the current navigation solutions.
+There are two main reasons that make X-ray pulsars interesting candidates for space
+navigation. One is their stable periodic proﬁle, and the other is that relatively small
+size detectors are needed to detect the X-ray pulsar photons. The latter provides a
+huge advantage for the spacecraft design procedure. A brief history of pulsar-based
+navigation and previous research on this ﬁeld is also discussed.
+
+
+========== PAGE 26 ==========
+
+Chapter 3
+Signal Modeling
+3.1
+Introduction
+In this chapter, we present an overview of the X-ray pulsar-based navigation system.
+We provide the mathematical tools needed to analyze the proposed system. We also
+characterize the epoch folding procedure.
+Section 3.2 describes the navigation problem and the proposed navigation so-
+lution. In Sect. 3.3, we explain how X-ray pulsar detectors work. Based on the
+presented X-ray detection mechanism, we use some mathematical tools to char-
+acterize the pulsar signals in Sect. 3.4. Section 3.5 offers a clarifying remark on
+pulsar signal modeling. We introduce and mathematically formulate the epoch fold-
+ing procedure in Sect. 3.6. The effect of absolute velocity errors on epoch folding is
+studied in Sect. 3.7. An algorithm is provided in Sect. 3.8 for numerical simulation
+of the X-ray photon TOAs. To verify the analytical results, numerical examples are
+presented in Sect. 3.9.
+3.2
+Proposed Navigation System Structure
+First, we consider the relative navigation problem between two spacecraft. At the
+end, we explain how the spacecraft absolute navigation problem can be addressed.
+For relative position estimation, both the space vehicles must lock on the same
+X-ray source, and detect the same signal emitted from it. The spacecraft located far-
+ther away from the pulsar, receives a delayed version of the signal which is observed
+by the spacecraft closer to the source. The distance between the space vehicles is
+proportional to the time delay. The proposed approach is to periodically estimate the
+time delay, and then use these estimates as measurements in a recursive algorithm
+for position estimation. As it can be seen in Fig. 3.1, the relative distance projected
+on the direction of the source, Δd, is related to the time delay, td, by
+Δd = n·Δx = ctd,
+(3.1)
+where c is the speed of light, Δx the relative position vector, and n is the normalized
+direction vector pointing to the source.
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 3, c⃝Springer Science+Business Media, LLC 2011
+13
+
+
+========== PAGE 27 ==========
+
+14
+3 Signal Modeling
+Fig. 3.1 Relative position between two spacecraft observing the same X-ray source
+X-ray Detector
+Pulse Delay 
+Estimation
+Kalman Filter
+Photons
+Position
+Estimate
+IMU
+TOAs
+Acceleration data
+ˆdt
+Fig. 3.2 Structure of the proposed X-ray pulsar-based navigation system
+The pulsar is far away compared to the relative separation of the spacecraft,
+and the vehicles are assumed to be close enough. Hence, they see the source with
+the same direction vector, and this vector is known. All the measurements are per-
+formed in an inertial frame whose origin is the solar system barycenter (SSB). The
+spacecraft must communicate constantly to share and analyze their data. This com-
+munication channel can be used as an additional information source that can be
+incorporated to enhance the navigation solution. For simplicity, it is assumed that
+the cycle ambiguity problem does not arise. In other words, the signal passes the
+projected distance between the spacecraft, Δd, in less than one pulsar cycle. Rela-
+tivistic effects are negligible. The measurement noise variance is selected based on
+the accuracy of the time delay estimates. On each spacecraft, an inertial measure-
+ment unit (IMU) is to provide the acceleration measurements, which are converted
+to the velocity and position data and are utilized by the Kalman ﬁlter. The time de-
+lay estimates are in turn taken in as measurements by the Kalman ﬁlter to obtain
+the navigation solution. The precision of relative range is based on the geometric
+distribution of the set of employed pulsars over the sky, in much the same way as
+the geometric distribution of GPS satellites determines the geometric dilution of
+precision. The proposed navigation algorithm can be summarized into the following
+stages (see Fig. 3.2).
+
+
+========== PAGE 28 ==========
+
+3.3 X-ray Detectors
+15
+1. Signal detection using X-ray detectors (Chap. 3).
+2. Pulse time delay estimation (Chaps. 4, 5, and 6).
+3. Obtain the navigation solution utilizing a Kalman ﬁlter (Chap.7).
+Note that if the ﬁrst spacecraft is at the SSB, the navigation problem reduces to
+the absolute navigation problem of one spacecraft.
+3.3
+X-ray Detectors
+X-ray detectors are designed based on measuring the time of arrival (TOA) of
+photons when they hit the detecting material [33]. To obtain the X-ay pulsar mea-
+surements precisely, a low power detection system is required that is capable of
+measuring the photon time of arrivals with sub microsecond accuracy. Detec-
+tors must have a large detection area, low background noise, and be lightweight.
+Furthermore, they need to not require heavy and expensive cooling systems. Previ-
+ous satellite missions have used X-ray detectors with gas-based technology. These
+detectors are prone to leaks in the entrance window [25]. Another disadvantage of
+the detector is that, although made of low density gas, they can be rather heavy be-
+cause of the massive frames they need to contain the gas. Because of these problems,
+an alternative technology is much of interest to make X-ray detectors.
+As part of DARPA XNAV program, NRL has developed a new technology for
+the next generation of X-ray silicon-based detectors that achieve all of the aforemen-
+tioned capabilities [25]. These detectors are made of silicon PIN (p-type, intrinsic,
+and n-type) diodes that are reverse-biased with high voltage so that the whole sili-
+con volume does not have any free charge carrier. Therefore, when an X-ray photon
+hits the silicon, it will create a large number of electrons and holes. These elec-
+trons and holes drift under the electric ﬁeld to the surface. Then, they are collected
+into preampliﬁers and generate signals whose amplitudes are proportional to the
+energy deposited by the X-ray photons. These signals are processed by a shaping
+ampliﬁer and a discriminator to provide the time of arrival of photons. The time
+resolution of the X-ray detector is dictated by the drift time of the electrons across
+the thickness of the detector. The drift time in silicon at room temperature is 20
+ns/mm [25]. The thickness of the detectors determines if they can efﬁciently detect
+higher energy X-rays. To obtain more accurate solutions for X-ray-based navigation,
+many X-ray photons must be collected. Therefore, the energy range of detectors
+must be maximized, meaning they must be made as thick as possible. The thickest
+silicon detectors currently manufactured are 2 mm thick [25]. More details of the
+silicon-based technology, including required hardware for post-processing of data,
+are explained in [25].
+Based on this photon detection approach, mathematical models describing the
+X-ray pulsar signals are provided in the next section.
+
+
+========== PAGE 29 ==========
+
+16
+3 Signal Modeling
+3.4
+X-ray Pulsar Signal
+Let (t0,tf ) be the observation interval and Tobs = tf −t0. Furthermore, let ti be the
+TOA of the ith photon and the set {t1,t2,...,tM}, denoted by {ti}M
+i=1, be a random
+sequence in increasing order,
+t0 ≤t1 < t2 < ··· < tM ≤t f ,
+(3.2)
+where the number of detected photons in (t0,tf ), M, is also a random variable.
+Let t0 = 0 and N0 = 0 then
+Nt = max{n, tn ≤t}
+(3.3)
+is called a point process, denoted by {Nt, t > 0}. Note that Nt is the number of
+detected photons in the interval (0,t). A point process {Nt, t > 0} is called a
+non-homogeneous Poisson process (NHPP) with a time-varying rate λ(t) ≥0 if
+it satisﬁes the following conditions [40].
+1. The probability of detecting one photon in a time interval Δt, is given by
+P(Nt+Δt −Nt = 1) = λ(t)Δt
+when
+Δt →0.
+(3.4)
+2. The probability of detecting more than one photon in Δt is
+P(Nt+Δt −Nt ≥2) = 0
+when
+Δt →0.
+(3.5)
+3. Non-overlapping increments are independent, where
+Nt −Ns,
+t > s
+(3.6)
+is the increment of the stochastic process {Nt,t > 0}.
+For a ﬁxed t, the number of detected photons in (0,t), Nt, is a Poisson random
+variable with parameter
+ t
+0 λ(ξ)dξ [40], that is
+P(Nt = k) =
+ t
+0 λ(ξ)dξ
+k
+exp
+
+−
+ t
+0 λ(ξ)dξ
+
+k!
+(3.7)
+and its mean and variance are
+E[Nt] = var[Nt]
+=
+ t
+0 λ(ξ)dξ
+≜Λ(t).
+(3.8)
+
+
+========== PAGE 30 ==========
+
+3.4 X-ray Pulsar Signal
+17
+The number of detected X-ray photons in any ﬁxed time interval (t,s), Nt −Ns,
+is a Poisson random variable as well with parameter
+ t
+s λ(ξ)dξ [40], i.e.,
+P(Nt −Ns = k) =
+ t
+s λ(ξ)dξ
+k
+exp
+
+−
+ t
+s λ(ξ)dξ
+
+k!
+.
+(3.9)
+The probability density function of the photon TOAs is presented by the follow-
+ing theorem [41].
+Theorem 3.1. The M-dimensional joint probability density function (pdf) of the
+TOAs set, {ti}M
+i=1, denoted by p
+
+{ti}M
+i=1,M
+
+, is given by
+p
+
+{ti}M
+i=1,M
+
+=
+⎧
+⎪
+⎨
+⎪
+⎩
+e−Λ
+M
+∏
+i=1
+λ(ti)
+M ≥1
+e−Λ
+M = 0,
+(3.10)
+where
+Λ ≜Λ(t f )−Λ(t0)
+(3.11)
+is called the integrated rate of the Poisson process.
+Proof. To calculate p({ti}M
+i=1,M), consider non-overlapping inﬁnitesimal intervals
+of width Δti symmetric about ti, i = 1,2,...,M (see Fig. 3.3). The TOAs pdf, satisﬁes
+the following,
+P
+
+τ1 ∈
+
+t1 −Δt1
+2 ,t1 + Δt1
+2
+
+,...,τM ∈
+
+tM −ΔtM
+2 ,tM + ΔtM
+2
+
+=
+ t1+Δt1/2
+t1−Δt1/2 ···
+ tM+ΔtM/2
+tM−ΔtM/2 p({τi}M
+i=1,M)dτ1 ···dτM.
+(3.12)
+The expression on the left-hand side of (3.12) is the probability of detecting ex-
+actly one photon in each one of the intervals and none outside them. In other words,
+P
+
+τ1 ∈
+
+t1 −Δt1
+2 ,t1 + Δt1
+2
+
+,...,τM ∈
+
+tM −ΔtM
+2 ,tM + ΔtM
+2
+
+= P(Nt1−Δt1/2 −Nt0 = 0)·P(Nt1+Δt1/2 −Nt1−Δt1/2 = 1)·
+...
+P(NtM+ΔtM/2 −NtM−ΔtM/2 = 1)·P(Ntf −NtM+ΔtM/2 = 0).
+(3.13)
+0t
+tf
+2t
+Δ
+2t
+t
+1t
+Δ
+1t
+1
+−
+Δ
+M
+t
+1
+−
+M
+t
+M
+t
+Δ
+M
+t
+Fig. 3.3 A sample realization of a Poisson point process
+
+
+========== PAGE 31 ==========
+
+18
+3 Signal Modeling
+Using (3.9), the probability of receiving M = 0 photon in the interval (a,b) is
+given by
+P(Nb −Na = 0) = exp
+
+−
+ b
+a λ(t)dt
+
+.
+(3.14)
+Therefore, by letting Δti →0 for all i, and substituting (3.4) and (3.14) into the
+right-hand side of (3.13), it can be simpliﬁed as
+P
+
+τ1 ∈
+
+t1 −Δt1
+2 ,t1 + Δt1
+2
+
+,...,τM ∈
+
+tM −ΔtM
+2 ,tM + ΔtM
+2
+
+= e−Λ
+M
+∏
+i=1
+λ(ti)Δti,
+(3.15)
+where Λ is given in (3.11).
+On the other hand, as Δti →0 for all i, right side of (3.12) equals
+ t1+Δt1/2
+t1−Δt1/2 ···
+ tM+ΔtM/2
+tM−ΔtM/2 p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM = p
+
+{ti}M
+i=1,M
+ M
+∏
+i=1
+Δti.
+(3.16)
+Therefore, since (3.15) and (3.16) are equal, the joint pdf p
+
+{ti}M
+i=1,M
+
+is
+obtained for M ≥1,
+p
+
+{ti}M
+i=1,M
+
+= e−Λ
+M
+∏
+i=1
+λ(ti).
+(3.17)
+■
+The overall rate function λ(t) ≥0, represents the aggregate rate of all arriving
+photons from the X-ray pulsar and background,
+λ(t) = λb + λsh
+
+φdet(t)
+
+(ph/s),
+(3.18)
+where h(φ) is the periodic pulsar proﬁle, φdet(t) the detected phase, and, λb and λs
+are the known effective background and source arrival rates, respectively [42]. The
+periodic function h(φ) is usually deﬁned on the phase interval φ ∈[0,1) (cycle), and
+then its deﬁnition is extended to the entire real line by letting h(φ +n) = h(φ), where
+n is an integer. In other words, each period of the pulsar intensity is represented by
+one cycle. Furthermore, the function h(φ) is non-negative and normalized according
+to
+ 1
+0 h(φ)dφ = 1, and minφ h(φ) = 0. The shape of the pulsar proﬁle and its period
+are known. Figure 3.4 shows the proﬁle of the Crab pulsar (PSR B0531+21) in the
+X-ray band (1–15 keV), created using multiple observations with the USA experi-
+ment onboard the Advanced Research and Global Observation Satellite (ARGOS)
+vehicle [19].
+
+
+========== PAGE 32 ==========
+
+3.4 X-ray Pulsar Signal
+19
+Fig. 3.4 Crab pulsar proﬁle obtained by ARGOS
+The detected rate constants λb and λs are functions of the detector speciﬁca-
+tions. Speciﬁcally, they are proportional to the collective area, A, and the detector
+efﬁciency, η, as
+λb = b ·η ·A
+(3.19)
+λs = s·η ·A,
+(3.20)
+where b is the background rate and s is the source ﬂux.
+Phase at the detector referenced to the beginning of the observation, t0, consists
+of an initial phase, φ0 ∈[0,1), and the accumulated phase
+φdet(t) = φ0 +
+ t
+t0
+f(τ)dτ,
+(3.21)
+where fo(t) is the observed signal frequency, which can be decomposed into two
+different components: X-ray source frequency, fs, and the Doppler frequency shift,
+fd(t). In other words,
+fo(t) = fs + fd(t).
+(3.22)
+The Doppler frequency fd(t) is due to the detector’s velocity, v(t), and is
+given by
+fd(t) = fs
+v(t)
+c ,
+(3.23)
+where c is the speed of light. Consequently, the detected phase equals
+φdet(t) = φ0 + fs(t −t0)+
+ t
+t0
+fd(τ)dτ.
+(3.24)
+
+
+========== PAGE 33 ==========
+
+20
+3 Signal Modeling
+Note that the pulsar is located far deep in space (at inﬁnite distance from the
+detector). Furthermore, the observed phase is calculated referenced to the beginning
+of the observation time, and not the time that photons have left the X-ray source.
+Hence, although h(·) is periodic, the phase ambiguity issue does not arise.
+3.4.1
+Constant-Frequency Model
+Assuming that the detector’s velocity v(t) = v is a known constant, then
+φdet(t) = φ0 +(t −t0)fo,
+(3.25)
+where
+fo =
+
+1 + v
+c
+
+fs.
+(3.26)
+Hence, from (3.18), the rate function is
+λ(t;φ0, fo) = λb + λsh
+
+φ0 +(t −t0)fo
+
+.
+(3.27)
+This model is used when the spacecraft moves in a constant radial speed and the
+observed pulse frequency, fo, does not change over time or its change is negligible.
+Since h(·) is strictly periodic and its argument is an afﬁne function of time, λ(t)
+becomes strictly periodic as well.
+3.4.2
+Time-Dependent-Frequency Model
+If v(t) is not constant, fd(t) is a time dependent, and
+φd(t) =
+ t
+t0
+fd(τ)dτ
+(3.28)
+is a nonlinear function of time, which results in a quasi-periodic λ(t). This is the
+case when the radial speed of the spacecraft, v(t), changes signiﬁcantly over the
+observation time. Hence, the observed phase at the detector is
+φdet(t) = φ0 +(t −t0)fs +φd(t)
+(3.29)
+and the rate function becomes
+λ
+
+t;φ0,v(t)
+
+= λb +λs h
+
+φ0 +(t −t0)fs +φd(t)
+
+.
+(3.30)
+In (3.30), presence of the nonlinear term, φd(t), makes the Poisson rate function
+be quasi-periodic.
+
+
+========== PAGE 34 ==========
+
+3.5 Discussion
+21
+3.5
+Discussion
+Using the TOA pdf presented in (3.10), it can be veriﬁed that
+
+Ω p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM = 1,
+(3.31)
+where Ω is the sure event, i.e., the event that any number of photons occur at any
+time instant in the interval [t0,tf ]. Note
+
+Ω p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM =
+∞
+∑
+M=0
+
+ΩM
+p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM,
+(3.32)
+where ΩM is the event of receiving M photons at any M different increasing
+time instants {t1,t2,...,tM} in the interval [t0,t f ]. The probability of event ΩM is
+given by
+
+ΩM
+p
+
+{τi}M
+i=1,M
+
+dτ1 ...dτM
+= P[t1 = t1 ∈(t0,tf ),t2 = t2 ∈(t1,t f ),...,tM = tM ∈(tM−1,tf )]. (3.33)
+Note that the sequence {t1,t2,...,tM} in (3.33) is in increasing order. Since there
+exists M! permutations of ti, for a ﬁxed M, the probability that M number of ti’s
+occur in no special order, is M! times that of the sequence occurring in increasing
+order [41]. Hence,
+P[t1 = t1 ∈(t0,tf ),t2 = t2 ∈(t0,t f ),,...,tM = tM ∈(t0,t f )]
+= M!·
+
+ΩM
+p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM.
+(3.34)
+Using (3.10), the left side of (3.34) can be expressed as
+ tf
+t0
+ tf
+t0
+···
+ tf
+t0
+p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM = e−Λ
+ tf
+t0
+λ(τ)dτ
+M
+= e−ΛΛM.
+(3.35)
+Therefore, from (3.34) and (3.35), for a ﬁxed M
+
+ΩM
+p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM = Λ M
+M! ·e−Λ.
+(3.36)
+
+
+========== PAGE 35 ==========
+
+22
+3 Signal Modeling
+Now, using (3.32) and (3.36)
+
+Ω p
+
+{τi}M
+i=1,M
+
+dτ1 ···dτM = e−Λ
+∞
+∑
+M=0
+Λ M
+M!
+= e−Λ ·eΛ
+= 1.
+(3.37)
+3.6
+Epoch Folding
+A feasible question is how to recover the pulsar rate function employing the mea-
+sured photon TOAs. The procedure of recovering the X-ray pulsar intensity function
+from measured photon time tags is called epoch folding. It is performed as follows:
+all the time tags during the observation time are collected. Then they are folded
+back into a single time interval equal to one pulse period, meaning that their mod-
+ulus with one time period is calculated. Afterward, the period duration is divided
+into some equal-length bins and the number of photons in each bin is counted (see
+Fig. 3.5). Finally, the computed photon counts are normalized and the empirical pul-
+sar proﬁle is derived. Epoch folding is mathematically formulated in the rest of this
+section.
+Assume that the observation time consists of NP pulsar periods. In other words,
+Tobs ≈NpP, where P is the pulsar period. Let c(ti) be the number of detected pho-
+tons in the ith bin whose center is ti. Also, assume that the bin size is Tb seconds
+and the number of time bins in one period is Nb, i.e., Tb = P/Nb. Using (3.8), for
+1st Cycle
+2nd Cycle
+kth Cycle
+Np
+th Cycle
+TOA folding
+t
+0t
+0t
+P
++
+bT
+bT
+bT
+bT
+1
+( )
+p
+N
+j
+i
+j
+c t
+=Σ
+{
+ft t
+P
+0t
+P
+P
+Fig. 3.5 Epoch folding: All [color-coded] photon TOAs are folded back into the ﬁrst cycle [t0,
+t0 + P], and it is divided to some equal-length bins. Then, the number of photons in each bin is
+counted and normalized
+
+
+========== PAGE 36 ==========
+
+3.6 Epoch Folding
+23
+inﬁnitesimal Tb values, c(ti) is a Poisson random variable with the following mean
+and variance,
+E[c(ti)] = var[c(ti)]
+= λ(ti)Tb.
+(3.38)
+The bin size, Tb, must be chosen small enough such that (3.38) is not violated.
+Now, consider the random variable ˘λ(ti), named empirical rate function, which rep-
+resents the normalized number of photons resulted from folding back Np epochs of
+time tags into the ith bin,
+˘λ(ti) =
+1
+NpTb
+Np
+∑
+j=1
+cj(ti).
+(3.39)
+Then, the relation between ˘λ(ti) and λ(ti) is given in the following theorem [43].
+Theorem 3.2. Let λ(ti), 0 ≤ti ≤P, be the true rate function, and ˘λ(ti) be the
+empirical rate function, obtained from an epoch folding procedure. Then,
+˘λ(ti) = λ(ti)+ ˘n(ti)
+when
+Tobs →∞,
+(3.40)
+where ˘n(ti) is referred to as the epoch folding noise. The noise, ˘n(ti), is uncorrelated
+and for long observation times, its mean and variance are given by
+E[˘n(ti)] = 0
+(3.41)
+var[˘n(ti)] = Nb
+Tobs
+λ(ti).
+(3.42)
+Proof. Consider the average random variable, ˘C(ti), which obtained from folding
+back Np epochs of time tags into ith bin
+˘C(ti) = 1
+Np
+Np
+∑
+j=1
+cj(ti),
+(3.43)
+where j is the epoch’s index. Then, from (3.38), as Np →∞(or equivalently
+Tobs →∞),
+E[ ˘C(ti)] = λ(ti)Tb
+(3.44)
+var
+
+Np ˘C(ti)
+
+= λ(ti)Tb.
+(3.45)
+Therefore, using (3.39)
+E[˘λ(ti)] = λ(ti)
+(3.46)
+
+
+========== PAGE 37 ==========
+
+24
+3 Signal Modeling
+Fig. 3.6 Two photon TOAs
+t
+bT
+it
+bT
+kt
+var[˘λ(ti)] = λ(ti)
+NpTb
+= Nb
+Tobs
+λ(ti).
+(3.47)
+As a result of (3.46) and (3.47), the empirical rate function can be modeled by
+(3.40), (3.41), and (3.42).
+To prove that ˘n(ti) is uncorrelated, the ﬁrst and second moments of Nt are calcu-
+lated using (3.8),
+E[Nt] =
+ t
+0 λ(τ)dτ
+(3.48)
+E[N2
+t ] =
+ t
+0 λ(τ)dτ
+2
++
+ t
+0 λ(τ)dτ.
+(3.49)
+Consider two time instants ti and tk, where tk > ti (see Fig. 3.6). Because non-
+overlapping increments of Nt are independent,
+E[NtiNtk] = E[Nti(Ntk −Nti +Nti)]
+= E[Nti(Ntk −Nti)]+E[N2
+ti]
+= E[Nti]E[Ntk −Nti]+E[N2
+ti].
+(3.50)
+Then, using (3.48) and (3.49)
+E[NtiNtk] =
+ ti
+0 λ(τ)dτ
+ tk
+ti
+λ(τ)dτ +
+ ti
+0 λ(τ)dτ +1
+
+.
+(3.51)
+For inﬁnitesimal values of Tb, the number of detected photons in ith bin, i.e.,
+c(ti), can be approximated by
+c(ti) ≃Nti+Tb/2 −Nti−Tb/2.
+(3.52)
+Hence,
+E[c(ti)c(tk)] = E[(Nti+Tb/2 −Nti−Tb/2)(Ntk+Tb/2 −Ntk−Tb/2)]
+= E[Nti+Tb/2Ntk+Tb/2]−E[Nti+Tb/2Ntk−Tb/2]
+−E[Nti−Tb/2Ntk+Tb/2]+E[Nti−Tb/2Ntk−Tb/2].
+(3.53)
+
+
+========== PAGE 38 ==========
+
+3.7 Epoch Folding in Presence of Velocity Errors
+25
+Calculating each term in (3.53), using (3.51), it results in
+E[c(ti)c(tk)] =
+ tk+Tb/2
+tk−Tb/2
+λ(τ)dτ
+ ti+Tb/2
+0
+λ(τ)dτ −
+ ti−Tb/2
+0
+λ(τ)dτ
+
+=
+ tk+Tb/2
+tk−Tb/2 λ(τ)dτ
+ ti+Tb/2
+ti−Tb/2 λ(τ)dτ
+(3.54)
+which can be approximated by
+E[c(ti)c(tk)] ≈T 2
+b λ(ti)λ(tk)
+(3.55)
+for inﬁnitesimal values of Tb.
+As a result, the auto-correlation function of ˘λ(ti) can be calculated from (3.39)
+E[˘λ(ti)˘λ(tk)] =
+
+1
+NpTb
+2
+E
+ Np
+∑
+j=1
+cj(ti)
+Np
+∑
+j=1
+cj(tk)
+
+=
+
+1
+NpTb
+2 Np
+∑
+j=1
+Np
+∑
+r=1
+E[cj(ti)cr(tk)]
+= λ(ti)λ(tk).
+(3.56)
+On the other hand, noting that ˘n(t) is zero mean, (3.40) leads to
+E[˘λ(ti)˘λ(tk)] = λ(ti)λ(tk)+E[˘n(ti)˘n(tk)].
+(3.57)
+Then, from (3.56) and (3.57), the auto correlation function of ˘n(t) is given by
+E[˘n(ti)˘n(tk)] = 0.
+(3.58)
+■
+To perform epoch folding, the observed pulsar frequency, fo = 1/P, must be con-
+stant and known during the observation time. In other words, the detector velocity,
+v, must be a known constant. Since in practice the velocity is not perfectly known,
+the effect of velocity errors on epoch folding is studied in the next section.
+3.7
+Epoch Folding in Presence of Velocity Errors
+As mentioned, it is necessary to investigate how much the epoch folding procedure
+is tolerant to possible errors in the spacecraft velocity data. Let the detector velocity
+error be Δv. From (3.26), this error causes the observed frequency to change as
+Δfo = fs
+Δv
+c .
+(3.59)
+
+
+========== PAGE 39 ==========
+
+26
+3 Signal Modeling
+Since P = 1/ fo, Δfo makes P change by
+ΔP = −Δfo
+f 2o
+(3.60)
+which can be simpliﬁed using (3.59), as
+ΔP = −fs
+cf 2o
+Δv.
+(3.61)
+Hence, the observed pulsar period will be
+ˇP = P+ΔP.
+(3.62)
+This pulsar period, which is ΔP seconds off from the correct one, will be used to
+fold back the photon TOAs into one cycle (see Fig. 3.7). Assuming the number of
+bins is still Nb, the new bin size is given by
+ˇTb =
+ˇP
+Nb
+.
+(3.63)
+Furthermore, the number of epochs to be folded back is
+ˇNp = Tobs
+ˇP .
+(3.64)
+The error ΔP, can be translated to the phase domain
+Δφ = ΔP
+P
+= foΔP
+(3.65)
+and using (3.61), it can be simpliﬁed by
+Δφ = −fs
+cfo
+Δv
+≈−1
+cΔv.
+(3.66)
+ft t
+0t
+P
+Δ
+2 P
+Δ
+3 P
+Δ
+P
+P
+P
+P
+P
+P
+Intensity function
+Fig. 3.7 Epoch folding in the presence of the spacecraft velocity error
+
+
+========== PAGE 40 ==========
+
+3.7 Epoch Folding in Presence of Velocity Errors
+27
+From (3.38), this bias error in phase changes the statistical properties of cj(ti) as
+follows.
+E[c j(ti)] = var[c j(ti)]
+= λ
+
+ti;φ0 +(j −1)Δφ
+ ˇTb,
+j = 1,2,..., ˇNp
+(3.67)
+In other words, the mean of folded back photon counts from the jth cycle is
+shifted by (j −1)Δφ cycle. Thus, the empirical rate function equals the follow-
+ing [44].
+˘λ(ti) =
+1
+ˇNp ˇTb
+ˇNp
+∑
+j=1
+cj(ti)
+= 1
+ˇNp
+ˇNp
+∑
+j=1
+λ
+
+ti;φ0 +(j −1)Δφ
+
++ ˘n(ti),
+(3.68)
+where
+E[˘n(ti)] = 0
+(3.69)
+and
+var[˘n(ti)] =
+1
+ˇN2p ˇTb
+ˇNp
+∑
+j=1
+λ
+
+ti;φ0 +(j −1)Δφ
+
+.
+(3.70)
+From (3.70) it is clear that if (j−1)Δφ is always smaller than the bin size, (3.70)
+boils down to the result given in (3.40). That is, if
+|Δφ|( ˇNp −1) ≈|Δφ| ˇNp < 1
+Nb
+(3.71)
+or, using (3.66)
+Δv <
+c
+Nb ˇNp
+(3.72)
+then, the empirical function satisfactorily represents the true rate function. The up-
+per bound in (3.72) shows how much error on the spacecraft velocity data can be
+tolerated by the epoch folding procedure. If the velocity error exceeds the bound, as
+(3.70) shows, the empirical rate function will be a deteriorated version of the true
+function. The deterioration shows as a shift in the initial phase, and a change in the
+magnitude of the rate function.
+An interesting point (3.72) shows is that the upper bound is inversely proportional
+to the number of bins Nb. But one should be careful in choosing Nb too small,
+because (3.38) must not be violated.
+
+
+========== PAGE 41 ==========
+
+28
+3 Signal Modeling
+3.8
+Generating Photon TOAs
+To assess the analytical results, the X-ray photon TOAs corresponding to a particular
+known pulsar rate function λ(t) must be simulated. To realize corresponding TOAs,
+an algorithm based on inversion of the integrated rate function is used [43,45].
+Let U be a uniform random variable in the interval (0,1). Deﬁne
+g(u) = F−1
+y
+(u),
+(3.73)
+where F−1
+y
+(·) is the inverse function of Fy(·). Then, Y = g(U) is a random variable
+with the distribution Fy(y) [46]. That is,
+If y = F−1
+y
+(U) then P{Y ≤y} = Fy(y).
+(3.74)
+Now let Fz|tn=t(z|tn = t) be the probability distribution of Z = tn+1 −tn given
+tn = t, where ti is the TOA of the ith photon. Then,
+P(Z > z|tn = t) = 1 −Fz|tn=t(z|tn = t).
+(3.75)
+Also, using (3.9)
+P(Z > z|tn = t) = P(Nt+z −Nt = 0)
+= exp
+
+−
+ t+z
+t
+λ(t)dt
+
+= exp
+
+−
+
+Λ(t +z)−Λ(t)
+
+,
+(3.76)
+where Λ(t) is deﬁned in (3.8). Therefore, from (3.75) and (3.76)
+Fz|tn=t(z|tn = t) = 1 −exp{−
+
+Λ(t +z)−Λ(t)
+
+}
+(3.77)
+and
+F−1
+z|tn=t(z|tn = t) = −t +Λ −1
+Λ(t)−ln(1 −z),
+
+(3.78)
+where F−1
+z|tn=t(·) is the inverse function of Fz|tn=t(·). Hence, given tn = t, Z can be
+generated as
+Z = −t +Λ−1
+Λ(t)−ln(1 −U)
+
+.
+(3.79)
+As 1−U is also a uniform random variable in the interval (0,1), without loss of
+generality, (3.79) can be restated as
+Z = −t +Λ −1
+Λ(t)−lnU
+
+.
+(3.80)
+
+
+========== PAGE 42 ==========
+
+3.8 Generating Photon TOAs
+29
+Also, note that if X is an exponential random variable, described by the following
+pdf,
+p(x) =
+
+λee−λex
+x ≥0
+0
+otherwise
+(3.81)
+then, its probability distribution is given by
+Fx(x) = 1 −e−λex
+(3.82)
+and
+F−1
+x
+(x) = −1
+λe
+ln(1 −x).
+(3.83)
+Therefore, from (3.74)
+X = −1
+λe
+ln(1 −U)
+(3.84)
+is an exponential random variable with parameter λe. As 1 −U is also a uniform
+random variable in the interval (0,1), it can be concluded that
+X = −1
+λe
+lnU
+(3.85)
+is an exponential random variable with parameter λe. Thus, the term −lnU in (3.80)
+is an exponential random variable, named E, with parameter λe = 1. As a result,
+using (3.80), given t = tn, tn+1 can be generated as
+tn+1 = tn +Z
+= Λ−1
+Λ(tn)+E
+
+.
+(3.86)
+The preceding discussion is concluded into Algorithm 3.1.
+Algorithm 3.1 TOA Simulation:
+•
+L ←0 (L is an auxiliary variable)
+•
+k ←0 (k is a counter)
+•
+WHILE tk ≤t f
+–
+Generate an exponential random variable, E, with parameter λe = 1.
+–
+k ←k +1
+–
+L ←Λ −1
+Λ(L)+E
+
+–
+tk ←L
+•
+END
+
+
+========== PAGE 43 ==========
+
+30
+3 Signal Modeling
+3.9
+Numerical Examples
+The Crab pulsar (PSR B0531+21) is selected to verify the analytical results. The
+pulsar period is 33.5 ms, and its proﬁle, h(φ), is shown in Fig. 3.8. The constant
+arrival rates are chosen to be λb = 5 and λs = 15 ph/s. The detector’s velocity is
+assumed to be v = 3 km/s; and the initial phase observed at the ﬁrst detector is
+φ0 = 0.16 cycle.
+A Monte Carlo simulation was performed in which 500 independent realization
+of photon TOAs were processed. Photon TOAs were generated as realizations of a
+non-homogeneousPoisson process, as explained in Algorithm 3.1. The accumulated
+rate function used to generate the TOAs, Λ, is plotted in Fig. 3.8.
+An observation time of Tobs = 100 s is selected to verify the epoch folding
+results. The photon time tags are folded back into one single pulsar cycle which
+is divided into Nb = 1,024 bins, and the rate functions on each detector are de-
+rived using (3.39). The empirical rate function along with the true one is plotted
+in Fig. 3.9. As the plots show, the empirical rate function converges to the true
+function.
+In Fig. 3.9, the variance of ˘n(t), obtained via simulation, is also plotted and
+compared to the analytical variance for each detector. The plots show an excellent
+0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+0
+2
+4
+6
+8
+10
+Phase, φ (cycle)
+Periodic Proﬁle, h(φ)
+0
+5
+10
+15
+20
+25
+30
+33
+0
+0.2
+0.4
+0.6
+Time, t (msec)
+Λ(t)
+Fig. 3.8 Crab pulsar proﬁle, and Λ(t) for λb = 5 and λs = 15 ph/s
+
+
+========== PAGE 44 ==========
+
+3.9 Numerical Examples
+31
+0
+5
+10
+15
+20
+25
+30
+33
+0
+50
+100
+150
+Time, t (msec)
+˘¸(t)
+¸(t)
+0
+5
+10
+15
+20
+25
+30
+33
+0
+500
+1000
+1500
+Time, t (msec)
+var[˘n(t)]
+Empirical
+Analytical
+Fig. 3.9 Pulsar rate function, and the variance of ˘n(t) for Tobs = 100 s
+agreement between the simulation and the analytical value, given in (3.42). The
+difference between these two plots gets larger at the time instants where there is a
+sharp change in the rate function. This phenomenon is due to the limited number
+of time bins and ﬁnite observation time which violate (3.38). In other words, if the
+observation time is inﬁnitely long and the time bins are inﬁnitely small then these
+jumps in empirical graphs will vanish.
+The auto-correlation of ˘λ(t), E[˘λ(t)˘λ(t +D0)], is calculated numerically for the
+time delay D0 = P/4 second, where P is the pulsar observed period. The plot is
+shown in Fig. 3.10, and it veriﬁes that E[˘λ(t)˘λ(t + D0)] = λ(t)λ(t + D0). This
+means that the epoch folding noise, ˘n(t), is uncorrelated.
+The effect of spacecraft imprecise absolute velocity data on epoch folding is
+studied as well. The velocity error is intentionally chosen to be big: Δv = 1,000 m/s.
+For the selected parameters, the upper bound (3.72) roughly equals 10 m/s. Since
+the velocity error is bigger than the bound, the empirical rate function and the noise
+variance are expected to be deteriorated as opposed to the case where the veloc-
+ity is perfectly known. Figure 3.11 veriﬁes this fact. Comparing the empirical rate
+function to the true one shows that it is shifted, and its peak is shortened and ﬂat-
+tened. The ﬁgure also veriﬁes that the variance of the epoch folding noise is shifted
+because of the velocity error.
+
+
+========== PAGE 45 ==========
+
+32
+3 Signal Modeling
+0
+5
+10
+15
+20
+25
+30
+0
+200
+400
+600
+800
+1000
+1200
+1400
+1600
+1800
+2000
+Time, t (msec)
+E[˘¸(t)˘¸(t + P=4)]
+¸(t)¸(t + P=4)
+Fig. 3.10 Autocorrelation of ˘λ(t) for D0 = P/4
+0
+15
+25
+33
+0
+50
+100
+150
+Time, t (msec)
+˘¸(t)
+¸(t)
+0
+15
+25
+33
+0
+500
+1000
+1500
+Time, t (msec)
+var[˘n(t)]
+Empirical
+Analytical
+Fig. 3.11
+˘λ(t) and the variance of ˘n(t) when Δv = 1,000 m/s
+
+
+========== PAGE 46 ==========
+
+3.10 Summary
+33
+3.10
+Summary
+In this chapter, we offer an overview of the proposed navigation system structure.
+We explain how by estimation of the time delay between the X-ray pulsar signals,
+the spacecraft relative or absolute position can be estimated. More detailed math-
+ematical formulation of the estimation problem, and our proposed solutions to the
+problem will be presented in the following chapters. We also suggest using IMUs to
+provide the spacecraft acceleration data. We explain how based on time tagging the
+photon time of arrivals, X-ray pulsar detectors work. Using the presented detection
+mechanism, we develop the mathematical models needed to characterize the pulsar
+signals. We formulate and analyze the epoch folding procedure and show how it
+results in recovering the pulsar intensity function. We investigate how errors on the
+spacecraft velocity data can affect the epoch folding, and show that they result in
+recovering a deteriorated rate function. Finally, we examine the theoretical results
+via numerical simulations.
+
+
+========== PAGE 47 ==========
+
+
+
+========== PAGE 48 ==========
+
+Chapter 4
+Pulse Delay Estimation
+4.1
+Introduction
+As explained in Chap. 3, the navigation system measurement is obtained through
+estimation of the time delay between the received signals. The delay estimation
+problem plays the most important role in the navigation system. In this chapter, we
+study this problem in more detail.
+Section 4.2 offers a mathematical formulation of the delay estimation problem.
+In Sects. 4.3 and 4.4, we present a lower bound on the variance of the estimation
+error, called the Cram´er–Rao lower bound (CRLB). Some numerical examples on
+calculation of the CRLB is also given in Sect. 4.5.
+4.2
+Pulse Delay Estimation
+Let {t(1)
+i
+}M1
+i=1 be the measured photon TOAs at the ﬁrst detector. This TOA set cor-
+responds to the following rate function.
+λ1(t;φ1) = λb +λs h
+
+φ1 +(t −t0)f1
+
+(4.1)
+At the second spacecraft, a different TOA set is measured, {t(2)
+i
+}M2
+i=1, which cor-
+responds to the delayed rate function observed by the ﬁrst detector
+λ2(t;φ1) = λb + λsh
+
+φ1 +(t −t0 −te −tx)f2
+
+,
+(4.2)
+where tx is the true time delay between the detected rate functions, and te is the
+differential time between clocks [47]. Let td = te +tx, and deﬁne φ2 as
+φ2 ≜φ1 −f2td.
+(4.3)
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 4, c⃝Springer Science+Business Media, LLC 2011
+35
+
+
+========== PAGE 49 ==========
+
+36
+4 Pulse Delay Estimation
+Then, the rate function λ2(·) in (4.2) can be simpliﬁed as
+λ2(t;φ2) = λb + λsh
+
+φ2 +(t −t0)f2
+
+.
+(4.4)
+Note that f1 and f2 are observed pulsar frequencies. To construct the measure-
+ments for the Kalman ﬁlter, td must be estimated.
+To estimate the pulse delay, td, φ1 and φ2 will be estimated on each detector. Then,
+using (4.3), td can be found. We have proposed two different methods for estimation
+of the pulsar intensity function’s initial phase, and analyzed their characteristics.
+1. Recovering the pulsar rate functions at each detector through the epoch folding
+procedure represents the ﬁrst strategy. The empirical rate function will be used
+for estimation of the initial phase values. Two different pulse delay estimators
+based on epoch folding are introduced, and their performance against the CRLB
+is analyzed. One uses the cross-correlation function between the empirical and
+true photon intensity functions [44]. The other employs a least-squares criterion
+[43,44,48]. Details are given in Chap. 5.
+2. The second strategy is based on the direct use of the measured photon TOAs. To
+estimate the unknown parameters (initial phase values and Doppler frequencies),
+a maximum likelihood (ML) estimation problem is formulated using the pdf of
+the photon time tags [43,49]. Different aspects of this approach are explained in
+Chap.6.
+4.3
+CRLB
+Being able to place a lower bound on the variance of any unbiased estimator is
+extremely useful in practice. It allows one to assert if the estimator is the minimum
+variance estimator and provides a benchmark against which the performance of any
+unbiased estimator can be compared. An estimator that is unbiased and attains the
+CRLB is said to be efﬁcient, meaning that it efﬁciently uses the data. The CRLB is
+stated in the following theorem [50].
+Theorem 4.1. Let p(x;θ) be the probability density function (or probability mass
+function) of the observed random vector, x, which is parameterized by the unknown
+parameter θ. A semicolon is used to denote the dependence. Assume that p(x;θ)
+satisﬁes the following “regularity” conditions
+E
+ ∂
+∂θ ln p(x;θ)
+
+= 0,
+for all θ,
+(4.5)
+where θ is the unknown parameter vector, and the expectation is taken with respect
+to p(x;θ). Then, the covariance matrix of any unbiased estimator ˆθ satisﬁes
+cov( ˆθ) ≥I−1(θ),
+(4.6)
+
+
+========== PAGE 50 ==========
+
+4.3 CRLB
+37
+where the inequality “≥” means
+
+cov( ˆθ)−I−1(θ)
+
+is positive semideﬁnite and
+I(θ) is the Fisher matrix given by
+[I(θ)]ij = −E
+
+∂2
+∂θi∂θj
+ln p(x;θ)
+
+,
+(4.7)
+where the derivatives are evaluated at the true value of θ and the expectation is
+taken with respect to p(x;θ). The matrix I−1(θ) is called the Cram´er–Rao lower
+bound.
+Now consider the following pulsar rate function, which corresponds to the mea-
+sured TOA set on the detector.
+λ(t;φ0, fo) = λb + λsh
+
+φ0 +(t −t0)fo
+
+.
+(4.8)
+Assuming that φ0 and fo are not known, the aim is to ﬁnd the CRLB for es-
+timation of these parameters. The result is presented in the following theorem
+[51,52].
+Theorem 4.2. Let
+θ ≜
+
+φ0 fo
+T
+(4.9)
+be the unknown parameters vector. The Fisher matrix and its inverse (CRLB) for
+estimation of θ in (4.8) are given by
+I(θ) = Ip
+6
+
+6Tobs 3T 2
+obs
+3T 2
+obs 2T 3
+obs
+
+,
+(4.10)
+where
+Ip ≜
+ 1
+0
+[λsh′(φ)]2
+λb + λsh(φ) dφ.
+(4.11)
+Therefore,
+CRLB(θ) = I−1(θ)
+= 2
+Ip
+
+2/Tobs −3/T2
+obs
+−3/T2
+obs 6/T 3
+obs
+
+.
+(4.12)
+Proof. Let θ1 and θ2 be the elements of the vector θ (this notation is used for
+simplicity). To derive the CRLB, the photon TOA measurements are transformed
+into another set of data containing the number of detected photons. This new
+data set is formed by dividing the observation time into N number of bins whose
+length is Δt and by placing the number of counted photons in each bin into the
+vector
+x =
+
+x1 x2 ··· xN
+T
+(4.13)
+
+
+========== PAGE 51 ==========
+
+38
+4 Pulse Delay Estimation
+{
+x1
+t
+Δ
+{
+x2
+{
+xN−1
+xN
+ft
+t
+0t
+{
+Fig. 4.1 Binning the observation time
+as shown in Fig. 4.1. For sufﬁciently small Δt, the rate of arrival in nth bin can be
+assumed to be constant:
+λn(θ) ≈1
+Δt
+ t0+nΔt
+t0+(n−1)Δt λ(t;θ)dt.
+(4.14)
+The bin count xn is a Poisson random variable whose probability is presented by
+p(xn = k;θ) =
+
+λn(θ)Δt
+k
+k!
+exp
+
+−λn(θ)Δt
+
+,
+k = 0,1,2,...
+(4.15)
+and its mean and variance are
+E [xn;θ] = var(xn;θ)
+= λn(θ)Δt.
+(4.16)
+As xn random variables are independent, their joint probability mass function
+(pmf) equals
+p(x;θ) =
+N
+∏
+n=1
+p(xn;θ)
+=
+N
+∏
+n=1
+
+λn(θ)Δt
+xn
+xn!
+exp
+
+−λn(θ)Δt
+
+.
+(4.17)
+To derive the CRLB using (4.17), ﬁrst, it must be checked if the regularity con-
+dition (4.5) holds. Therefore, the natural logarithm of (4.17) must be calculated
+ln p(x;θ) =
+N−1
+∑
+n=0
+
+xn ln[λn(θ)Δt]−λn(θ)Δt −ln(xn!)
+
+.
+(4.18)
+The derivative of (4.18) with respect to θ equals
+∂
+∂θ ln p(x;θ) =
+N−1
+∑
+n=0
+	
+xn ·
+1
+λn(θ)Δt · ∂
+∂θ λn(θ)Δt −∂
+∂θ λn(θ)Δt
+
+(4.19)
+
+
+========== PAGE 52 ==========
+
+4.3 CRLB
+39
+and its expectation is given by
+E
+ ∂
+∂θ ln p(x;θ)
+
+=
+N−1
+∑
+n=0
+	
+E[xn]·
+1
+λn(θ)Δt · ∂
+∂θ λn(θ)Δt −∂
+∂θ λn(θ)Δt
+
+=
+N−1
+∑
+n=0
+	
+λn(θ)Δt ·
+1
+λn(θ)Δt · ∂
+∂θ λn(θ)Δt −∂
+∂θ λn(θ)Δt
+
+= 0.
+(4.20)
+Hence, the regularity conditions (4.5) hold.
+To obtain the CRLB, the Fisher matrix I(θ) must be found. From (4.7) and (4.16),
+the matrix elements, Iij, are given by
+Iij = −E
+
+∂2
+∂θi∂θj
+ln p(x;θ)
+
+=
+N−1
+∑
+n=0
+	
+−E[xn]·
+∂2
+∂θi∂θj
+ln[λn(θ)Δt]+
+∂2
+∂θi∂θj
+λn(θ)Δt
+
+=
+N−1
+∑
+n=0
+	
+−
+
+λn(θ)Δt
+
+1
+λn(θ)Δt ·
+∂2
+∂θi∂θj
+λn(θ)Δt
+−
+
+1
+λn(θ)Δt
+2
+· ∂
+∂θi
+λn(θ)Δt · ∂
+∂θj
+λn(θ)Δt
+
++
+∂2
+∂θi∂θj
+λn(θ)Δt
+
+=
+N−1
+∑
+n=0
+1
+λn(θ) · ∂
+∂θi
+λn(θ)· ∂
+∂θj
+λn(θ)·Δt.
+(4.21)
+By letting Δt →0, the summation in (4.21) can be replaced by an integral
+Iij =
+ tf
+t0
+∂
+∂θi
+λ(t;θ)· ∂
+∂θj
+λ(t;θ)
+λ(t;θ)
+dt,
+i, j = 1,2.
+(4.22)
+Using (4.8), the partial derivatives in (4.22) are
+∂
+∂θ1
+λ(t;θ) =
+∂
+∂φ0
+λ(t;θ) = λs ·h′
+φ0 +(t −t0)fo
+
+(4.23)
+∂
+∂θ2
+λ(t;θ) = ∂
+∂fo
+λ(t;θ) = λs ·(t −t0)·h′
+φ0 +(t −t0)fo
+
+.
+(4.24)
+
+
+========== PAGE 53 ==========
+
+40
+4 Pulse Delay Estimation
+Substituting (4.23) into (4.22), I11 may be found,
+I11 =
+ tf
+t0
+ ∂
+∂φ0
+λ(t;θ)
+2
+λ(t;θ)
+dt
+=
+ t0+Tobs
+t0
+
+λsh′
+φ0 +(t −t0)fo
+2
+λb + λsh
+
+φ0 +(t −t0)fo
+ dt
+=
+ Tobs
+0
+
+λsh′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt.
+(4.25)
+The observation time can decomposed as Tobs = Np ·P+Tp, where P is the pulsar
+period, and 0 ≤Tp < P. Hence, the integral in (4.25) can be split as follows
+I11 =
+Np
+∑
+n=1
+	 nP
+(n−1)P
+
+λsh′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt
+
++
+ NpP+Tp
+NpP
+
+λsh′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt.
+(4.26)
+If the observation time is long enough, i.e., Tobs ≫0 then Tobs ≈Np · P and the
+last integral in (4.26) almost equals to zero. Also, because h(·) is periodic, all of the
+remained integrals in (4.26) are equal. Therefore,
+I11 ≈
+Np
+∑
+n=1
+ nP
+(n−1)P
+
+λsh′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt
+= Np
+ P
+0
+
+λsh′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt.
+(4.27)
+By changing the integration variable, and noting that fo = 1/P and Tobs ≈NpP
+I11 = Np
+f
+ φ0+fP
+φ0
+
+λsh′(φ)
+2
+λb +λsh(φ) dφ
+≈Tobs
+ φ0+1
+φ0
+
+λsh′(φ)
+2
+λb +λsh(φ) dφ
+= Tobs
+ 1
+0
+
+λsh′(φ)
+2
+λb +λsh(φ) dφ.
+(4.28)
+
+
+========== PAGE 54 ==========
+
+4.3 CRLB
+41
+To ﬁnd I22, (4.24) is substituted into (4.7), the integration variable is changed,
+and the integral is split into summation of the integrals in each period
+I22 =
+ t0+Tobs
+t0
+ ∂
+∂f λ(t;θ)
+2
+λ(t;θ)
+dt
+=
+ t0+Tobs
+t0
+
+λs(t −t0)h′
+φ0 +(t −t0)fo
+2
+λb + λsh
+
+φ0 +(t −t0)fo
+
+dt
+(4.29)
+=
+ Tobs
+0
+
+λs ·t ·h′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt
+=
+Np
+∑
+n=1
+	 nP
+(n−1)P
+
+λs ·t ·h′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt
+
++
+ NpP+Tp
+NpP
+
+λs ·t ·h′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt.
+(4.30)
+As the observation time is long enough, the last integral in (4.30) is negligible.
+Also, notice that if (n −1)P ≤t ≤nP, then t in (4.30) can be replaced by
+t = (n −1 +φ)P,
+(4.31)
+where 0 ≤φ ≤1. Hence,
+I22 ≈
+Np
+∑
+n=1
+ nP
+(n−1)P
+
+λs ·t ·h′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt
+=
+Np
+∑
+n=1
+ 1
+0
+
+λs ·(n −1 + φ)P·h′
+φ0 +(n −1 +φ)foP
+2
+λb +λsh
+
+φ0 +(n −1 +φ)foP
+
+Pdφ
+= P3
+Np
+∑
+n=1
+ 1
+0
+(n −1 + φ)2 ·
+
+λsh′
+φ0 +n −1 + φ
+2
+λb +λsh
+
+φ0 +n −1 + φ
+
+dφ
+= P3
+Np
+∑
+n=1
+ 1
+0
+(n −1 + φ)2 ·
+
+λsh′
+φ0 +φ
+2
+λb +λsh
+
+φ0 + φ
+
+dφ.
+(4.32)
+By changing the integration variable in (4.32),
+I22 = P3
+Np
+∑
+n=1
+ φ0+1
+φ0
+(n −1 + φ −φ0)2 ·
+
+λsh′(φ)
+2
+λb + λsh(φ)
+dφ.
+(4.33)
+
+
+========== PAGE 55 ==========
+
+42
+4 Pulse Delay Estimation
+Because Np ≫1, the integral value of the term that contains (n−1)2 is dominant.
+Therefore, I22 can be approximated by
+I22 ≈P3
+Np
+∑
+n=1
+ φ0+1
+φ0
+(n −1)2 ·
+
+λsh′(φ)
+2
+λb +λsh(φ)
+dφ
+(4.34)
+which equals
+I22 = P3 (Np −1)(Np)(2Np −1)
+6
+ φ0+1
+φ0
+
+λsh′(φ)
+2
+λb +λsh(φ) dφ
+(4.35)
+and can be approximated by
+I22 ≈P3 N3
+p
+3
+ φ0+1
+φ0
+
+λsh′(φ)
+2
+λb + λsh(φ) dφ
+≈T 3
+obs
+3
+ 1
+0
+
+λsh′(φ)
+2
+λb + λsh(φ) dφ.
+(4.36)
+Substituting (4.23) and (4.24) into (4.7), changing the integration variable and
+splitting the integral, give rise to
+I12 = I21 =
+ t0+Tobs
+t0
+∂
+∂φ0
+λ(t;θ)· ∂
+∂fo
+λ(t;θ)
+λ(t,θ)
+dt
+=
+ t0+Tobs
+t0
+[λsh′
+φ0 +(t −t0)fo
+
+][λs(t −t0)h′
+φ0 +(t −t0)fo
+
+]
+λb +λsh
+
+φ0 +(t −t0)fo
+
+dt
+=
+ Tobs
+0
+t ·
+
+λsh′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt
+=
+Np
+∑
+n=1
+	 nP
+(n−1)P
+t ·
+
+λsh′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt
+
++
+ NpP+Tp
+NpP
+t ·
+
+λsh′
+φ0 + fot
+2
+λb +λsh
+
+φ0 + fot
+ dt
+(4.37)
+
+
+========== PAGE 56 ==========
+
+4.3 CRLB
+43
+As Np ≫1, the last integral in (4.37) can be neglected compared to the ﬁrst term.
+Using the change of variable (4.31), (4.37) can be simpliﬁed as
+I12 = I21 ≈
+Np
+∑
+n=1
+ nP
+(n−1)P
+t ·
+
+λsh′
+φ0 + fot
+2
+λb + λsh
+
+φ0 + fot
+ dt
+=
+Np
+∑
+n=1
+ 1
+0
+(n −1 + φ)P·
+
+λsh′
+φ0 +(n −1 +φ)foP
+2
+λb +λsh
+
+φ0 +(n −1 +φ)foP
+
+Pdφ
+= P2
+Np
+∑
+n=1
+ 1
+0
+(n −1 + φ)
+
+λsh′
+φ0 +n −1 + φ
+2
+λb + λsh
+
+φ0 +n −1 + φ
+
+dφ
+= P2
+Np
+∑
+n=1
+ 1
+0
+(n −1 + φ)
+
+λsh′
+φ0 + φ
+2
+λb + λsh
+
+φ0 +φ
+
+dφ
+= P2
+Np
+∑
+n=1
+ φ0+1
+φ0
+(n −1 + φ)[λsh′(φ)]2
+λb +λsh(φ)
+dφ.
+(4.38)
+The term containing (n−1) has the largest contribution in the summation (4.38),
+because Np ≫1. Therefore, (4.38) can be approximated by
+I12 = I21 ≈P2
+Np
+∑
+n=1
+ φ0+1
+φ0
+(n −1)[λsh′(φ)]2
+λb + λsh(φ)
+dφ
+= P2 (Np −1)Np
+2
+ φ0+1
+φ0
+[λsh′(φ)]2
+λb +λsh(φ) dφ.
+(4.39)
+Since the term containing N2
+p is dominant, (4.39) can be approximated by
+I12 = I21 ≈P2 N2
+p
+2
+ φ0+1
+φ0
+[λsh′(φ)]2
+λb + λsh(φ) dφ
+(4.40)
+and using the approximation Tobs ≈NpP, it can be simpliﬁed to
+I12 = I21 ≈T 2
+obs
+2
+ 1
+0
+[λsh′(φ)]2
+λb + λsh(φ) dφ.
+(4.41)
+From (4.28), (4.36), and (4.41), the Fisher matrix and its inverse can be found.
+These matrices are given in (4.10) and (4.12), respectively.
+■
+
+
+========== PAGE 57 ==========
+
+44
+4 Pulse Delay Estimation
+If the observed frequency, fo, is known then the only unknown parameter to be
+estimated is φ0. In this case, from (4.28), the CRLB for estimation of φ0 is given by
+CRLB(φ0) =
+1
+TobsIp
+,
+(4.42)
+where Ip is given in (4.11).
+The pulse delay estimate, ˆtd, can be determined from (4.3) as
+ˆtd =
+ˆφ1 −ˆφ2
+ˆf2
+.
+(4.43)
+Hence, if velocities of the spacecraft are known, f2 does not need to be esti-
+mated, and from (4.42) and (5.1), the CRLB for estimation of td is given by the
+following [44].
+CRLB(td) = 2
+f 2
+2
+	
+1
+TobsIp
+
+(4.44)
+4.4
+Discussion
+Pulse delay estimator (4.43) is just a function of the velocity of spacecraft farther to
+the X-ray source. This may seem counter intuitive as one expects it to be a function
+of velocities of the both spacecraft. However, this is not the case. The pulsar signal
+is ﬁrst detected on the closer vehicle. Then, assuming the clocks on both detectors
+are synchronized, since the signal is emitted by the X-ray source, the time duration
+it takes for the signal to be detected on the farther vehicle is just a function of its
+own velocity.
+Equation (4.44) shows that the CRLB value for estimation of the pulse delay is
+inversely proportional to the observation time. In other words, to obtain more accu-
+rate pulse delay estimates, longer observation time is needed. Furthermore, since the
+CRLB is inversely proportional to Ip, which, in turn, is proportional to λs, making
+measurements on brighter pulsars results in more accurate pulse delay estimates.
+All of these analytical results are also consistent with intuition.
+4.5
+Numerical Examples
+The CRLB for estimation of the relative distance is calculated for eight different
+X-ray pulsars. It is given by σ = c
+
+CRLB(td), where c is the speed of light. The
+employed pulsars are presented in Table 4.1, and their proﬁles in two cycles are
+shown in Fig. 4.2. The spacecraft velocities are assumed to be v1 = 3 km/s and
+v2 = 9 km/s; and the initial phase observed at the ﬁrst detector is φ1 = 0.2 cycle.
+The relative distance between the spacecraft is assumed to be 180 km. Hence, the
+pulse delay is td = 0.6 ms.
+
+
+========== PAGE 58 ==========
+
+4.5 Numerical Examples
+45
+Table 4.1 Accuracy of the
+X-ray pulsar measurements
+Pulsar
+Period (s)
+min
+λb,λs
+σ (m)
+B0531+21
+0.0335
+2.6497E3
+B0540−69
+0.0504
+4.4901E3
+B0833−45
+0.0893
+1.8775E3
+B1509−58
+0.1502
+2.8866E3
+B1821−24
+0.0031
+188.68E0
+B1937+21
+0.0016
+27.516E0
+B1055−52
+0.1971
+1.1775E4
+J0437−47
+0.0057
+461.08E0
+0
+0.5
+1
+1.5
+2
+0
+5
+10
+B0531+21
+0
+0.5
+1
+1.5
+2
+0
+2
+4
+B0540−69
+0
+0.5
+1
+1.5
+2
+0
+5
+B0833−45
+0
+0.5
+1
+1.5
+2
+0
+2
+4
+B1509−58
+0
+0.5
+1
+1.5
+2
+0
+10
+20
+B1821−24
+0
+0.5
+1
+1.5
+2
+10
+20
+B1937+21
+0
+0.5
+1
+1.5
+2
+0
+2
+4
+Phase, Á (cycle)
+Phase, Á (cycle)
+B1055−52
+0
+0.5
+1
+1.5
+2
+0
+2
+4
+J0437−47
+0
+h(Á)
+h(Á)
+h(Á)
+h(Á)
+h(Á)
+h(Á)
+h(Á)
+h(Á)
+Fig. 4.2 Pulsars’ proﬁles, h(φ), over two cycles
+The observation time is assumed to be Tobs = 100 s, and σ is calculated for
+different values of λb and λs. The results are plotted in Fig. 4.3. As these ﬁgures
+show, the rate of change of the σ surface drops for large values of λs. Note that
+from (4.44), the σ value is inversely proportional to λs and the observation time,
+Tobs. Hence, to obtain smaller values of σ for relative distance estimation, either the
+observation time or λs must be increased. The minimum values of the σ surfaces
+are also given in Table 4.1. The minimum values change in a range of a few tens of
+meters to a few tens of kilometers.
+
+
+========== PAGE 59 ==========
+
+46
+4 Pulse Delay Estimation
+0
+5
+0
+200
+400
+0
+5000
+10000
+15000
+¸b
+B0531+21
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+2
+4
+6
+x 10
+4
+¸b
+B0540-69
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+2
+4
+6
+x 10
+4
+¸b
+B0833-45
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+1
+2
+3
+x 10
+5
+¸b
+B1509-58
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+500
+1000
+1500
+¸b
+B1821-24
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+200
+400
+600
+¸b
+B1937+21
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+2
+4
+6
+x 10
+5
+¸b
+B1055-52
+¸s
+¾ (m)
+0
+5
+0
+200
+400
+0
+5000
+10000
+15000
+¸b
+J0437-47
+¸s
+¾ (m)
+Fig. 4.3 The σ surface for Tobs = 100 s
+
+
+========== PAGE 60 ==========
+
+4.6 Summary
+47
+4.6
+Summary
+In this chapter, we formulate the pulse delay estimation problem. We show that the
+pulse delay is composed of the true time delay between the detected pulsar rate
+functions (which is due to the geometric range) and the differential time between
+the detectors’ asynchronized clocks. We present the CRLB for estimation of the
+spacecraft absolute velocities and the initial phase of the pulsar intensity functions.
+We also present the CRLB for estimation of the pulse delay when the spacecraft
+velocities are known. Some numerical examples are given as well.
+
+
+========== PAGE 61 ==========
+
+
+
+========== PAGE 62 ==========
+
+Chapter 5
+Pulse Delay Estimation Using Epoch Folding
+5.1
+Introduction
+In this chapter we offer our ﬁrst approach for estimation of the pulse delay. The
+proposed approach is to retrieve the photon intensity functions on each detector via
+epoch folding to obtain the empirical rate functions, i.e., ˘λk(t). Then, the empirical
+intensities will be used for estimation of the initial phase on each detector. Finally,
+from (4.3), the pulse delay can be estimated using the estimates of φ1 and φ2,
+ˆtd =
+ˆφ1 −ˆφ2
+f2
+.
+(5.1)
+Based on epoch folding, two different pulse delay estimators are presented in
+this chapter. Section 5.2 suggests using the correlation function between the em-
+pirical rate function and the true one to estimate the initial phase of the intensity
+function. In Sect. 5.3, a least-squares approach is proposed for estimation of the ini-
+tial phase. Some clarifying remarks are given in Sect. 5.4. The effect of absolute
+velocity errors on the performance of the proposed pulse delay estimators is studied
+in Sect. 5.5. We study the numerical implementation of the estimators in Sect. 5.6.
+Finally, we provide several numerical examples to assess the performance of the
+proposed estimators in Sect. 5.7.
+5.2
+Cross Correlation Technique
+Let Tb be the bin size, and ˘λ j(ti) be the empirical rate function on jth detector, where
+0 ≤ti ≤P. The known rate function is
+λ(ti) = λb + λsh
+
+(ti −t0)fo
+
+.
+(5.2)
+Let the delayed rate function be
+λ(ti;φj) = λb +λsh
+
+φj +(ti −t0)fo
+
+.
+(5.3)
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 5, c⃝Springer Science+Business Media, LLC 2011
+49
+
+
+========== PAGE 63 ==========
+
+50
+5 Pulse Delay Estimation Using Epoch Folding
+Therefore,
+˘λ j(ti) = λ(ti;φ j)+ ˘n j(ti),
+j = 1,2,
+(5.4)
+where
+E[˘n j(ti)] = 0
+(5.5)
+and
+var[˘n j(ti)] ≜σ2
+j (ti)
+= Nb
+Tobs
+λ j(ti;φ j).
+(5.6)
+The initial phase φj can be estimated by identiﬁcation of the maximum of the
+cross correlation (CC) function between λ(t) and ˘λ j(t)
+ˆφj = −argmax
+ψ∈(0,1)
+R j(ψ),
+j = 1,2,
+(5.7)
+where
+R j(ψ) =
+ ∞
+−∞λ ∗(t)˘λ j(t;ψ)dt
+(5.8)
+is the CC function [44].
+The asymptotic performance of this estimator is presented by the following
+theorem [44].
+Theorem 5.1. The pulse delay estimator obtained from (5.7) and (5.1), is unbiased
+for Tobs ≫0, and its asymptotic variance is given by,
+var[ˆtd] =
+2
+ 1
+0
+
+λb +λsh(φ)
+
+[λsh′(φ)]2dφ
+f 2
+2 Tobs
+ 1
+0 [λsh′(φ)]2dφ
+2
+,
+(5.9)
+where h′(φ) = ∂h/∂φ. This means that the estimator is consistent since its variance
+converges to zero as more TOA measurements are incorporated. Furthermore, it
+is not asymptotically efﬁcient, meaning that its variance does not converge to the
+CLRB in ﬁnite time, i.e.,
+var[ˆtd] > CRLB(td)
+for
+Tobs < ∞.
+(5.10)
+Proof. First, the performance of the cross correlation initial phase estimator on each
+detector is analyzed. For simplicity in notations, the subindex j of φ j in (5.4) is
+dropped. Let
+x1(t) = λ(t)
+= λb + λsh
+
+(t −t0)fo
+
+(5.11)
+
+
+========== PAGE 64 ==========
+
+5.2 Cross Correlation Technique
+51
+and
+x2(t) = ˘λ(t;φ).
+(5.12)
+Assuming φ = −foD, x2(t) can be rewritten as
+x2(t) = λb +λsh
+
+(t −t0)fo + φ
+
++ ˘n(t)
+= λb +λsh
+
+(t −t0 −D)fo
+
++ ˘n(t)
+= x1(t −D)+ ˘n(t).
+(5.13)
+Let ˆD be the estimate of D. As the signals x1(t) and x2(t) are band-limited, the
+cross correlation (5.8) has a derivative at ˆD, and it follows from (5.7) that
+˙R( ˆD) = 0.
+(5.14)
+By linearizing ˙R( ˆD) about the true time delay D, the following is obtained [53].
+˙R(D)+( ˆD−D) ¨R(D) = 0
+(5.15)
+Deﬁning the delay estimation error
+δ = ˆD−D
+(5.16)
+from (5.16) and (5.15), it can be expressed as
+δ = −
+˙R(D)
+¨R(D).
+(5.17)
+The signals x1(t) and x2(t) have the following spectra
+S1(f) = Sλ(f)
+(5.18)
+and,
+S2(f) =
+⎧
+⎨
+⎩
+Sλ(f)e−j2π fD +Tb∑
+k
+˘n(k)e−j2π fkTb |f| < fs/2
+0
+|f| ≥fs/2,
+(5.19)
+where k ≜tk, fs = 1/Tb, and Sλ(f) is the spectrum of λ(t), which equals
+Sλ(f) = Tb∑
+k
+λ(k)e−j2π fkTb.
+(5.20)
+The cross-correlation function is the inverse fourier transform of the cross power
+spectrum
+R(τ) =
+ ∞
+−∞S∗
+1(f)S2(f)ej2π fτd f.
+(5.21)
+
+
+========== PAGE 65 ==========
+
+52
+5 Pulse Delay Estimation Using Epoch Folding
+Therefore,
+˙R(τ) = j2π
+ ∞
+−∞fS∗
+1(f)S2(f)ej2π fτd f
+= j2π
+ fs/2
+−fs/2 fS∗
+λ(f)
+
+Sλ(f)e−j2π fD +Tb∑
+k
+˘n(k)e−j2π fkTb
+
+ej2π fτd f.
+(5.22)
+Assuming ˘n(k) is small (or equivalently Tobs ≫0), (5.22) can be linearized about
+the true values of the samples as follows [53].
+˙R(τ) ≈∑
+k
+˘n(k)∂˙R(τ)
+∂˘n(k) ,
+(5.23)
+where
+∂˙R(τ)
+∂˘n(k) = j2πTb
+ fs/2
+−fs/2 fS∗
+λ(f)e−j2π fkTbej2π fτd f.
+(5.24)
+Therefore,
+˙R(τ) ≈j2πTb∑
+k
+˘n(k)
+ ∞
+−∞fSλ(f)ej2π f(kTb −τ)d f
+∗
+.
+(5.25)
+Hence,
+˙R(D) ≈j2πTb∑
+k
+
+˘n(k)
+ ∞
+−∞fSλ (f)ej2π f(kTb−D)d f
+∗
+= Tb∑
+k
+˘n(k)˙λ(k).
+(5.26)
+From (5.21),
+¨R(τ) = −4π2
+ ∞
+−∞f 2S∗
+1(f)S2(f)ej2π fτd f
+≈−4π2
+ ∞
+−∞f 2|Sλ(f)|2ej2π f(τ −D)d f.
+(5.27)
+Then,
+¨R(D) ≈−4π2
+ ∞
+−∞f 2|Sλ(f)|2d f
+= Tb∑
+k
+˙λ 2(k).
+(5.28)
+
+
+========== PAGE 66 ==========
+
+5.2 Cross Correlation Technique
+53
+Substituting (5.26) and (5.28) into (5.17), the estimation error is given by
+δ ≈
+∑
+k
+˘n(k)˙λ(k)
+∑
+k
+˙λ 2(k)
+.
+(5.29)
+Therefore, from (5.29)
+E[δ] = 0.
+(5.30)
+Since φ = −foD, this means that the phase estimator is unbiased as well,
+E[ ˆφ] = φ.
+(5.31)
+Furthermore,
+var[δ] =
+∑
+k
+var[˘n(k)]· ˙λ 2(k)
+
+∑
+k
+˙λ 2(k)
+2
+,
+(5.32)
+where var[˘n(k)] is given in (3.42). Therefore,
+var[δ] =
+1
+TbNp
+·
+∑
+k
+λ(k)˙λ 2(k)
+
+∑
+k
+˙λ 2(k)
+2 .
+(5.33)
+Let Tb →0 (or equivalently Nb →∞), then (5.33) becomes
+var[δ] ≈
+1
+TbNp
+·
+1
+Tb
+ P
+0 λ(t)˙λ 2(t)dt
+ 1
+Tb
+ P
+0
+˙λ 2(t)dt
+2
+= 1
+Np
+·
+ P
+0 λ(t)˙λ 2(t)dt
+ P
+0
+˙λ 2(t)dt
+2 .
+(5.34)
+The phase value varies in the range 0 ≤φ ≤1, and the time span is 0 ≤t ≤P.
+As a result, they are related as φ = t/P. Therefore,
+dt = Pdφ
+(5.35)
+
+
+========== PAGE 67 ==========
+
+54
+5 Pulse Delay Estimation Using Epoch Folding
+and
+∂
+∂t λ(t) =
+∂
+P∂φ λ(φ).
+(5.36)
+Thus, (5.34) can be simpliﬁed as,
+var[δ] = 1
+Np
+·
+1
+P
+ 1
+0 λ(φ)˙λ 2(φ)dφ
+ 1
+P
+ 1
+0
+˙λ 2(φ)dφ
+2
+= P
+Np
+·
+ 1
+0 λ(φ)˙λ 2(φ)dφ
+ 1
+0
+˙λ 2(φ)dφ
+2
+= f 2
+o
+Tobs
+·
+ 1
+0 λ(φ)˙λ 2(φ)dφ
+ 1
+0
+˙λ 2(φ)dφ
+2 .
+(5.37)
+Since ˆφ = −fo ˆD,
+var[ ˆφj] =
+1
+Tobs
+·
+ 1
+0 λ(φ)˙λ 2(φ)dφ
+ 1
+0
+˙λ 2(φ)dφ
+2 .
+(5.38)
+Therefore, substituting λ(φ) = λb + λsh(φ) in (5.38), and using (5.1), the vari-
+ance of the time delay estimator is determined as given in (5.9).
+To compare the performance against the CRLB it is shown that var[ˆtd]/CRLB(td)
+is greater than one. Using (5.9) and (4.44), the ratio equals
+var[ˆtd]
+CRLB(td) =
+ 1
+0 g1(φ)dφ ·
+ 1
+0 g3(φ)dφ
+ 1
+0 g2(φ)dφ
+2
+,
+(5.39)
+where
+g1(φ) ≜
+
+λb +λsh(φ)
+
+[λsh′(φ)]2
+(5.40)
+g2(φ) ≜[λsh′(φ)]2
+(5.41)
+g3(φ) ≜
+
+λsh′(φ)
+2
+λb + λsh(φ).
+(5.42)
+
+
+========== PAGE 68 ==========
+
+5.3 Nonlinear Least Squares Technique
+55
+Note that from Cauchy–Schwartz inequality,
+ 1
+0 g1(φ)dφ ·
+ 1
+0 g3(φ)dφ ≥
+ 1
+0
+
+g1(φ)g3(φ)dφ
+2
+.
+(5.43)
+From (5.40), (5.41), and (5.42), it can easily be seen that
+g2(φ) =
+
+g1(φ)g3(φ).
+(5.44)
+Therefore, (5.43) and (5.39) result in
+var[ˆtd] ≥CRLB(td).
+(5.45)
+The equality holds if and only if g3(φ) is a multiple of g1(φ), which implies
+λb +λsh(φ) ≡const.
+(5.46)
+Since this is not the case for a general h(φ), equality does not hold, and the
+variance does not attain the CRLB asymptotically.
+■
+5.3
+Nonlinear Least Squares Technique
+The initial phase can be estimated by ﬁtting the empirical rate function, ˘λ j(t), to
+the true known rate function, λ(t), via solving a nonlinear least squares (NLS) op-
+timization problem [43]. The NLS cost function is deﬁned based on minimizing the
+difference between the empirical rate function and the true one at the jth detector,
+i.e., ˘λ j(t)−λ(t;φ j). Hence, the objective function, J(φj), is deﬁned as follows.
+J(φj) =
+Nb
+∑
+i=1
+˘λ j(ti)−λ(ti;φj)
+2,
+j = 1,2
+(5.47)
+The unknown initial phase is estimated by minimizing the cost function (5.47), as
+ˆφj = argmin
+φj∈(0,1)
+J(φj),
+j = 1,2.
+(5.48)
+The following theorem summarizes the performance of the proposed pulse delay
+estimator [44].
+Theorem 5.2. The pulse delay estimator obtained from (5.48) and (5.1) is asymp-
+totically unbiased, and its asymptotic variance is given by (5.9). That is, the NLS
+estimator’s asymptotic performance is the same as the CC estimator.
+
+
+========== PAGE 69 ==========
+
+56
+5 Pulse Delay Estimation Using Epoch Folding
+Proof. For simplicity in notations, the subindex j in (5.47) is dropped and the cost
+function is restated as,
+J(φ) =
+˘x−f(φ)
+T˘x−f(φ)
+
+,
+(5.49)
+where
+˘x ≜
+˘λ(t1) ˘λ(t2) ··· ˘λ(tNb)
+T
+(5.50)
+and
+f(φ) ≜
+
+λ(t1;φ) λ(t2;φ) ··· λ(tNb;φ)
+T .
+(5.51)
+Now, assuming that the selected minimum is in the correct neighborhood (or
+equivalently the observation time is long enough), the mean and variance of the
+estimator ˆφ can be approximated by linearizing f(φ) about the true value of phase,
+φo, as
+f(φ) ≈f(φo)+(φ −φo)h,
+(5.52)
+where
+h ≜∂f(φ)
+∂φ
+
+φ=φo.
+(5.53)
+Therefore, (5.49) becomes
+J(φ) =
+˘x−f(φo)+hφ o −hφ
+T˘x−f(φ o)+hφo −hφ
+
+.
+(5.54)
+Noting that ˘x−f(φo)+hφo is ﬁxed and φ is the variable, the linear least-squares
+solution to the cost function (5.54) is given by
+ˆφ = k−1hT˘x−f(φ o)+hφo
+= φ o +r−1hT˘x−f(φ o)
+
+,
+(5.55)
+where
+r ≜hTh.
+(5.56)
+The estimation error is deﬁned as
+eφ = ˆφ −φ o.
+(5.57)
+Hence, from (5.55)
+E[eφ] = r−1hT(φ o)E [˘x−f(φo)]
+(5.58)
+and
+var[eφ] = r−1hTvar[˘x −f(φ o)]hr−1.
+(5.59)
+Note that from (3.40)
+˘x−f(φo) = ˘n,
+(5.60)
+where
+˘n ≜
+
+˘n(t1) ˘n(t2) ··· ˘n(tNb)
+T .
+(5.61)
+
+
+========== PAGE 70 ==========
+
+5.4 Discussion
+57
+Hence, employing (3.41) and (3.42), the asymptotic mean and variance of the
+estimation error, as Tobs →∞, are
+E[eφ] = 0
+(5.62)
+and
+var[eφ] = Nb
+Tobs
+r−1hTLhr−1,
+(5.63)
+where
+L ≜diag
+
+λ(t1;φ o),λ(t2;φo),...,λ(tNb;φo)
+
+.
+(5.64)
+This means that the NLS estimator ˆφ0 is asymptotically unbiased. By substitut-
+ing the values of r, h, and L into (5.63), the asymptotic variance of initial phase
+estimator is given by
+var[ ˆφj] = Nb
+Tobs
+·
+Nb
+∑
+i=1
+λ(ti;φ o)
+
+λ ′(ti;φo)
+2
+ Nb
+∑
+i=1
+
+λ ′(ti;φo)
+2
+2
+.
+(5.65)
+By letting Nb →∞and substituting the value of λ(·) from (3.27), (5.65) can be
+replaced by
+var[ ˆφ j] =
+ 1
+0
+
+λb +λsh(φ)
+
+[λsh′(φ)]2dφ
+Tobs
+ 1
+0 [λsh′(φ)]2dφ
+2
+.
+(5.66)
+Therefore, from (5.1), the time delay estimator’s asymptotic variance equals
+2var[ ˆφj]/ f 2
+2 , which is given in (5.9).
+■
+5.4
+Discussion
+In [54], it is stated that if some regularity conditions are satisﬁed, the NLS estimator
+is consistent. It is easy to check that the mentioned conditions are met by the NLS es-
+timator (5.48). Furthermore, it is mentioned that the NLS estimator is not in general
+asymptotically efﬁcient, and this property depends on the underlying distribution of
+the noise. The signiﬁcance of Theorem 5.2 is that it states (5.48) is indeed not an
+asymptotically efﬁcient estimator. A meaningful measure to compare the estimator’s
+performance to the CRLB is the asymptotic relative efﬁciency (ARE), which is the
+ratio between the estimator’s asymptotic variance and the CRLB [55]. The ARE for
+the proposed NLS estimator is calculated and given in (5.39). From (5.39), it is clear
+that the LNS estimator’s ARE is only a function of the pulsar proﬁle, h(φ), and the
+photon constant rates, λb and λs.
+
+
+========== PAGE 71 ==========
+
+58
+5 Pulse Delay Estimation Using Epoch Folding
+Also note that the proposed NLS phase estimation approach is different from the
+one given in [56], which is typically used for radio pulsar timing. The method in
+[56] is based on minimizing the difference between the Fourier transforms of the
+empirical rate function and the true one.
+5.5
+Absolute Velocity Errors
+The presented pulse delay estimators were analyzed based on accurate knowledge of
+the spacecraft absolute velocities. If there are absolute velocity errors, the proposed
+pulse delay estimation approach still works under certain conditions. If the velocity
+errors in the direction of the X-ray source are small enough, the resulted pulse delay
+errors can be neglected. This is a result of the upper bound presented in (3.72).
+If the velocity errors on each spacecraft are almost equal, Δv1 ≈Δv2, then from
+(3.66), Δφ1 ≈Δφ2. This results in the same deterioration of initial phase estimates
+on each detector. Hence, from (5.1), as the difference between the phase estimates
+is employed for estimation of the pulse delay, it remains asymptotically unbiased.
+However, the variance of estimation error becomes larger than the case where the
+absolute velocities are perfectly known due to two reasons [44]. One is the effect of
+the velocity error on f2 in the denominator of (5.1). It is given by
+Δˆtd = −Δ ˆφ
+f 2
+2
+Δf2,
+(5.67)
+where
+Δ ˆφ = ˆφ1 −ˆφ2
+(5.68)
+and
+Δf2 = fs
+Δv2
+c .
+(5.69)
+Therefore, the time delay estimate error due to this velocity error equals
+Δˆtd = −Δ ˆφ Δv2
+cf 2
+2
+fs
+≈−Δ ˆφ Δv2
+cf2
+.
+(5.70)
+This causes cΔˆtd meters of error in position estimation
+δΔx = cΔˆtd
+≈−Δ ˆφ Δv2
+f2
+.
+(5.71)
+
+
+========== PAGE 72 ==========
+
+5.6 Computational Complexity Analysis
+59
+The second reason that the variance of the pulse delay estimator increases is that
+the variance of the initial phase estimates becomes larger. These estimation errors
+can be modeled by increasing the variance of the measurement noise in the Kalman
+ﬁltering stage.
+If the aforementioned assumptions about spacecraft velocities are not valid, the
+absolute velocities must be estimated as well as the initial phase values. We propose
+two solutions for this problem.
+One approach is to simultaneously estimate fk and φk. This is possible by
+using the TOA pdfs (6.1) to form two likelihood functions, and then solve the
+two-dimensional ML estimation problems. More details about this approach are dis-
+cussed in Chap. 6.
+In a different approach, we propose to employ the geometry of pulsars in the
+sky to estimate the spacecraft absolute velocities. For more details on this method,
+please see Chap. 7.
+5.6
+Computational Complexity Analysis
+5.6.1
+Epoch Folding
+To use the CC or NLS initial phase estimators, the empirical rate function must be
+obtained through epoch folding. To obtain it, from (3.39), Nb(Np −1) additions, and
+2Nb divisions are needed. Hence, the total number of calculations for epoch folding
+is Nb(Np +1) ﬂops. This shows that the amount of necessary calculations for epoch
+folding is a linear function of Np. In other words, it roughly linearly grows as the
+observation time becomes longer.
+5.6.2
+CC Estimator
+As ˘λ(t;ψ) is a discrete signal which is available at multiples of Tb s, the discrete
+cross-correlation function must be calculated. It is given by
+RD(ψ) = 1
+Nb
+Nb
+∑
+k=1
+x1(kTb)x2(kTb;ψ),
+(5.72)
+where x1(t) and x2(t) are deﬁned in (5.11) and (5.12), respectively [57].
+The cross-correlation function can be computed in the time domain using (5.72),
+or in the Fourier domain
+RD(ψ) = F −1{X1(fk)X∗
+2 (fk)},
+(5.73)
+where X1(fk) and X2(fk) are the discrete Fourier transforms of x1(kTb) and x2(kTb).
+
+
+========== PAGE 73 ==========
+
+60
+5 Pulse Delay Estimation Using Epoch Folding
+If the resolution of the initial phase estimate is needed to be ﬁner than 1/Nb,
+it is necessary to interpolate the cross-correlation function. One approach is to ap-
+proximate the correlation function by a convex parabola in the neighborhood of its
+maximum, as
+RD(ψ) = aψ2 +bψ +c,
+(5.74)
+where a, b, and c are parameters ﬁtting the measured correlation. Using this approx-
+imation, the continuous time-delay estimation can be performed by ﬁnding the apex
+of the parabola,
+ˆDs = −b
+2a.
+(5.75)
+Hence, to obtain the continuous initial phase estimate, two steps are needed:
+• Locate the index km of the maximizer delay RD(kmTs), where Ts = 1/Nb, to ﬁnd
+the coarse estimate.
+• To ﬁnd the subsample estimate, use the maximum cross-correlation delay
+RD(kmTs), and two of its adjacent values RD(kmTs −Ts) and RD(kmTs + Ts)
+for a parabolic approximation, and add it to the coarse estimate,
+ˆφ = kmTs −1
+2 ·
+RD(kmTs +Ts)−RD(kmTs −Ts)
+RD(kmTs +Ts)−2RD(kmTs)+RD(kmTs −Ts).
+(5.76)
+Note that due to the parabolic approximation, the phase estimate (5.76) becomes
+biased [57].
+Using (5.72), to obtain the discrete cross-correlation function, for a ﬁxed ψ,
+Nb multiplications, Nb −1 additions, and 1 division are performed. Since the
+search domain to maximize RD(ψ) is (0,1) cycle, which is divided into Ng grids,
+a total number of 2NgNb ﬂops must be performed to obtain the initial phase
+estimate.
+From (5.76), we can see that three additions and two multiplications are needed
+for interpolation. It is also clear that the interpolation is performed only to ﬁnd the
+maximizer point. Hence, the number of calculation ﬂops is not a function of the
+observation time, Tobs.
+In summary, to obtain the CC estimator, ﬁrst epoch folding is performed which
+needs Nb(Np + 1) operation ﬂops. Then the search interval (0,1) cycle is divided
+into Ng grids, and the correlation function is obtained for each grid. This imposes
+2NbNg operations.
+If the correlation function is obtained using the Fourier transform from (5.73),
+ﬁrst the Fourier transform of each signal must be found. Then Nb multiplications are
+performed and using inverse Fourier transform on the resulted signal, the correlation
+function is determined. As fast Fourier transform techniques are widely available,
+this approach is expected to be faster than the time domain method.
+
+
+========== PAGE 74 ==========
+
+5.7 Numerical Examples
+61
+5.6.3
+NLS Estimator
+To construct the NLS cost function, using (5.47), Nb subtractions, Nb multiplica-
+tions, and Nb additions must be performed for a ﬁxed φ0. Hence, the total number of
+ﬂoating-point operations is 3Nb. This means that the computational cost to construct
+the NLS cost function is not a function of the observation time.
+Although for any given φ0, λ(ti,φ0) is known, the mathematical equation of the
+rate function λ(t;φ0) is not usually available in practice. Hence, the gradient of the
+cost function, if needed, must be calculated numerically. Furthermore, the cost func-
+tion is not convex in general. This means that it usually has multiple minima. Hence,
+to avoid getting trapped in local extrema, and since (5.48) is a scalar optimization
+problem, employing a one-dimensional grid search over the interval (0,1) cycle is
+necessary to solve it. In other words, ﬁrst, the epoch folding procedure, with a cost
+of Nb(Np +1) ﬂops, is performed. Then, the search interval (0,1) is divided into Ng
+grids. For each grid, the cost function (5.47) is calculated, and the minimizer grid is
+found. This imposes a total ﬂoating-point operations of 3NgNb ﬂops.
+5.7
+Numerical Examples
+First, performance of the initial phase estimators on one detector is examined.
+Then, a relative navigation scenario is presented and the pulse delay estimators are
+simulated.
+5.7.1
+Initial Phase Estimators
+The Crab pulsar (PSR B0531+21) is chosen as the X-ray source. The constant ar-
+rival rates are chosen to be λb =5 and λs =15 ph/s. The spacecraft velocity on the
+direction vector pointing to the pulsar is assumed to be v=3 km/s; and the initial
+phase observed at the detector is φ1 =0.2 cycle. A Monte Carlo simulation was per-
+formed in which 500 independent realization of photon TOAs were processed by
+the phase estimators.
+To evaluate each estimator’s performance, the empirical rate function is derived
+for each observation time, and the initial phase is estimated by optimizing the cost
+functions given in (5.8) and (5.47). The optimization is done using a grid search
+algorithm over [0,1) cycle. The interval is divided into 1,024 grids and the cost
+functions are calculated for each one. Note that the magnitude of the estimation
+error is calculated modulo one cycle, i.e.,
+|e| = min{mod (φ0 −ˆφ0,1),
+mod ( ˆφ0 −φ0,1)}.
+(5.77)
+For instance, if φ0 = 0.1 and ˆφ0 = 0.9, the error is 0.2 cycle, and not 0.8 cycle.
+
+
+========== PAGE 75 ==========
+
+62
+5 Pulse Delay Estimation Using Epoch Folding
+0.1
+1
+10
+100
+500
+10
+-1
+10
+-2
+10
+-3
+Observation Time, Tobs (sec)
+RMS Error (cycle)
+NLS (Simulation)
+CC (Simulation)
+CC,NLS (Analytic)
+CRLB(Á0)
+Fig. 5.1 RMS error for the CC and NLS phase estimators
+In Fig. 5.1, the root mean square (RMS) of the CC and NLS estimation errors for
+each observation time are plotted against the square root of the CRLB(φ0) and the
+analytical value, presented in (4.42) and (5.66), respectively. The mean square error
+(MSE) of the estimator which measures the average mean squared deviation of the
+estimator from the true value, is deﬁned as follows.
+MSE( ˆφ0) = E[( ˆφ0 −φ0)2]
+(5.78)
+The MSE can be rewritten as
+MSE( ˆφ0) = E
+
+ˆφ0 −E( ˆφ0)
+
++
+
+E( ˆφ0)−φ0
+2
+= var( ˆφ0)+
+
+E( ˆφ0)−φ0
+2
+= var( ˆφ0)+b2(φ0),
+(5.79)
+where
+b(φ0) = E( ˆφ0)−φ0
+(5.80)
+is the bias of the estimator. This shows that the MSE is composed of errors due to
+the variance of the estimator as well as the bias.
+The RMS plots in Fig. 5.1 show that as time goes on, the variance of estimation
+error approaches zero, implying that both estimators are consistent. The difference
+
+
+========== PAGE 76 ==========
+
+5.7 Numerical Examples
+63
+between the RMS error and the CRLB is determined by the difference between
+(5.66) and (4.42). It is in general a function of the pulsar rate function, but it is
+always inversely proportional to the observation time. As the observation time is
+reduced, there is a threshold point at which the RMS error starts to deviate from the
+CRLB value. The reason is that as the observation time goes below this threshold,
+the realization of TOAs does not represent the rate function precisely. Therefore,
+they result in a distorted cost function whose extremum happens at a farther point
+to the true parameter, φo. As a result, the estimator becomes biased, and as (5.79)
+shows, the estimation error’s variance starts to depart from the CRLB.
+The CC cost function (5.8), obtained by Monte Carlo simulation over 500 re-
+alizations of TOAs, is plotted in Fig. 5.2 for different observation times. The plots
+show that for short observation times, the CC function has a smaller peak, and as the
+observation time increases and more TOAs are measured, the peak value becomes
+larger.
+The cost function (5.47) is also plotted in Fig. 5.3 for different observation times.
+The plots show that as the observation time increases, the cost function becomes
+smaller.
+Figures 5.2 and 5.3 also show that each of the cost functions has multiple
+extrema. Hence, they verify that, to avoid getting trapped in local extrema, adopting
+-1
+-0.5
+0
+0.5
+1
+0
+0.02
+0.04
+0.06
+0.08
+0.1
+R(Á0)
+Tobs = 0.1 sec
+-1
+-0.5
+0
+0.5
+1
+0
+0.2
+0.4
+0.6
+0.8
+1
+Tobs = 10 sec
+-1
+-0.5
+0
+0.5
+1
+0
+0.2
+0.4
+0.6
+0.8
+1
+Á0 (cycle)
+R(Á0)
+Tobs = 70 sec
+-1
+-0.5
+0
+0.5
+1
+0
+0.2
+0.4
+0.6
+0.8
+1
+Á0 (cycle)
+Tobs = 300 sec
+Fig. 5.2 The CC cost function
+
+
+========== PAGE 77 ==========
+
+64
+5 Pulse Delay Estimation Using Epoch Folding
+0
+0.5
+1
+3.155
+3.16
+3.165
+3.17
+3.175
+3.18 x 10
+8
+J(Á0)
+Tobs = 0.1 sec
+0
+0.5
+1
+2
+2.5
+3
+3.5 x 10
+6
+Tobs = 10 sec
+0
+0.5
+1
+0
+0.5
+1
+1.5
+2 x 10
+6
+Á0 (cycle)
+J(Á0)
+Tobs = 70 sec
+0
+0.5
+1
+0
+5
+10
+15 x 10
+5
+Á0 (cycle)
+Tobs = 300 sec
+Fig. 5.3 The NLS cost function
+a grid search optimization approach is necessary. As the search is performed over
+the whole interval (0,1) cycle, the algorithm initialization issues do not arise.
+5.7.2
+Pulse Delay Estimators
+Now we simulate the pulse delay estimators. The spacecraft velocities on the direc-
+tion vector pointing to the pulsar are assumed to be v1 = 3 km/s and v2 = 9 km/s;
+and the initial phase observed at the ﬁrst detector is φ1 = 0.2 cycle. The Doppler
+frequencies depend on v1 and v2, which are scalars. Hence, we do not need the
+spacecraft velocity vectors for this simulation. The relative distance between the
+spacecraft is assumed to be Δd = 180 km. Hence, the pulse delay to be estimated is
+td = 0.6 ms. Since td is less than the pulsar period, there is no phase ambiguity.
+An observation time of Tobs = 100 s is selected to verify the epoch folding re-
+sults. For each observation time, photon time tags are folded back into one single
+pulsar cycle which is divided into Nb = 1,024 bins, and the rate functions on each
+detector are derived using (3.39). The empirical rate functions along with the true
+ones are plotted in Figs. 5.4 and 5.5. As the plots show, the empirical rate functions
+
+
+========== PAGE 78 ==========
+
+5.7 Numerical Examples
+65
+0
+5
+10
+15
+20
+25
+30
+33
+0
+50
+100
+150
+Fig. 5.4
+˘λ1(t) for Tobs = 100 s
+0
+5
+10
+15
+20
+25
+30
+33
+0
+50
+100
+150
+Fig. 5.5
+˘λ2(t) for Tobs = 100 s
+
+
+========== PAGE 79 ==========
+
+66
+5 Pulse Delay Estimation Using Epoch Folding
+0
+5
+10
+15
+20
+25
+30
+33
+0
+500
+1000
+1500
+Time, t (msec)
+var[˘n(t)]
+Empirical
+Analytical
+Fig. 5.6 The variance of ˘n1(t) for Tobs = 100 s
+converge to the true functions. In Figs. 5.6 and 5.7, the variance of ˘n(t), obtained via
+simulation, is plotted and compared to the analytical variance for each detector.
+The effect of imprecise absolute velocity data on epoch folding is studied as well.
+The errors are intentionally chosen to be big: Δv1 = 1,000 m/s and Δv2 = 1,250 m/s.
+For the selected parameters, the upper bound (3.72) roughly equals 10 m/s. Since the
+velocity errors are bigger than the bound, the empirical rate functions are expected to
+be deteriorated. Figures 5.8 and 5.9 verify this fact. Comparing them to the true rate
+functions shows that they are shifted, and their peaks are ﬂattened. The same phe-
+nomenon happens for the noise variance which can be seen in Figs. 5.10 and 5.11.
+Figures 5.12 and 5.13 show the RMS error of the proposed pulse delay esti-
+mators, obtained through simulation, against the CRLB and the analytical value,
+calculated as in (4.44) and (5.9). The mean square error (MSE) of the estimator is
+deﬁned as
+MSE(ˆtd) = E[(ˆtd −td)2]
+(5.81)
+and the cost functions are optimized using a grid search approach in the domain of
+(0,1) cycle.
+As expected, the RMS plots show that as time goes on, the variance of each pulse
+delay estimator approaches zero. Also, as the observation time is reduced, there is
+a threshold point at which the estimation error variance starts to deviate from the
+CRLB. It is due to the fact that the phase estimators become biased when there are
+not enough photon TOAs to process.
+
+
+========== PAGE 80 ==========
+
+5.7 Numerical Examples
+67
+0
+5
+10
+15
+20
+25
+30
+33
+0
+500
+1000
+1500
+Empirical
+Analytical
+Time, t (msec)
+var[˘n(t)]
+Fig. 5.7 The variance of ˘n2(t) for Tobs = 100 s
+0
+5
+10
+15
+20
+25
+30
+33
+0
+50
+100
+150
+Time, t (msec)
+˘¸(t)
+¸(t)
+Fig. 5.8
+˘λ1(t) when Δv1 = 1,000 m/s
+
+
+========== PAGE 81 ==========
+
+68
+5 Pulse Delay Estimation Using Epoch Folding
+0
+5
+10
+15
+20
+25
+30
+33
+0
+50
+100
+150
+Time, t (msec)
+˘¸(t)
+¸(t)
+Fig. 5.9
+˘λ2(t) when Δv2 = 1,250 m/s
+0
+5
+10
+15
+20
+25
+30
+33
+0
+500
+1000
+1500
+Time, t (msec)
+var[˘n(t)]
+Empirical
+Analytical
+Fig. 5.10 var[˘n(t)] when Δv1 = 1,000 m/s
+
+
+========== PAGE 82 ==========
+
+5.7 Numerical Examples
+69
+0
+5
+10
+15
+20
+25
+30
+33
+0
+500
+1000
+1500
+Time, t (msec)
+var[˘n(t)]
+Empirical
+Analytical
+Fig. 5.11 var[˘n(t)] when Δv2 = 1,250 m/s
+0.1
+1
+10
+100
+500
+10-4
+10-3
+10-2
+Observation Time, Tobs (sec)
+RMS Error (sec)
+NLS (Simulation)
+NLS (Analytic)
+
+CRLB(td)
+Fig. 5.12 The RMS error of the NLS-based estimator
+
+
+========== PAGE 83 ==========
+
+70
+5 Pulse Delay Estimation Using Epoch Folding
+0.1
+1
+10
+100
+500
+10-4
+10-3
+10-2
+Observation Time, Tobs (sec)
+RMS Error (sec)
+CC (Simulation)
+CC (Analytic)
+
+CRLB(td)
+Fig. 5.13 The RMS error of the CC-based estimator
+Note that we performed this simulation to verify that the analytical RMS values
+match the numerical results. Different choices of λb, λs, v1, v2, φ1, and Δd, only
+change numerical values of CRLB, analytical RMS errors, and simulation RMS
+errors.
+Finally, the performance of the pulse delay estimators is studies when the space-
+craft velocity errors are Δv1 = 1,000 m/s and Δv2 = 1,250 m/s. The RMS error plots
+are presented in Figs. 5.14 and 5.15. As the plots show, the asymptotic performance
+of the estimators degrades compared to the case where the absolute velocities are
+perfectly known.
+5.8
+Summary
+We explain how to use the epoch folding procedure for estimation of the pulse delay.
+We presented two different initial phase estimators which both work based on epoch
+folding. The key idea in employing epoch folding for X-ray pulsar-based navigation
+is to recover the photon intensity functions on each detector and estimate their initial
+phase. One estimator works based on maximizing the cross correlation between the
+empirical rate function and the true one. The other one is obtained by minimizing the
+difference between the rate functions via solving a least-squares problem. We ana-
+lyze theses estimators and show that they are not asymptotically efﬁcient but they
+
+
+========== PAGE 84 ==========
+
+5.8 Summary
+71
+0.1
+1
+10
+100
+500
+10-4
+10-3
+10-2
+Observation Time, Tobs (sec)
+RMS Error (sec)
+NLS (Simulation)
+NLS (Analytic)
+
+CRLB(td)
+Fig. 5.14 The RMS error of the NLS-based estimator in presence of absolute velocity errors
+0.1
+1
+10
+100
+500
+10-4
+10-3
+10-2
+Observation Time, Tobs (sec)
+RMS Error (sec)
+CC (Simulation)
+CC (Analytic)
+
+CRLB(td)
+Fig. 5.15 The RMS error of the CC-based estimator in presence of absolute velocity errors
+
+
+========== PAGE 85 ==========
+
+72
+5 Pulse Delay Estimation Using Epoch Folding
+are consistent. We investigate the numerical implementation aspects by analyzing
+the number of ﬂoating point operations. Further numerical examples on computa-
+tional complexity of the estimators will be presented in Chap. 6. We explain that
+the proposed pulse delay estimation technique works not only when the spacecraft
+velocities are perfectly known but also under some conditions where the velocity
+data is not perfect. By offering different simulation scenarios, we also examine the
+analytical results via numerical examples.
+
+
+========== PAGE 86 ==========
+
+Chapter 6
+Pulse Delay Estimation via Direct Use of TOAs
+6.1
+Introduction
+An important point regarding the pulse delay estimation techniques introduced in
+Chap. 5 is that they need to employ the epoch folding procedure which needs the
+exact knowledge of the spacecraft velocities. Furthermore, it was shown that the pro-
+posed epoch folding-based estimators are not asymptotically efﬁcient. To address
+these problems, we propose another method in this chapter. This approach is based
+on direct use of the measured TOA sets, {t(1)
+i
+}M1
+i=1 and {t(2)
+i
+}M2
+i=1. Because the mea-
+sured TOAs are being used directly, it is not necessary for the estimators to have
+access to the velocity data. Nonetheless, the effect of imprecise velocity data on
+the performance of the pulse delay estimator is studied. Computational complexity
+study is also performed.
+We formulate an ML problem in Sect. 6.2 for estimation of the Doppler frequen-
+cies and the initial phase values. Some remarks on numerical implementation of
+the proposed estimator are offered in Sect. 6.3. The ML computational complexity
+analysis is presented in Sect. 6.4. All computational complexity analysis results are
+summarized in Sect. 6.5. The effect of absolute velocity errors on the pulse delay
+estimator’s performance is studied in Sect. 6.6. Numerical simulations are provided
+in Sect. 6.7.
+6.2
+Maximum-Likelihood Estimator
+Employing the pdfs associated with the detected time tags, an ML estimation prob-
+lem can be formulated to estimate φk and fk. According to (3.10), the pdfs associated
+with each set of time tags are given by,
+p
+
+{t(k)
+i
+}Mk
+i=1;φk, fk
+
+= e−Λ(φk,fk)
+Mk
+∏
+i=1
+λk(t(k)
+i
+;φk, fk),
+(6.1)
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 6, c⃝Springer Science+Business Media, LLC 2011
+73
+
+
+========== PAGE 87 ==========
+
+74
+6 Pulse Delay Estimation via Direct Use of TOAs
+where
+Λ(φk, fk) ≜
+ tf
+t0
+λk(t;φk, fk)dt,
+k = 1,2.
+(6.2)
+Recognizing the pdfs given in (6.1) as likelihood functions, the maximum-
+likelihood estimators (MLEs) are provided by maximizing each likelihood function
+with respect to the unknown parameters. Equivalently, the natural logarithm of the
+likelihood function or the log-likelihood function (LLF) can be maximized.
+LLF(φk, fk) =
+Mk
+∑
+i=1
+ln
+
+λk(ti;φk, fk)
+
+−Λ(φk, fk),
+k = 1,2.
+(6.3)
+If the observation time is long enough compared with the pulsar period then
+Λ(φk, fk) in (6.3) shows a minimal dependence on the parameters φk and fk, that is,
+∂Λ/∂φk = 0, and ∂Λ/∂fk = 0. The reason is as follows. Let the observation time
+contains Np pulsar cycles, Tobs = NpP+Tp, where 0 ≤Tp < 1. Using periodicity of
+λ(t;φk, fk), (6.2) can be res-stated as follows.
+Λ(φk, fk) =
+ t0+Tp
+t0
+λ(t;φk, fk)dt +Np
+ P
+0 λ(t;φk, fk)dt.
+(6.4)
+Since λ(·) ≥0 is a periodic function, its integral over one period is not a function
+of the initial phase and the Doppler frequency. As a result, the second term on the
+right hand side of (6.4) is independent of φk and fk, while the ﬁrst term is a function
+of φk and fk. Hence, if Np ≫1, then the second term is strongly dominant, and the
+value of Λ(φk, fk) will not be sensitive to φk and fk. In other words ∂Λ(φk)/∂φk ≈0
+and ∂Λ(fk)/∂fk ≈0. Therefore, it can be dropped from the objective function, and
+the likelihood functions, denoted by Ψ(φk, fk), become,
+Ψ(φk, fk) =
+Mk
+∑
+i=1
+ln
+
+λk(ti;φk, fk)
+
+.
+(6.5)
+The unknown parameters φk and fk can be determined by solving the following
+optimization problems,
+( ˆφk, ˆfk) = argmax
+φk, fk
+Ψ(φk, fk),
+k = 1,2
+(6.6)
+and the pulse delay may be estimated from (4.43).
+The statistical properties of the MLEs (6.6) are summarized in the following
+theorem [51].
+Theorem 6.1. The MLE determined from (6.6) is unbiased for Tobs ≫0, and attains
+the CRLB, presented in (4.12). In other words, it is asymptotically efﬁcient.
+Proof. To investigate the properties of the MLE, ﬁrst note the following theorem
+[50].
+
+
+========== PAGE 88 ==========
+
+6.2 Maximum-Likelihood Estimator
+75
+Theorem 6.2. If the pdf p(x;θ) of the data x satisﬁes the regularity conditions
+given in (4.5) then the MLE of the parameter θ is asymptotically unbiased and
+asymptotically attains the CRLB. It is therefore asymptotically efﬁcient.
+Let θ be the unknown parameter to be estimated. To apply Theorem 6.2, it must
+be shown that the regularity condition (4.5) is satisﬁed, where x = {ti}M
+i=1. From
+(3.10),
+ln p(x;θ) = −Λ(θ)+
+M
+∑
+i=1
+lnλ(ti;θ).
+(6.7)
+Therefore,
+∂
+∂θ ln p(x;θ) = −∂
+∂θ Λ(θ)+
+M
+∑
+i=1
+1
+λ(ti;θ) · ∂
+∂θ λ(ti;θ).
+(6.8)
+Because the observation time is assumed to be long enough, the ﬁrst term in (6.8)
+vanishes and,
+E
+ ∂
+∂θ ln p(x;θ)
+
+=
+M
+∑
+i=1
+E
+
+1
+λ(ti;θ) · ∂
+∂θ λ(ti;θ)
+
+.
+(6.9)
+To calculate the stochastic expectation appearing in the right-hand side of (6.9),
+the following corollary may be used [41].
+Corollary 6.3. Let {tj}N
+j=1 be the photon TOAs with the pdf given in (3.10). Also, let
+g
+
+{tj}N
+j=1
+
+≜
+N
+∏
+j=1
+r(tj),
+(6.10)
+where r(t) is any general function. Then, the stochastic expectation of g
+
+{tj}N
+j=1
+
+for a ﬁxed N equals,
+EN
+	
+g
+
+{tj}N
+j=1
+
+= e−Λ
+N! Γ N,
+(6.11)
+where Λ is deﬁned in (3.11), and,
+Γ ≜
+ tf
+t0
+r(t)λ(t)dt.
+(6.12)
+Proof (Proof of Corollary 6.3). Let ΩN be the event of receiving N photons at any
+N different increasing time instants in an interval [t0,t f ]. Then, using the TOA pdf,
+given in (3.10),
+EN
+	
+g
+
+{tj}N
+j=1
+
+=
+
+ΩN
+p
+
+{ti}N
+i=1,N
+ N
+∏
+j=1
+r(t j)dt1 ···dtN,
+(6.13)
+
+
+========== PAGE 89 ==========
+
+76
+6 Pulse Delay Estimation via Direct Use of TOAs
+where ΩN is the event of receiving N photons at any N different increasing time in-
+stants in interval [t0,tf ]. Note that the sequence {t1,t2,...,tN} is in increasing order.
+As there exists N! permutations of ti, for a ﬁxed N, the probability that N number of
+ti’s occurs in no special order is N! times that of the sequence occurring in increasing
+order. Therefore,
+
+ΩN
+p
+
+{ti}N
+i=1,N
+ N
+∏
+j=1
+r(tj)dt1 ···dtN
+= 1
+N!
+ tf
+t0
+ tf
+t0
+···
+ tf
+t0
+p
+
+{ti}N
+i=1,N
+ N
+∏
+j=1
+r(tj)dt1 ···dtN
+= e−Λ
+N!
+ tf
+t0
+ tf
+t0
+···
+ tf
+t0
+N
+∏
+j=1
+r(t j)λ(tj)dt1 ···dtN
+= e−Λ
+N!
+ tf
+t0
+r(t)λ(t)dt
+N
+≜e−Λ
+N! Γ N.
+(6.14)
+□
+Now it can be seen that the stochastic expectation in the right-hand side of (6.9)
+is a special case of (6.11) where N = 1. Hence,
+E
+
+1
+λ(ti;θ) · ∂
+∂θ λ(ti;θ)
+
+= e−ΛΓ
+= e−Λ
+ tf
+t0
+r(t;θ)λ(t;θ)dt,
+(6.15)
+where
+r(t;θ) =
+˙λ(t;θ)
+λ(t;θ)
+(6.16)
+which yields in,
+E
+
+1
+λ(ti;θ) · ∂
+∂θ λ(ti;θ)
+
+= e−Λ
+λ(t f ;θ)−λ(t0;θ)
+
+.
+(6.17)
+As Λ increases as a function of observation time, the term e−Λ approaches zero,
+while λ(tf ;θ) −λ(t0;θ) remains ﬁnitely bounded in magnitude. Therefore, the
+right-hand side of (6.17) approaches zero. This means that the regularity condition
+(4.5) holds, and as a result, according to Theorem 6.2, the MLE ˆθ is asymptotically
+efﬁcient.
+■
+
+
+========== PAGE 90 ==========
+
+6.3 Numerical Determination of the MLE
+77
+Assuming the velocities of the vehicles are known, the Doppler frequencies do
+not need to be estimated, and the phase estimates may be obtained by solving the
+following optimization problem,
+ˆφk = argmax
+φk∈(0,1)
+Ψ(φk),
+k = 1,2.
+(6.18)
+Furthermore, the pulse delay estimator is determined from (5.1).
+The statistical properties of the resulting pulse delay estimator are presented by
+the following theorem [49].
+Theorem 6.4. The pulse delay estimator determined from (6.18) and (5.1) is
+asymptotically efﬁcient, and its variance is given by (4.44).
+Proof. From Theorem 6.1, the phase estimators are asymptotically efﬁcient. Hence,
+using (5.1), the pulse delay estimator is asymptotically efﬁcient as well, and its
+variance equals 2CRLB(φ0)/ f 2
+2 where CRLB(φ0) is presented in (4.42).
+■
+6.3
+Numerical Determination of the MLE
+To ﬁnd the MLE of a parameter θ, the likelihood function needs to be maximized.
+If the allowable values of θ lie in a certain interval then the maximum of likeli-
+hood function in that interval needs to be found. The safest way to do this is to
+perform a grid search over that interval. As long as the spacing between θ values
+is small enough, it is guaranteed to reach to the maximum of likelihood function.
+However, if the range of θ is not known or conﬁned to a ﬁnite interval then a grid
+search may not be computationally feasible. In such situations, iterative optimiza-
+tion procedures are employed. A typical one is the Newton-Raphson method. In
+general, these methods result in the MLE if the initial guess is close to the true
+value. If not, they may not converge or only convergence to a local maximum is
+attained. An important point about MLE is that the likelihood function changes for
+each data set.
+The iterative methods attempt to maximize the likelihood function by ﬁnding the
+zero of its derivative,
+∂
+∂θ ln p(x;θ) = 0.
+(6.19)
+The Newton-Raphson iteration is [50],
+θ (k+1) = θ (k) −
+
+∂2
+∂θ∂θT ln p(x;θ)
+−1 ∂
+∂θ ln p(x;θ)
+
+θ=θ(k)
+,
+(6.20)
+
+
+========== PAGE 91 ==========
+
+78
+6 Pulse Delay Estimation via Direct Use of TOAs
+where
+
+∂2
+∂θ∂θ T ln p(x;θ)
+
+ij
+=
+∂2
+∂θi∂θj
+ln p(x;θ)
+(6.21)
+is the Hessian of the likelihood function, and ∂ln p(x;θ)/∂θ is the gradient vector.
+In implementing (6.20), inversion of the Hessian matrix is not required because it
+can be rewritten as,
+∂2
+∂θ∂θ T ln p(x;θ)
+
+θ=θ(k)θ (k+1)
+=
+∂2
+∂θ∂θ T ln p(x;θ)
+
+θ=θ(k)θ (k) −∂
+∂θ ln p(x;θ)
+
+θ=θ(k)
+(6.22)
+Regarding Newton-Raphson iterative procedure, one should notice that it may
+not converge. In particular, this may be the case if the Hessian matrix is small. Even
+if it converges, the point found may only be a local optimum. Hence, to avoid these
+possibilities, it is beneﬁcial to use several starting points.
+6.4
+ML Computational Complexity Analysis
+From (6.5), to construct the ML cost function for a ﬁxed φ0, M additions must
+be performed. Also, the cost function must be evaluated at the measured TOAs.
+If the rate function’s analytical equation is known, this does not impose a signiﬁcant
+amount of computational cost.
+As the mathematical equation of the rate function is not usually available in
+practice, its value at the TOAs must be found by interpolation. If a simple linear
+interpolation is used, it costs four additions and two multiplications for each TOA.
+Hence, the total computational cost, for a ﬁxed φ0, is 6M ﬂops. Similar to the NLS
+or CC cases, because the cost function is not concave in general, adopting a grid
+search optimization approach over (0,1) cycle is desirable. If the search interval is
+divided into Ng grids, the total imposed computational cost due to the interpolation
+is 6MNg ﬂops. This means that the amount of interpolation computations also grows
+as the number of received photons, M, increases.
+6.5
+Computational Complexity: Summary
+Note that M ≫Np for long observations. Hence, compared to the NLS and CC
+cases, the amount of calculations for the ML estimator signiﬁcantly increases as
+the observation time becomes longer. This is a noticeable disadvantage of the ML
+approach compared to the NLS estimation. This is to be avoided for implementation
+purposes. Hence, if the NLS or CC estimator’s variances are within an acceptable
+
+
+========== PAGE 92 ==========
+
+6.7 Numerical Examples
+79
+Table 6.1 Computational cost
+Estimator
+Additions
+Subtractions
+Multiplications
+Divisions
+CC
+Nb(Np −1)+(Nb −1)Ng
+N/A
+NbNg
+2Nb +1
+NLS
+Nb(Np −1)+NbNg
+NbNg
+NbNg
+2Nb
+ML
+M +4MNg
+N/A
+2MNg
+N/A
+distance from the CRLB, it is more convenient to implement one of them. This is
+indeed the case. It is clear from (4.44) and (5.9) that the difference between the NLS
+estimator’s variance and the CRLB becomes smaller as the observation increases.
+As a result, especially for long observation times, implementation of epoch-folding-
+based algorithms is computationally more efﬁcient. Note that the ARE, given in
+(5.39), can also be calculated for each pulsar to measure how far is the estimator’s
+performance from the CRLB.
+If the cross-correlation function is calculated using the time domain approach, the
+computational cost for CC and NLS estimators is almost the same. As the correlation
+function can be found using the Fourier domain approach, its computational cost is
+expected to be less than the NLS estimator.
+All computational cost results, presented in Sects. 5.6.2, 5.6.3, and 6.4, are sum-
+marized in Table 6.1.
+6.6
+Absolute Velocity Errors
+Similar to the CC and NLS cases, if the velocity errors on each spacecraft are almost
+equal, Δv1 ≈Δv2, this results in the same deterioration of initial phase estimation on
+each detector. Hence, from (5.1), since the difference between the phase estimates
+is employed for estimation of the pulse delay, it remains asymptotically unbiased.
+However, the variance of estimation error becomes larger than the case where the
+absolute velocities are perfectly known. This error can be modeled by increasing the
+variance of the measurement noise in the Kalman ﬁltering stage. If these assump-
+tions are not valid, the absolute velocities can be estimated from (6.6).
+6.7
+Numerical Examples
+The algorithm presented in Sect. 3.8 is used to generate the photon TOAs associ-
+ated with the Crab pulsar (PSR B0531+21). The simulations are performed using
+the Monte-Carlo technique with over 500 independent realization of photon TOAs
+for each observation time. The constant arrival rates are chosen to be λb = 5 and
+λs = 15 ph/s.
+First, the ML phase estimator is numerically simulated on one detector. Then the
+pulse delay performance is numerically examined. Finally, the computational cost
+needed for calculation of all of the proposed estimators is studied.
+
+
+========== PAGE 93 ==========
+
+80
+6 Pulse Delay Estimation via Direct Use of TOAs
+6.7.1
+ML Phase Estimator
+The spacecraft velocity on the direction vector pointing to the pulsar is assumed to
+be v = 3 km/s; and the initial phase observed at the detector is φ1 = 0.2 cycle.
+Figure 6.1 shows the RMS error of the MLE. The ML estimates are determined
+by solving the optimization problem (6.18). A grid search approach on the interval
+[0,1) cycle over 1,024 grids is utilized to solve (6.18). The ML plot shows that
+the estimator attains the CRLB for long observation times. Similar to the CC and
+NLS estimators, as the observation time drops below a certain threshold, the RMS
+error deviates from the CRLB. This behavior is due the fact that in this region,
+the maximum of the LLF does not lie in the vicinity of the true parameter and the
+estimator is biased.
+The cost function (6.5) is plotted in Fig. 6.2 for different observation times. The
+plots show that as the observation time increases, the cost function becomes larger.
+Figure 6.2 also show that each of the cost functions has multiple maxima. Hence,
+they verify that, to avoid getting trapped in local maxima, adopting a grid search op-
+timization approach is necessary. As the search is performed over the whole interval
+(0,1) cycle, the algorithm initialization issues do not arise.
+It is also veriﬁed that Λ(φ0) in (6.3) can safely be dropped from the cost function.
+The ML phase estimates are found using (6.3) as the cost function. No meaning-
+ful difference is observed between the obtained RMS errors and the ones obtained
+using (6.5).
+0.1
+1
+10
+100
+500
+10-3
+10-2
+10-1
+Observation Time, Tobs (sec)
+RMS Error (cycle)
+ML (Simulation)
+CRLB(Á0)
+Fig. 6.1 RMS error for maximum-likelihood estimator (MLE)
+
+
+========== PAGE 94 ==========
+
+6.7 Numerical Examples
+81
+0
+0.5
+1
+6
+7
+8
+9
+10
+11
+0
+0.5
+1
+450
+500
+550
+600
+650
+700
+Tobs = 10 sec
+0
+0.5
+1
+3000
+3500
+4000
+4500
+5000
+Tobs = 70 sec
+0
+0.5
+1
+1.2
+1.4
+1.6
+1.8
+2
+2.2 x 10
+4
+Tobs = 300 sec
+Ψ(Á0)
+Ψ(Á0)
+Á0 (cycle)
+Á0 (cycle)
+Fig. 6.2 The ML cost function
+6.7.2
+Pulse Delay Estimator
+Assuming the velocity data is available, the pulse delay estimator is numerically
+evaluated. The spacecraft velocities are assumed to be v1 = 3 km/s and v2 = 9 km/s;
+and the initial phase observed at the ﬁrst detector is φ1 = 0.2 cycle. The relative
+distance between the spacecraft is assumed to be 180 km. Hence, the pulse delay to
+be estimated is td = 0.6 ms.
+Figure 6.3 shows the RMS of the proposed pulse delay estimator, obtained
+through simulation, against the CRLB, calculated as in (4.44). The plots show that
+as time goes on, the estimator asymptotically attains the CRLB. The cost functions
+(6.5) are optimized using a grid search approach in the domain of (0,1) cycle. Simi-
+lar to NLS and CC estimators, as the observation time is reduced, there is a threshold
+point at which the variance of the estimation error starts to deviate from the theoreti-
+cal value. This is due to the fact that the estimator becomes biased if the observation
+time is not long enough. The reason is that as the observation time goes below this
+threshold, the number of detected photons is not high enough. Therefore, the real-
+ization of TOAs does not effectively represent the rate function of received photons.
+Hence, it results in a distorted cost function whose maximum does not lie in the
+vicinity of the true phase delay.
+
+
+========== PAGE 95 ==========
+
+82
+6 Pulse Delay Estimation via Direct Use of TOAs
+10-1
+100
+101
+102
+10-5
+10-4
+10-3
+10-2
+10-1
+Observation Time (sec)
+RMS Error (sec)
+ML (Simulation)
+
+CRLB(td)
+Fig. 6.3 RMS error for ML-based delay estimator
+The performance of the proposed estimators is also studied when the absolute
+velocity data is not perfectly known. The errors are assumed to be Δv1 = 1,000 and
+Δv2 = 1,200 m/s. As Fig. 6.4 shows the RMS errors increase compared to the case
+where the velocity data is perfectly known.
+6.7.3
+Computational Cost
+Figure 5.1 shows that asymptotic performance of the CC and NLS estimators is
+very close to the CRLB. This motivates the numerical implementation study of each
+estimator. Hence, the CPU time used by MATLAB to perform the calculations for
+one Monte Carlo realization is investigated. The utilized processor is an Intel 2.4
+GHz dual core.
+Figure 6.5 shows that the computational cost for linear interpolation used to cal-
+culate the CC estimator is almost independent of the observation time. This is to be
+expected, as the interpolation is performed at one point just to ﬁnd a ﬁner maximizer
+for the cross-correlation function. It also shows that the linear interpolation used for
+calculation of the MLE and the epoch folding have almost the same computational
+complexity, and as expected, the amount of calculations almost linearly grows as
+the observation time becomes longer.
+
+
+========== PAGE 96 ==========
+
+6.7 Numerical Examples
+83
+10-1
+100
+101
+102
+10-5
+10-4
+10-3
+10-2
+10-1
+Observation Time (sec)
+RMS Error (sec)
+ML (Simulation)
+
+CRLB(td)
+Fig. 6.4 RMS error for ML-based delay estimator in presence of spacecraft velocity errors
+10-1
+100
+101
+102
+103
+10-6
+10-5
+10-4
+10-3
+10-2
+10-1
+100
+101
+102
+Observation Time, Tobs (sec)
+CPU Time (sec)
+Epoch Folding
+ML Interpolation
+CC Interpolation
+Fig. 6.5 CPU time used for epoch folding and interpolations
+
+
+========== PAGE 97 ==========
+
+84
+6 Pulse Delay Estimation via Direct Use of TOAs
+10-1
+100
+101
+102
+103
+10-6
+10-5
+10-4
+10-3
+10-2
+10-1
+100
+101
+102
+Observation Time, Tobs (sec)
+CPU Time (sec)
+Construction of R(Á0)
+Construction of J(Á0)
+Construction of Ψ(Á0)
+Fig. 6.6 CPU time used for construction of the cost functions
+From Fig. 6.6, it can be seen that the amount of calculations to construct the
+CC and NLS cost functions does not change with the observation time. However,
+the computational cost to form the ML cost function almost linearly grows as the
+observation time becomes longer. It also shows that using Fourier domain approach
+to calculate the CC cost function signiﬁcantly reduces the amount of calculations.
+The total CPU time used to ﬁnd the CC estimator is the sum of the epoch fold-
+ing time, the time used for construction of the CC cost function, and the parabolic
+interpolation time. The total CPU time to ﬁnd the NLS estimator is the sum of the
+epoch folding time and the cost function construction time for all grid points. The
+total CPU time for the MLE is the sum of the construction time and the total in-
+terpolation time for all grids. The reason is that for each grid, an interpolation is
+needed for the evaluation of the cost function at the measured TOAs. These plots
+are all shown in Fig. 6.7.
+As the plots show, the ML CPU time is bigger than the one for the NLS algorithm,
+and it grows signiﬁcantly faster with the observation time. The ML calculational
+cost rate with respect to the observation time is almost 15 times bigger than the
+NLS rate in this simulation scenario. Furthermore, the NLS CPU time is about 10
+times bigger than the CPU time used to calculate the CC estimator.
+
+
+========== PAGE 98 ==========
+
+6.8 Summary
+85
+10-1
+100
+101
+102
+103
+10-6
+10-5
+10-4
+10-3
+10-2
+10-1
+100
+101
+102
+Observation Time, Tobs (sec)
+CPU Time (sec)
+CC Total
+NLS Total
+ML Total
+Fig. 6.7 Total CPU time used for calculation of the estimators
+6.8
+Summary
+Using the pdf of the photon TOAs we construct an ML criterion, and formulate
+an asymptotically efﬁcient estimator of the initial phase and the Doppler frequency
+for each detector. When the spacecraft velocity is known, it becomes only a phase
+estimator. Although the MLE asymptotically achieves the CRLB, we show that its
+computational cost is signiﬁcantly higher than the epoch folding-based estimators.
+Under certain conditions, the pulse delay estimator can be used even when the space-
+craft absolute velocities are not perfectly known. We also verify the analytical results
+on the MLE’s performance and the computational costs via numerical examples.
+
+
+========== PAGE 99 ==========
+
+
+
+========== PAGE 100 ==========
+
+Chapter 7
+Recursive Estimation
+7.1
+Introduction
+In this chapter, a recursive algorithm is formulated which can be used to ﬁnd the
+relative navigation solution between the two spacecraft. The navigation system is
+equipped with IMUs which provide the spacecraft acceleration data. The dynamics
+of relative position between the two spacecraft and a model of the IMU accuracy are
+utilized for developing the navigation algorithm. The measurements, which are ob-
+tained by time tagging the photons, are modeled as a linear function of the projected
+relative position onto the unit direction pointing to the pulsar plus the measurement
+noise. The measurement noise variance is selected based on how well the pulse de-
+lay is estimated. Then, by applying a Kalman ﬁlter, the relative position, the relative
+velocity, the relative bias between accelerometers, and the differential time between
+clocks are estimated, and the steady state estimation error covariance is obtained.
+The effect of different system parameters on the achievable accuracy of relative po-
+sition estimation is investigated. In particular, the effect of different values of IMU
+uncertainty, measurement noise variance, and number of pulsars used for estimation
+are considered.
+We formulate the system dynamics for the navigation problem in Sect. 7.2.
+The measurement equation is presented in Sect. 7.3. The Kalman ﬁlter is given in
+Sect. 7.4. We investigate the observability of the system dynamics in Sect. 7.5. In
+Sect. 7.6, we brieﬂy explain how the proposed approach is applicable to the absolute
+navigation problem. We offer a geometric approach for estimation of the spacecraft
+absolute velocities in Sect. 7.7. Section 7.8 provides different numerical simulation
+scenarios of the navigation system.
+7.2
+System Dynamics
+X-ray pulsars are being observed over the sky map. All the measurements are per-
+formed in an inertial system whose origin is the SSB. The directional location of the
+pulsars is known. We denote this directional unit vector as H(i)
+j , where i identiﬁes
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 7, c⃝Springer Science+Business Media, LLC 2011
+87
+
+
+========== PAGE 101 ==========
+
+88
+7 Recursive Estimation
+the pulsar and j denotes the spacecraft. It is assumed that the space vehicles are
+close enough so that H(i)
+1 ∼= H(i)
+2 = H(i).
+Let Δx ∈R3 be the relative position, Δv ∈R3 be the relative velocity, and Δa ∈R3
+be the relative acceleration between the two spacecraft, and assume they follow the
+following dynamics
+Δ ˙X = AΔX +BΔa +Gwv,
+(7.1)
+where ΔX =
+
+ΔxT ΔvTT, the matrices are
+A =
+03×3
+I
+0
+03×3
+
+,
+B =
+ 03×3
+I3×3
+
+,
+G =
+I3×3
+03×3
+
+(7.2)
+and wv is an independent zero mean white noise process with a known power spec-
+tral density (PSD), denoted by Wv
+E[wv(t)wv(τ)T] = Wvδ(t −τ).
+(7.3)
+Each spacecraft is equipped with an inertial measurement unit which measures
+its acceleration, a(i), as
+a(i)
+IMU = a(i) +w(i)
+a +b(i)
+a ,
+i = 1,2
+(7.4)
+where w(i) is a white noise process with a known PSD, and b(i)
+a is the accelerometer’s
+bias. Let ΔaIMU be
+ΔaIMU ≜a(1)
+IMU −a(2)
+IMU.
+(7.5)
+Therefore, from (7.4)
+ΔaIMU = Δa +ba +wa,
+(7.6)
+where
+Δa = a(1) −a(2)
+(7.7)
+and
+ba = b(1)
+a −b(2)
+a
+(7.8)
+is the relative bias. Because it slowly varies, and to keep the Kalman ﬁlter open, it
+is assumed to be a Brownian motion process, as
+˙ba = wb,
+(7.9)
+where wa and wb are zero mean independent white noise processes with known
+PSDs, denoted by Wa and Wb
+E[wa(t)wa(τ)T] = Waδ(t −τ)
+(7.10)
+E[wb(t)wb(τ)T] = Wbδ(t −τ).
+(7.11)
+
+
+========== PAGE 102 ==========
+
+7.2 System Dynamics
+89
+The relative distance is determined by integration of ΔaIMU,
+Δ ˙XIMU = AΔXIMU +BΔaIMU,
+(7.12)
+where ΔXIMU =
+
+ΔxT
+IMU ΔvT
+IMU
+T. Deﬁning the error as,
+Xe ≜ΔXIMU −ΔX
+(7.13)
+from (7.1), (7.6), and (7.12), the dynamics of Xe are given by
+˙Xe = AXe +Bba +Bwa +Gwv.
+(7.14)
+The differential time is common among all X-ray detectors. To model its slowly
+varying dynamics, and to keep the Kalman ﬁlter open (i.e., the Kalman gain does
+not converge to zero) [58], it is assumed to be a Brownian motion process,
+˙te = we,
+(7.15)
+where we is an independent zero mean white noise process with a known PSD,
+named We
+E[we(t)we(τ)T] = Weδ(t −τ).
+(7.16)
+Collecting the unknown vectors Xe, ba, and te into the vector X as,
+X ≜
+⎛
+⎝
+Xe
+ba
+te
+⎞
+⎠
+(7.17)
+its dynamics are given by
+˙X = FX +w,
+(7.18)
+where
+F =
+⎛
+⎝
+A
+B
+0
+03×6
+03×3
+0
+01×6
+01×3
+0
+⎞
+⎠
+(7.19)
+and
+w ≜
+⎛
+⎜
+⎜
+⎝
+wv
+wb
+wa
+we
+⎞
+⎟
+⎟
+⎠
+(7.20)
+is an independent white noise process where
+E[w(t)w(τ)T] = diag(Wv,Wb,Wa,We)δ(t −τ).
+(7.21)
+
+
+========== PAGE 103 ==========
+
+90
+7 Recursive Estimation
+To obtain the discrete model, the system (7.18) is sampled with the sampling
+time, Ts. The discrete model is as follows [59].
+X(k +1) = ΦX(k)+wd(k)
+(7.22)
+where
+Φ = exp(FTs)
+(7.23)
+and
+wd(k) =
+ Ts
+0
+exp(Fτ)w(τ)dτ.
+(7.24)
+Note that F3 = 0. Therefore,
+Φ = I +TsF + T 2
+s
+2 F2
+(7.25)
+which equals
+Φ =
+⎛
+⎜
+⎜
+⎜
+⎝
+I3×3
+TsI
+1
+2T 2
+s I
+0
+0
+I3×3
+TsI
+0
+0
+0
+I3×3
+0
+0
+0
+0
+1
+⎞
+⎟
+⎟
+⎟
+⎠.
+(7.26)
+As w(t) is zero mean, from (7.24), wd(k) is zero mean as well
+E[wd(k)] = 0
+(7.27)
+and
+E[ωd(k)ωd(j)T] = Qδk j,
+(7.28)
+where Q, which is the variance matrix of the process noise, is given in (7.29).
+Q =
+⎛
+⎜
+⎜
+⎜
+⎜
+⎝
+TsWv + Ts3
+3 Wa + T 5s
+20Wb
+Ts2
+2 Wa + Ts4
+8 Wb
+Ts3
+6 Wb
+0
+Ts2
+2 Wa + Ts4
+8 Wb
+TsWa + Ts3
+3 Wb
+T 2s
+2 Wb
+0
+T 3s
+6 Wb
+Ts2
+2 Wb
+TsWb
+0
+0
+0
+0
+TsWe.
+⎞
+⎟
+⎟
+⎟
+⎟
+⎠
+(7.29)
+7.3
+Measurements
+The pulse delay estimate for the ith pulsar is denoted by ˆt(i)
+d . It is related to the
+relative position via
+c ˆt(i)
+d (k) = cˆt(i)
+x +cte(k)+ η(i)
+d (k)
+= H(i)Δx(k)+cte(k)+η(i)
+d (k),
+(7.30)
+
+
+========== PAGE 104 ==========
+
+7.3 Measurements
+91
+where H(i) is the directional unit vector pointing to the ith pulsar, and η(i)
+d (k) is an
+independent zero-mean white noise sequence. The pulse delay estimates are avail-
+able every Tm seconds. Hence, the autocorrelation function of η(i)
+d (k) is
+E[η(i)
+d (k)η(i)
+d (j)
+T] = R(i)δk j, R(i) = c2var[ˆtd](i),
+(7.31)
+where var[ˆtd](i) is the variance of the ith pulse delay estimator, obtained every Tm
+seconds.
+Let’s deﬁne the measurement with respect to the ith pulsar as
+y(i)(k) ≜c ˆt(i)
+d (k).
+(7.32)
+Using (7.30), the measurements have the following discrete model
+y(i)(k) = H(i)Δx(k)+cte(k)+η(i)
+d (k).
+(7.33)
+Employing N different pulsars, N measurements are available, which can be col-
+lected into the following matrix format,
+Y(k) = CΔX(k)+c1te(k)+ηd(k),
+(7.34)
+where
+Y ≜
+⎛
+⎜
+⎜
+⎜
+⎝
+y(1)
+y(2)
+...
+y(N)
+⎞
+⎟
+⎟
+⎟
+⎠,
+C ≜
+⎛
+⎜
+⎜
+⎜
+⎝
+H(1)
+01×3
+H(2)
+01×3
+...
+H(N)
+01×3
+⎞
+⎟
+⎟
+⎟
+⎠
+(7.35)
+and
+ηd ≜
+
+η(1)
+d
+η(2)
+d
+... η(N)
+d
+T
+.
+(7.36)
+The measurement noise, ηd(k), is an independent white zero-mean process, and
+E[ηd(k)ηd(j)T] = Rδk j,
+(7.37)
+where
+R = diag
+
+R(i)
+,
+i = 1,...,N
+(7.38)
+is the measurement noise variance matrix.
+Recall that from (7.17), ΔX = ΔXIMU −Xe. Therefore, (7.34) can be restated as
+Z(k) ≜−(Y(k)−CΔXIMU(k))
+= CXe(k)−c1te(k)+η(k),
+(7.39)
+
+
+========== PAGE 105 ==========
+
+92
+7 Recursive Estimation
+where η(k) = −ηd(k), which is clearly an independent zero mean white noise with
+the same power spectral density as ηd(k). Using (7.17), the measurement (7.39) can
+be expressed as a function of X(k)
+Z(k) = HX(k)+η(k)
+(7.40)
+where,
+H =
+
+C 0N×3 −c1
+
+.
+(7.41)
+To estimate the relative position, the relative velocity, the relative biases, and the
+differential time between clocks, the dynamic system in (7.22), and the measure-
+ment equation in (7.40) will be employed in a Kalman ﬁlter.
+7.4
+Discrete Time Estimation Process
+Let ˆX(−)
+k
+be the a priori system state estimate at time k, and P(−)
+k
+be the a priori
+estimation error covariance, which are based on all measurements up to Zk−1. Sim-
+ilarly, let ˆX(+)
+k
+and P(+)
+k
+denote the a posteriori estimate and covariance matrix after
+the measurement Zk has been processed. Assuming that measurements start at k = 0,
+the Kalman ﬁlter equations in discrete time are as follows [58,59].
+The ﬁlter’s initial values are set as
+ˆX(−)
+0
+= E[X0]
+(7.42a)
+P(−)
+0
+= E[(X0 −ˆX(−)
+0
+)(X0 −ˆX(−)
+0
+)T]
+(7.42b)
+and the state estimates are updated as
+Kk = P(−)
+k
+HT[HP(−)
+k
+HT +R]−1
+(7.43a)
+ˆX(+)
+k
+= ˆX(−)
+k
++Kk[Zk −H ˆX(−)
+k
+]
+(7.43b)
+P(+)
+k
+= [I −KkH]P(−)
+k
+[I −KkH]T +KkRKT
+k
+(7.43c)
+ˆX(−)
+k+1 = Φ ˆX(+)
+k
+(7.43d)
+P(−)
+k+1 = ΦP(+)
+k
+ΦT +Q.
+(7.43e)
+Note that the measurements (7.40) are available at a lower rate than the posi-
+tion estimate updates. Hence, when no measurement is available, the a priori and a
+posteriori estimates are equal. In other words, (7.43b) must be replaced by
+ˆX(+)
+k
+= ˆX(−)
+k
+(7.44)
+in the meantime between the pulsar measurements (7.40) become available.
+
+
+========== PAGE 106 ==========
+
+7.5 Discussion
+93
+7.5
+Discussion
+For the Kalman ﬁlter to estimate all the unknown states, the dynamic system (7.22)
+and (7.40) must be observable. Hence, the observability matrix is investigated.
+It equals
+O =
+⎛
+⎝
+H
+HF
+HF2
+⎞
+⎠
+=
+⎛
+⎝
+Γ 0 0 −c1
+0 Γ 0
+0
+0 0 Γ
+0
+⎞
+⎠
+(7.45)
+where
+ΓN×3 =
+⎛
+⎜
+⎜
+⎜
+⎝
+H(1)
+H(2)
+...
+H(N)
+⎞
+⎟
+⎟
+⎟
+⎠.
+(7.46)
+Note that O is an 3N ×10 matrix. If there are at least four different pulsar mea-
+surements (N ≥4) where no two are along the same directional vector from the
+spacecraft, then O will be full column-rank (i.e., rank 10). Hence the continuous
+system (7.18) is observable using the measurement (7.40). To conclude about the
+observability of discrete dynamics (7.22) and (7.40), the following theorem is em-
+ployed [60].
+Theorem 7.1. Suppose the continuous system (7.18) and (7.40) is observable. A
+necessary and sufﬁcient for its discretized equations (7.22) and (7.40), with sam-
+pling period Ts, to be observable is that |Im[λi −λ j]| ̸= 2πm/Ts for m = 1,2,...,
+whenever Re[λi −λ j] = 0, where λi is an eigenvalue of F.
+Because all eigenvalues of the matrix F are zero, then
+|Im[λi −λ j]| = 0
+̸= 2πm
+Ts
+.
+(7.47)
+Therefore, it can be concluded that the discretized system is fully observable too, if
+O is full column-rank.
+As a result, by choosing at least four different pulsars with different direction
+vectors, all the states can be estimated using the Kalman ﬁlter.
+
+
+========== PAGE 107 ==========
+
+94
+7 Recursive Estimation
+7.6
+Absolute Navigation
+The proposed navigation approach is applicable for absolute navigation as well. It
+is clear that if the location of one of the spacecraft is known, the relative naviga-
+tion problem boils down to an absolute navigation problem. As the location of the
+SSB is known, placing one of the spacecraft at the SSB, using the same problem
+formulation, the absolute navigation solution can be obtained.
+7.7
+A Geometric Approach for Estimation of Absolute Velocities
+In this section, we propose a different formulation of the navigation problem, using
+geometric dispersion of the X-ray pulsars over the sky map.
+For simplicity, a two-dimensional scenario where four pulsars are utilized is con-
+sidered (see Fig. 7.1). The ith pulsar’s estimated time delay is composed of the true
+pulse delay and the differential time between clocks. From (5.1), and using Taylor
+series, it equals
+ˆt(i)
+d = t(i)
+x +te
+=
+Δ ˆφ(i) +n(i)
+(1 +Vj cosθi/c)f (i)
+s
+≈Δ ˆφ(i) +n(i)
+f (i)
+s
+
+1 −Vj cosθi
+c
+
+,
+(7.48)
+j
+V
+(1)
+H
+(2)
+H
+(3)
+H
+(4)
+H
+1
+p
+θ
+2
+p
+θ
+3
+p
+θ
+2
+θ
+3
+θ
+4
+θ
+1
+θ
+Fig. 7.1 Using pulsar geometry to estimate absolute velocities
+
+
+========== PAGE 108 ==========
+
+7.8 Numerical Examples
+95
+where Δ ˆφ(i) = ˆφ1
+(i) −ˆφ2
+(i), Vj is the absolute velocity vector of the jth spacecraft, θi
+is the angle between Vj and H(i), and n(i) is the uncertainty modeling for the phase
+estimation error. Hence,
+Δ ˆφ(i)
+f (i)
+s
+= t(i)
+x +te + Δ ˆφ (i)
+f (i)
+s c
+Vj cosθi +η(i),
+(7.49)
+where
+η(i) = −n(i)
+
+1 −Vj cosθi
+c
+
+.
+(7.50)
+Deﬁning the ith pulsar measurement as z(i) = Δ ˆφ (i)/ f (i)
+s , (7.49) becomes
+z(i) = ˆt(i)
+x +te +z(i)Vj cosθi
+c
++η(i).
+(7.51)
+Because ˆt(i)
+x = H(i)Δx/c, the new set of measurements is
+z(i) = H(i)Δx
+c
++te +z(i)Vj cosθi
+c
++η(i).
+(7.52)
+Furthermore, the angular relations between directional vectors form a set of
+pseudo-measurements
+θ p
+1 = θ1 −θ2 +γ1
+(7.53a)
+θ p
+2 = θ2 +θ3 +γ2
+(7.53b)
+θ p
+3 = θ4 −θ3 +γ3,
+(7.53c)
+where γi is the uncertainty. Using (7.52) and (7.53) as measurements, a new Kalman
+ﬁlter can be formulated for estimation of Δx, Vj, and θi.
+7.8
+Numerical Examples
+To simulate the three-dimensional navigation algorithm, eight pulsars are selected
+(see Fig. 7.2 for pulsar geometry). The pulsar proﬁles are shown in Fig. 4.2. The
+pulsar galactic coordinates, and their photon ﬂux values are given in Table 7.1 [19].
+The detector area is assumed to be 104 cm2. The effective pulsar rate, λs, is
+calculated according to the pulsar photon ﬂux and the detector area. The effective
+background rate is chosen as λb = ⌈λs/10⌉. The corresponding values are given in
+Table 7.2.
+In three different scenarios, the measurements are incorporated every 100 s,
+and every 500 s. The NLS-based pulse delay estimation approach is utilized, and
+
+
+========== PAGE 109 ==========
+
+96
+7 Recursive Estimation
+Fig. 7.2 Pulsar geometry on the sky map
+Table 7.1 Employed pulsars
+Galactic
+Galactic
+Flux (2–10 keV)
+Pulsar
+Period (s)
+longitude (◦)
+latitude (◦)
+(ph/cm2/s)
+B0531 + 21
+0.0335
+184.56
+−5.78
+1.54E + 00
+B0540 −69
+0.0504
+279.72
+−31.52
+5.15E −03
+B0833 −45
+0.0893
+263.55
+−2.79
+1.59E −03
+B1509 −58
+0.1502
+320.32
+−1.16
+1.62E −02
+B1821 −24
+0.0031
+7.80
+−5.58
+1.93E −04
+B1937 + 21
+0.0016
+57.51
+−0.29
+4.99E −05
+B1055 −52
+0.1971
+164.50
+−52.45
+1.64E −06
+J0437 −47
+0.0057
+253.39
+−41.96
+6.65E −05
+Table 7.2 Employed pulsars (detector area: 104 cm2)
+λb
+λs
+σm (m)
+σm (m)
+Pulsar
+(ph/s)
+(ph/s)
+(Tobs = 100 s)
+(Tobs = 500 s)
+B0531 + 21
+1.54E + 03
+1.54E + 04
+5.64E + 2
+2.52E + 2
+B0540 −69
+5.15E + 00
+5.15E + 01
+3.46E + 4
+1.54E + 4
+B0833 −45
+1.59E + 00
+1.59E + 01
+4.67E + 4
+2.09E + 4
+B1509 −58
+1.62E + 01
+1.62E + 02
+8.62E + 4
+3.86E + 4
+B1821 −24
+1E + 00
+1.93E + 00
+4.56E + 3
+2.04E + 3
+B1937 + 21
+1E + 00
+4.99E −01
+4.53E + 3
+2.02E + 3
+B1055 −52
+1E + 00
+1.64E −02
+1.67E + 8
+7.49E + 7
+J0437 −47
+1E + 00
+6.65E −03
+1.11E + 5
+4.99E + 4
+σ(i)
+m =
+√
+R(i) values corresponding to each scenario are given in Table 7.2. The
+spacecraft absolute velocity data are not perfectly known. The velocity errors are
+assumed to be Δv1 = 1000 and Δv2 = 1200 m/s. Note that because of the effect of
+absolute velocity errors on the quality of measurements, the measurement noise
+variance values are bigger than their corresponding analytical values when the
+velocity data is perfectly known.
+
+
+========== PAGE 110 ==========
+
+7.8 Numerical Examples
+97
+To initiate the Kalman ﬁlter, the a priori covariance matrix is chosen as
+P0 = diag(P0x,P0v,P0ba,P0te),
+(7.54)
+where
+
+P0x = diag(106,106,106)
+(m)
+(7.55a)
+
+P0v = diag(104,103,102)
+(m/s)
+(7.55b)
+
+P0ba = diag(100.5,100.5,100.5)
+(m/s2)
+(7.55c)
+
+P0te = 103
+(s).
+(7.55d)
+The a priori state estimate at k = 0 is ˆX(−)
+0
+= 0. Note that although the initial
+uncertainties given in (7.55) change the transient response of the Kalman ﬁlter, they
+do not affect its steady state performance.
+The IMU process noise PSDs used by the Kalman ﬁlter are given in (7.56). Note
+that to simulate the dynamics (7.22), it is assumed that Wb = 0 and We = 0, since
+they are assumed to be constant states. Although, they follow slowly time varying
+dynamics in practice. Hence, to take this fact into account, and to keep the Kalman
+ﬁlter open, they are modeled as Brownian motion processes in the estimation stage.
+
+Wv = 10−6I
+(m/√s)
+(7.56a)
+√
+Wa = 10−7I
+(m/
+√
+s3)
+(7.56b)
+
+Wb = 10−5I
+(m/
+√
+s5)
+(7.56c)
+√We = 10−6
+(√s)
+(7.56d)
+The units in (7.56) are obtained from (7.29), noting that the diagonal elements
+have units m2, (m/s)2, (m/s2)2, and s2, respectively.
+In (7.56), the accelerometer bias uncertainty, Wb, is chosen small based on the
+fact that the available IMUs are very accurate. These values are easily achievable
+by available commercial IMUs such as LN200 [61]. Choosing other Wb values
+only affects achievable estimation accuracies. The accelerometer uncertainty, Wa,
+represents the applied forces to the spacecraft from the celestial sources (ex. solar
+radiation pressure). Hence, it is chosen small as well.
+To ﬁnd out how accurate the relative distance between the spacecraft can be esti-
+mated, the state estimation error, and the standard deviation (STD) of the a posteriori
+estimation error are investigated. In other words, the square roots of the diagonal el-
+ements of P(+)
+k
+are considered. Note that using (7.17), the standard deviation of ˆXe
+equals to the standard deviation of Δ ˆX, which represents the relative position and
+relative velocity vectors between the spacecraft. All results are obtained through
+Monte Carlo simulation over 3,000 independent realization of the stochastic signals.
+Different sampling times, Ts, are chosen for discretizing the continuous dynamics.
+As expected, Ts does not change either the error covariance in the steady state or the
+time that the steady state is reached; however, the number of iterations to get to the
+
+
+========== PAGE 111 ==========
+
+98
+7 Recursive Estimation
+same values of the error covariance varies. The initial state of the dynamic system
+(7.22) is assumed to be a Gaussian random variable
+X0 ∼N (0,P0),
+(7.57)
+where P0 is given in (7.54).
+In all scenarios the Monte Carlo state estimation error, obtained by averaging
+over 3,000 realizations, is observed to be zero. Hence, its plots are omitted. The
+Monte Carlo a posteriori standard deviation, along with the analytical one obtained
+from (7.43c) are plotted, and it is shown that they satisfactorily match. The analyt-
+ical values that are computed in the Kalman ﬁlter are based on modeling some of
+the variables as Brownian motion, as opposed to the simulation model where the
+variables are assumed to be slowly varying (in some cases constants). As a result,
+the simulation STD plots may not perfectly match the analytical values, but they are
+very close.
+The estimation error obtained from one [example] realization is plotted as well.
+As expected, we can see that at any time epoch, most of the Mote Carlo estimation
+error points are within the 1-σ envelope.
+In the ﬁrst scenario, eight pulsars listed in Table 7.1 are selected, and the mea-
+surements are obtained every 100 s. The results are plotted in Figs. 7.3–7.6. The
+obtained estimation accuracies are given in Tables 7.3, 7.4, and 7.5.
+0
+6
+12
+18
+-5000
+0
+5000
+x (m)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-2
+0
+2 x 10
+4
+y (m)
+0
+6
+12
+18
+-1
+0
+1 x 10
+5
+Time (min)
+z (m)
+Fig. 7.3 Relative position estimation (N = 8, Tobs = 100 s)
+
+
+========== PAGE 112 ==========
+
+7.8 Numerical Examples
+99
+0
+6
+12
+18
+-2
+0
+2 x 10
+4
+vx (m/sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-1000
+0
+1000
+vy (m/sec)
+0
+6
+12
+18
+-500
+0
+500
+Time (min)
+vz (m/sec)
+Fig. 7.4 Relative velocity estimation (N = 8, Tobs = 100 s)
+0
+6
+12
+18
+-5
+0
+5
+b( )
+x
+a
+(m/sec2)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-5
+0
+5
+( )
+b y
+a
+(m/sec2)
+0
+6
+12
+18
+-5
+0
+5
+Time (min)
+( )
+b z
+a
+(m/sec2)
+Fig. 7.5 Relative bias estimation (N = 8, Tobs = 100 s)
+
+
+========== PAGE 113 ==========
+
+100
+7 Recursive Estimation
+0
+6
+12
+18
+-6
+-4
+-2
+0
+2
+4
+6 x 10
+-5
+Time (min)
+te (sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+Fig. 7.6 Clock differential time estimation (N = 8, Tobs = 100 s)
+Table 7.3 Position
+estimation results
+Scenario
+√Px (m)
+Py (m)
+√Pz (m)
+N = 8, Tobs = 100 s
+1.93E + 3
+6.74E + 3
+3.87E + 4
+N = 8, Tobs = 500 s
+1.16E + 3
+4.97E + 3
+3.21E + 4
+N = 4, Tobs = 100 s
+2.16E + 4
+4.12E + 4
+6.83E + 4
+Table 7.4 Velocity estimation results
+Scenario
+
+Pvx (m/s)
+Pvy (m/s)
+Pvz (m/s)
+N = 8, Tobs = 100 s
+7.52
+21.87
+92.96
+N = 8, Tobs = 500 s
+2.09
+7.91
+47.55
+N = 4, Tobs = 100 s
+15.21
+114.78
+183.08
+Table 7.5 IMU Bias and clock differential time estimation results
+Scenario
+
+P(x)
+b
+(m/s2)
+
+P(y)
+b
+(m/s2)
+
+P(z)
+b
+(m/s2)
+√Pe (sec)
+N = 8, Tobs = 100 s
+1.31E−2
+3.74E−2
+1.34E−1
+1.32E−5
+N = 8, Tobs = 500 s
+1.59E−3
+5.87E−3
+3.45E−2
+1.14E−5
+N = 4, Tobs = 100 s
+2.05E−2
+1.80E−1
+2.15E−1
+8.01E−5
+
+
+========== PAGE 114 ==========
+
+7.8 Numerical Examples
+101
+In the second scenario, employing the same pulsars, the measurements are
+provided every 500 s. Hence, the measurement noise STD values decrease. The
+corresponding values are given in Table 7.2. As Figs. 7.7–7.10 show, using more
+accurate measurements, results in obtaining more accurate estimates. The estima-
+tion results are given in Tables 7.3, 7.4, and 7.5.
+In the third scenario, to investigate the effect of the pulsar geometry on the esti-
+mation accuracy, just the ﬁrst four pulsars from Table 7.1 are chosen for navigation.
+The measurements are updated every 100 s. The plots are shown in Figs. 7.11–7.14,
+and the resulted accuracies are given in Table 7.3. As expected, compared to the
+case where eight pulsars were employed, the estimation error standard deviations
+have increased (Tables 7.3, 7.4, and 7.5).
+Recall from (7.33) that the relative position, Δx, and the differential time between
+clocks, te, show up directly in the measurements. Hence, we expect the Kalman
+ﬁlter to be able to estimate them immediately, and it takes longer for the relative
+bias and velocity estimates to converge to the steady state values. From the a priori
+initial standard deviations, given in (7.55), and using the estimation plots shown in
+Figs. 7.3–7.14, this can be veriﬁed where the a posteriori position and differential
+time estimation standard deviations dramatically drop when the ﬁrst measurements
+is incorporated at t = 0.
+Another interesting point regarding Tables 7.3, 7.4, and 7.5 is that the
+x-coordinate estimates are more accurate than the y-coordinate estimates. Consider-
+ing Fig. 7.2, we expect this phenomenon. As the sky map shows, the employed
+pulsars are geometrically more distributed along the x-axis than the y-axis.
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-2000
+0
+2000
+x (m)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+5
+10
+15
+20
+25
+30
+35
+40
+−1
+0
+1 x 10
+4
+y (m)
+0
+5
+10
+15
+20
+25
+30
+35
+40
+−5
+0
+5 x 10
+4
+Time (min)
+z (m)
+Fig. 7.7 Relative position estimation (N = 8, Tobs = 500 s)
+
+
+========== PAGE 115 ==========
+
+102
+7 Recursive Estimation
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-2
+0
+2 x 10
+4
+vx (m/sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-2000
+0
+2000
+vy (m/sec)
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-200
+0
+200
+Time (min)
+vz (m/sec)
+Fig. 7.8 Relative velocity estimation (N = 8, Tobs = 500 s)
+Furthermore, Tables 7.3, 7.4, and 7.5 show that the z-coordinate estimates are
+less accurate than the x- and y-coordinate estimates. This implies that the pulsars
+geometric distribution along the z-axis is worse than the other axes.
+In summary, we investigated effectiveness of the proposed algorithm through
+different simulation scenarios. Achievable estimation accuracies depend on different
+elements of the navigation system. The main factors are the pulse delay estimation
+accuracies, the IMU accuracies, and the pulsars geometric distribution on the sky
+map.
+We have also performed a parametric study to investigate the range of achievable
+accuracies as a function of the quality of measurements. All simulation parameters
+are the same as the scenario where N = 8 and Tobs = 500 s. The only difference
+is the steady state STD of estimation errors are obtained for kRσm in the range of
+0.1 ≤kR ≤10, where σm values are the measurement noise standard deviations for
+Tobs = 500 s, given in Table 7.2. The results are plotted in Figs. 7.15–7.18. From
+these plots, the range of estimation accuracies are given in Table 7.6.
+These ranges show that employing bright pulsars, position estimation accuracies
+in the order of a couple of 100 m are achievable for position estimation. The velocity
+estimation accuracies in the order of a few meters per second can be obtained. The
+attainable bias estimation accuracy is less than 1 mm/s2. Furthermore, the differen-
+tial time between clocks can be estimated in the order of a few micro seconds.
+The effect of the IMU uncertainty on relative navigation solution is also inves-
+tigated. All parameters are the same as the scenario where N = 8 and Tobs = 500 s.
+
+
+========== PAGE 116 ==========
+
+7.8 Numerical Examples
+103
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-5
+0
+5
+b(x)
+a
+(m/sec2)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-5
+0
+5
+b(y)
+a
+(m/sec2)
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-5
+0
+5
+Time (min)
+b(z)
+a
+(m/sec2)
+Fig. 7.9 Relative bias estimation (N = 8, Tobs = 500 s)
+0
+5
+10
+15
+20
+25
+30
+35
+40
+-4
+-3
+-2
+-1
+0
+1
+2
+3
+4 x 10-5
+Time (min)
+te (sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+Fig. 7.10 Clock differential time estimation (N = 8, Tobs = 500 s)
+
+
+========== PAGE 117 ==========
+
+104
+7 Recursive Estimation
+0
+6
+12
+18
+-1
+0
+1 x 10
+5
+x (m)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-1
+0
+1 x 10
+5
+y (m)
+0
+6
+12
+18
+-2
+0
+2 x 10
+5
+Time (min)
+z (m)
+Fig. 7.11 Relative position estimation (N = 4, Tobs = 100 s)
+0
+6
+12
+18
+-1
+0
+1 x 10
+4
+vx (m/sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-2000
+0
+2000
+vy (m/sec)
+0
+6
+12
+18
+-1000
+0
+1000
+Time (min)
+vz (m/sec)
+Fig. 7.12 Relative velocity estimation (N = 4, Tobs = 100 s)
+
+
+========== PAGE 118 ==========
+
+7.8 Numerical Examples
+105
+0
+6
+12
+18
+-5
+0
+5
+b(x)
+a
+(m/sec2)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+0
+6
+12
+18
+-5
+0
+5
+b(y)
+a
+(m/sec2)
+0
+6
+12
+18
+-5
+0
+5
+Time (min)
+b(z)
+a
+(m/sec2)
+Fig. 7.13 Relative bias estimation (N = 4, Tobs = 100 s)
+0
+6
+12
+18
+-4
+-3
+-2
+-1
+0
+1
+2
+3
+4 x 10-4
+Time (min)
+te (sec)
+Estimation Error
+Analytic STD
+Monte Carlo STD
+Fig. 7.14 Clock differential time estimation (N = 4, Tobs = 100 s)
+
+
+========== PAGE 119 ==========
+
+106
+7 Recursive Estimation
+10-1
+100
+101
+102
+103
+104
+105
+106
+kR
+√
+√
+√
+Px (m)
+Py (m)
+Pz (m)
+Fig. 7.15 The STD of position estimation error
+10-1
+100
+101
+10-1
+100
+101
+102
+kR
+
+Pvx
+y
+z
+(m/sec)
+Pv (m/sec)
+
+Pv (m/sec)
+Fig. 7.16 STD of velocity estimation error
+
+
+========== PAGE 120 ==========
+
+7.8 Numerical Examples
+107
+10-1
+100
+101
+10-4
+10-3
+10-2
+10-1
+kR
+
+P (x)
+b
+(m/sec2)
+
+P (y)
+b
+(m/sec2)
+
+P (z)
+b
+(m/sec2)
+Fig. 7.17 The STD of bias estimation error
+10-1
+100
+101
+10-6
+10-5
+10-4
+kR
+√Pe (sec)
+Fig. 7.18 The STD of differential time estimation error
+
+
+========== PAGE 121 ==========
+
+108
+7 Recursive Estimation
+Table 7.6 Estimation results when R or Q matrices change
+R varies
+Q varies
+Min
+Max
+Min
+Max
+
+P(x)
+b
+(m)
+142.42
+8438.4
+852.27
+1423.6
+
+P(y)
+b
+(m)
+516.83
+2946.8
+2947.5
+5157.0
+
+P(z)
+b
+(m)
+3051.2
+169950
+17137.0
+30406.0
+Pvx (m/s)
+0.2489
+4.6571
+0.4737
+2.4889
+Pvy (m/s)
+0.5076
+13.6063
+1.3696
+5.0678
+Pvz (m/s)
+1.9286
+64.1779
+7.0152
+19.1681
+
+P(x)
+b
+(m/s2)
+3.3694E−4
+0.0012
+0.12515
+0.0034
+
+P(y)
+b
+(m/s2)
+4.1967E−4
+0.0032
+0.3271
+0.0042
+
+P(z)
+b
+(m/s2)
+6.9230E−4
+0.0137
+0.0016
+0.0069
+√Pe (s)
+1.1508E−6
+5.7419E−5
+5.7494E−6
+1.1473E−5
+10-1
+100
+101
+102
+103
+104
+105
+kQ
+√Px (m)
+Py (m)
+√Pz (m)
+Fig. 7.19 The STD of position estimation error
+The only parameters that are changed are the IMU uncertainties. Let σp be any of the
+IMU uncertainties given in (7.56d). Then, the achievable estimation accuracies are
+examined for kQσp, where 0.1 ≤kQ ≤10. The results are plotted in Figs. 7.19–7.22.
+The minimum and maximum accuracies are also given in Table 7.6.
+
+
+========== PAGE 122 ==========
+
+7.8 Numerical Examples
+109
+10-1
+100
+101
+10-1
+100
+101
+102
+kQ
+
+Pvx (m/sec)
+Pvy (m/sec)
+
+Pvz (m/sec)
+Fig. 7.20 The STD of velocity estimation error
+10-1
+100
+101
+10-4
+10-3
+10-2
+kQ
+
+P (x)
+b
+(m/sec2)
+
+P (y)
+b
+(m/sec2)
+
+P (z)
+b
+(m/sec2)
+Fig. 7.21 The STD of bias estimation error
+
+
+========== PAGE 123 ==========
+
+110
+7 Recursive Estimation
+10-1
+100
+101
+10-6
+10-5
+10-4
+kQ
+√
+Pe (sec)
+Fig. 7.22 The STD of differential time estimation error
+7.9
+Summary
+In this chapter, we present a recursive navigation algorithm. We utilize the pulse
+delay estimates to construct the measurements for a Kalman ﬁlter. We suggest to
+employ IMUs on each spacecraft to provide the acceleration data. Using the Kalman
+ﬁlter, we offer a recursive algorithm to estimate the relative position, the relative ve-
+locity, the relative accelerometer biases, and the differential time between clocks.
+Through different simulation scenarios, applicability of the propose navigation al-
+gorithm is also veriﬁed.
+
+
+========== PAGE 124 ==========
+
+Chapter 8
+Epilog
+This book has proposed a new approach for navigation of spacecraft in space
+employing X-ray pulsar measurements. The presented approach is applicable for
+both absolute and relative navigation problems. Pulsars emitting in the X-ray band
+were chosen because of their stable period and their geometric distribution in the
+sky map. The main advantage of using X-ray pulsars for navigation is that rela-
+tively small size detectors can be used for detection of the X-ray photons on board
+a spacecraft. This facilitates the spacecraft design procedure.
+The developed navigation technique is based on utilizing X-ray detectors on each
+spacecraft and locking the detectors on the same pulsar. Hence, the vehicle farther
+from the pulsar detects a signal whose intensity is the time delayed version of the
+one detected by the closer vehicle. The distance between the space vehicles is pro-
+portional to the time delay. The proposed approach is to periodically estimate the
+pulse delay, and then use these estimates as measurements in a recursive algorithm
+to ﬁnd the navigation solution. To analyze the system, mathematical models were
+developed for the X-ray pulsar signals, and the Cram´er–Rao lower bound for es-
+timation of the pulse delay was presented. Two different strategies for estimation
+of the pulse delay were suggested. One strategy was to employ epoch folding.
+The procedure, which is used to recover photon intensities, was mathematically
+studied and characterized. Two different estimators based on epoch folding were
+formulated and their asymptotic performance was analyzed. One estimator uses the
+cross-correlation function between the empirical rate function and the known pul-
+sar intensity function. The other estimator is obtained through solving a nonlinear
+least squares problem. It was shown that these estimators are consistent, but not
+asymptotically efﬁcient. The second strategy was to directly utilize the measured
+photon time of arrivals. Using this strategy and based on a maximum likelihood cri-
+terion, a pulse delay estimator was formulated, and it was shown that the estimator
+is asymptotically efﬁcient. It was shown that the cross-correlation-based estimator
+is computationally more efﬁcient than the other two estimators.
+Space vehicles are equipped with inertial measurement units to provide the accel-
+eration information, which are converted to velocity data and utilized by the pulse
+delay estimator. The pulse delay estimates, in turn, are taken in as measurements
+by the Kalman ﬁlter for recursive estimation. The measurement noise variance
+is selected based on accuracy of the pulse delay estimates. Models of spacecraft
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+DOI 10.1007/978-1-4419-8017-5 8, c⃝Springer Science+Business Media, LLC 2011
+111
+
+
+========== PAGE 125 ==========
+
+112
+8 Epilog
+dynamics and inertial measurement units are employed by the proposed algorithm.
+It was shown that the relative inertial measurement unit biases and the differen-
+tial time between detectors’ clocks can be estimated as well as the relative position
+and velocity between the spacecraft. The three-dimensional relative navigation so-
+lution can be obtained by taking measurements on four or more different X-ray
+pulsars. Depending on the number of pulsars, their characteristics, their geometric
+distribution in the sky, and inertial measurement unit uncertainties, the achievable
+estimation accuracies were examined.
+To enhance the position estimation accuracy, improving models of the spacecraft
+motion and IMU dynamics is necessary for future work. Because some models are
+now nonlinear, employing ﬁltering techniques such as the extended Kalman ﬁlter
+and the unscented Kalman ﬁlter may be appropriate. Modeling clock errors and
+studying their effect on the navigation solution are necessary to obtain more accurate
+results. Furthermore, to estimate the system biases with more precision, smoothing
+algorithms may be utilized. Developing signal processing techniques for estimation
+of the pulse phase when spacecraft velocities are varying rapidly is another necessity
+for improving the navigation algorithm. Additionally, it is of interest to investigate
+the navigation problem in more detail in situations where Doppler frequencies and
+pulse phases are simultaneously estimated. Proposing pulse delay estimators for
+these situations and analysis of their performance are important areas of future re-
+search. Addressing the cycle ambiguity problem is another topic to work on. Also,
+taking advantage of pulsar geometry for new formulations of the navigation prob-
+lem, is an interesting ﬁeld for enhancing the pulsar-based navigation solution.
+
+
+========== PAGE 126 ==========
+
+References
+1. J. F. Jordan, “Navigation of Spacecraft on Deep Space Missions,” Journal of Navigation,
+vol. 40, no. 1, pp. 19–29, Jan. 1987.
+2. W. G. Melbourne, “Navigation Between the Planets,” Scientiﬁc American, vol. 234, no. 6,
+pp. 58–74, Mar. 1976.
+3. J. R. Wertz, Spacecraft Attitude Determination and Control. Dordrecht: Kluwer, 1978.
+4. R. R. Bate, D. D. Muller, and J. E. White, Fundamentals of Astrodynamics. New York: Dover,
+1971.
+5. R. H. Battin, An Introduction to the Mathematics and Methods of Astrodynamics. Washington
+D.C.: American Institute of Aeronautics and Astronautics, Revised Edition, 1999.
+6. B. W. Parkinson and J. J. Spiker Jr., Global Positioning System. Washington D.C.: American
+Institute of Aeronautics and Astronautics, Inc., 1996, vols. I and II.
+7. About The Deep Space Network (2010). Jet Propulsion Lab (JPL), California Institute of
+Technology, Pasadena, CA. [Online]. Available: http://deepspace.jpl.nasa.gov/dsn/
+8. A. A. Emadzadeh, C. G. Lopes, and J. L. Speyer, “Online Time Delay Estimation of Pulsar
+Signals for Relative Navigation using Adaptive Filters,” in IEEE/ION PLANS, Monterey, CA,
+USA, May 2008, pp. 714–719.
+9. A. A. Emadzadeh and J. L. Speyer, “A Study of Pulsar Signal Modeling and its Time Delay
+Estimation for Relative Navigation,” in ION National Technical Meeting (NTM), San Diego,
+CA, USA, 2008, pp. 119 – 126.
+10. D. Folta, C. Gramling, A. Long, D. Leung, and S. Belur, “Autonomous Navigation Using Ce-
+lestial Objects,” in Americal Astronautical Society (AAS), Girdwood, Alaska, USA, Aug. 1999,
+pp. 2161–2177.
+11. R. Gounley, R. White, and E. Gai, “Autonomous Satellite Navigation by Stellar Refraction,”
+Journal of Guidance, Control and Dynamics, vol. 7, no. 2, pp. 129–134, 1984.
+12. D. Lorimer (2001). Binary and Millisecond Pulsars at the New Millenium. [Online]. Available:
+http://relativity.livingreviews.org/Articles/lrr-2001-5/
+13. ATNF Pulsar Catalogue (2010). [Online]. Available: http://www.atnf.csiro.au/research/pulsar/
+psrcat/
+14. A. G. Lyne and F. Graham-Smith, Pulsar Astronomy, 3rd ed. Cambridge: Cambridge
+University Press, 2006.
+15. D. N. Matsakis, J. H. Taylor, T. M. Eubanks, and T. Marshall, “A Statistic for Describing Pulsar
+and Clock Stabilities,” Astronomy and Astrophysics, vol. 326, pp. 924–928, Oct. 1997.
+16. J. G. Hartnett and A. Luiten (2010). “A Comparison of Astrophysical and
+Terrestrial
+Frequency Standards: Which are the best clocks?”. [Online]. Available: http://arxiv.org/abs/
+1004.0115v2
+17. P. A. Charles and F. D. Seward, Exploring the X-ray Universe. Cambridge: Cambridge
+University Press, 1995.
+18. W. Becker and J. Trumper, “The X-ray Luminosity of Rotation-Powered Neutron Stars,”
+Astronomy and Astrophysics, vol. 326, pp. 682–691, 1997.
+A.A. Emadzadeh and J.L. Speyer, Navigation in Space by X-ray Pulsars,
+113
+DOI 10.1007/978-1-4419-8017-5, c⃝Springer Science+Business Media, LLC 2011
+
+
+========== PAGE 127 ==========
+
+114
+References
+19. S. I. Sheikh, “The Use of Variable Celestial X-ray Sources for Spacecraft Navigation,” Ph.D.
+dissertation, University of Maryland, 2005.
+20. V. Pulsar: Chandra Reveals a Compact Nebula Created by a Shooting Neutron Star (2010).
+[Online]. Available: http://chandra.harvard.edu/photo/2000/vela/
+21. Nasa’s Fermi Telescope Probes Dozens of Pulsars (2010). [Online]. Available: http://www.
+nasa.gov/mission pages/GLAST/news/pulsar passel.html
+22. NRAO, Green Bank Telescopes (2010). [Online]. Available: http://www.gb.nrao.edu
+23. NAIC, arecibo Observatory Home (2010). [Online]. Available: http://www.naic.edu
+24. M. D. Grifﬁn and J. R. French, Space Vehicle Design. Washington D.C.: American Institute of
+Aeronautics and Astronautics, 1991.
+25. P. Ray, K. Wood, and B. Phlips, “Spacecraft Navigation Using X-ray Pulsars,” Naval Research
+Lab (NRL) Review, pp. 95–102, 2006.
+26. P. Reichley, G. Downs, and G. Morris, “Use of Pulsar Signals as Clocks,” NASA Jet Propulsion
+Laboratory Quarterly Technical Review, vol. 1, no. 1, pp. 80–86, July 1971.
+27. G. Downs and P. E. Reichley, “Techniques for Measuring Arrival Times of Pulsar Signals I:
+DSN Observations from 1968 to 1980,” NASA Jet Propulsion Laboratory, California Institute
+of Technology, Pasadena CA, NASA Technical Reports NASA-CR-163564, Aug. 1980.
+28. D. W. Allan, “Millisecond Pulsar Rivals Best Atomic Clock Stability,” in 41st Annual Sympo-
+sium on Frequency Control. 1987, 1987, pp. 2–11.
+29. G. S. Downs, “Interplanetary Navigation Using Pulsating Radio Sources,” in NASA Technical
+Reports N74-34150, Oct. 1974, pp. 1–12.
+30. T. J. Chester and S. A. Butman, “Navigation Using X-ray Pulsers,” in NASA Technical Reports
+N81-27129, Oct. 1981, pp. 22–25.
+31. K. Wallace, “Radio Stars, What they are and The Prospects for their Use in Navigational
+Systems,” Journal of Navigation, vol. 41, no. 3, pp. 358–374, 1988.
+32. J. E. Hanson, “Principles of X-ray Navigation,” Ph.D. dissertation, Stanford University, 1996.
+33. J. Sala, A. Urruela, X. Villares, R. Estalella, and J. M. Paredes (2004). “Feasibility Study for
+a Spacecraft Navigation System relying on Pulsar Timing Information.” [Online]. Available:
+http://www.esa.int/gsp/ACT/phy/pp/pulsar-navigation.htm
+34. S. I. Sheikh, A. R. Golshan, and D. J. Pines, “Absolute and Relative Position Determination
+Using Variable Celestial X-ray Sources,” in 30th Annual AAS Guidance & Control Conference,
+Breckenridge, Colorado, USA, Feb. 2007, pp. 855–874.
+35. S. I. Sheikh, P. S. Ray, K. Weiner, M. T. Wolff, and K. S. Wood, “Relative Navigation of
+Spacecraft Utilizing Bright, Aperiodic Celestial Sources,” 63rd Annual Meeting of Institute of
+Navigation (ION), pp. 444–453, April 2007.
+36. S. I. Sheikh, D. J. Pines, S. R. Ray, K. Wood, M. N. Lovellette, and M. T. Wolff, “Spacecraft
+Navigation Using X-ray Pulsars,” Journal of Guidance, Control and Dynamics, vol. 29, no. 1,
+pp. 49–63, 2006.
+37. S. I. Sheikh and D. J. Pines, “Recursive Estimation of Spacectraft Position and Velocity Us-
+ing X-ray Pulsar Time of Arrival Measurements,” NAVIGATION: Journal of The Institute of
+navigation, vol. 53, no. 3, pp. 149–166, 2006.
+38. D. W. Woodfork, “The Use of X-ray Pulsars for Aiding GPS Satellite Orbit Determination,”
+Master’s thesis, Air Force Institue Of Technology, Wright-Patterson Air Force Base, Ohio,
+2005.
+39. A. A. Emadzadeh, “Relative Navigation between Two Spacecraft Using X-ray Pulsars,” Ph.D.
+dissertation, University of California, Los Angeles, 2009.
+40. S. M. Ross, Introduction to Probability Models, 6th ed. New York: Academic Press, 1996.
+41. I. Bar-David, “Communication Under the Poisson Regime,” IEEE Transactions on Information
+Theory, vol. 15, no. 1, pp. 31–37, Jan. 1969.
+42. A. R. Golshan and S. I. Sheikh, “On Pulsar Phase Estimation and Tracking of Variable Celestial
+X-ray Sources,” in 63rd Annual Meeting of Institute of Navigation (ION), Cambrige, MA, USA,
+April 2007, pp. 413–422.
+43. A. A. Emadzadeh and J. L. Speyer, “On Modeling and Pulse Phase Estimation of X-ray
+Pulsars,” IEEE Transactions on Signal Processing, vol. 58, no. 9, pp. 4484–4495, Sept. 2010.
+
+
+========== PAGE 128 ==========
+
+References
+115
+44. ———, “X-ray Pulsar Based Relative Navigation Using Epoch Folding,” IEEE Transactions
+on Aerospace and Electronic Systems (in press), 2011.
+45. L. Devroye (1986). Non-Uniform Random Variate Generation. [Online]. Available: http://cg.
+scs.carleton.ca/∼luc/nonuniformrandomvariates.zip
+46. A. Papoulis (2002). Probability, Random Variables and Stochastic Processes, 4th ed. New
+York: McGraw-Hill.
+47. A. A. Emadzadeh and J. L. Speyer, “Relative Navigation between Two Spacecraft Using X-ray
+Pulsars,” IEEE Transactions on Control Systems Technology (inpress), 2011.
+48. A. A. Emadzadeh, A. R. Golshan, and J. L. Speyer, “Consistent Estimation of Pulse Delay
+for X-ray Pulsar based Relative Navigation,” in Proceedings of the 48th IEEE Conference on
+Decision and Control, Shanghai, China, 2009, pp. 1488–1493.
+49. A. A. Emadzadeh, J. L. Speyer, and A. R. Golshan, “Asymptotically Efﬁcient Estimation of
+Pulse Time Delay for X-ray Pulsar Based Relative Navigation,” in AIAA Guidance, Navigation,
+and Control Conference, Paper AIAA-2009-5974, Chicago, Illinois, USA, 2009.
+50. S. M. Kay, Fundamentals of Statistical Signal Processing: Estimation Theory, 2nd ed.
+Englewood Cliffs, NJ: Prentice Hall, 1993.
+51. D. L. Snyder, Random Point Processes. New York: Wiley, 1975.
+52. N. Ashby and A. R. Golshan, “Minimum Uncertainties in Position and Velocity Determination
+using x-ray Photons from Millisecond pulsars,” in ION National Technical Meeting (NTM),
+San Diego, CA, USA, 2008, pp. 110–118.
+53. P. Panek, “Error Analysis and Bounds in Time Delay Estimation,” IEEE Transactions on Signal
+Processing, vol. 55, pp. 3547–3549, Jul. 2007.
+54. E. Vonesh and V. M. Chinchilli, Linear and Nonlinear Models for the Analysis of Repeated
+Measurements. New York: Marcel Dekker, 1997.
+55. G. Casella and R. L. Berger, Statistical Inference, 2nd ed. Belmont, CA: Duxbury, 2001.
+56. J. H. Taylor, “Pulsar Timing and Relativistic Gravity,” Philosophical Transactions: Physical
+Sciences and Engineering, vol. 341, no. 1660, pp. 117–134, Oct. 1992.
+57. G. Jacovitti and G. Scarano, “Discrete Time Techniques for Time Delay Estimation,” IEEE
+Transactions on Signal Processing, vol. 41, pp. 525–533.
+58. A. Gelb, Appiled Optimal Estimation. Cambridge, MA: MIT Press, 1974.
+59. J. L. Speyer and W. H. Chung, Stochastic Processes, Estimation, and Control, 1st ed. SIAM,
+2008.
+60. C. T. Chen, Linear System Theory and Design, 3rd ed. New York Oxford: Oxford University,
+1998.
+61. (2010) [Online]. Available: http://webone.novatel.ca/assets/Documents/Papers/LN200.pdf
+
+
+========== PAGE 129 ==========
+
+
+
+========== PAGE 130 ==========
+
+Index
+A
+Accelerometer, 87, 88, 97
+Accumulated rate, 17
+ARGOS, 12
+Asymptotic relative efﬁciency, 57
+Asymptotically efﬁcient, 50, 57, 73, 74
+B
+Brownian motion, 89, 97, 98
+C
+Consistent (estimator), 50, 57, 62
+CPU, 82, 84
+Crab, 6, 8, 10, 61
+Cram´er-Rao lower bound, 2, 35, 37, 111
+Cross correlation function, 51
+D
+Deep Space Network, 4
+Delay estimation, 15, 35, 51, 58, 73, 95
+Detector, 11, 12, 15, 19, 30, 35
+Doppler, 4, 19, 36, 64, 73, 77
+E
+Empirical rate function, 23, 24, 27, 30, 36, 49,
+55, 59, 64, 111
+Epoch folding, 1, 13, 22, 23, 25, 27, 49, 59, 64
+F
+Fisher matrix, 37, 39
+Flux, 10, 19, 95
+Fourier transform, 58–60
+G
+Galactic coordinates, 95
+Gamma-ray, 6, 8–10
+Gaussian, 98
+GPS, 4, 5, 12, 14
+I
+IMU, 14, 87, 97
+Inertial measurement unit, 2, 14, 88, 111
+Integrated rate, 17, 28
+Intensity function, 22, 49
+Inverse Fourier transform, 51
+K
+Kalman ﬁlter, 2, 12, 14, 36, 87–89, 92, 95, 111
+M
+Maximum-likelihood, 2, 73
+ML, 36, 59, 73, 78, 79
+N
+NASA, 9
+Non-homogeneous Poisson process, 1, 16
+Nonlinear least squares, 55
+NRL, 12, 15
+O
+Observability, 87
+Observability matrix, 93
+Observable, 93
+P
+Phase-locked-loop, 12
+Photon, 8, 13, 15, 17, 28, 35, 49, 57, 75, 76, 95
+Point process, 16
+117
+
+
+========== PAGE 131 ==========
+
+118
+Index
+Poisson, 16, 17, 20, 30, 38
+Power spectral density, 88
+Probability density function, 17, 36
+Pulsar proﬁle, 18, 57, 95
+R
+Radio pulsar, 6, 8, 10, 11
+S
+solar system barycenter, 14
+Spacecraft, 3–5, 10, 11, 13, 35, 58, 73, 87, 111
+SSB, 15, 87, 94
+T
+Time of arrival, 1, 15
+TOA, 15–17, 37, 50, 73
+U
+Unbiased (estimator), 50, 55, 74, 75
+W
+White noise, 88, 89, 91
+X
+X-ray pulsar, 1, 3, 6, 7, 11, 13, 18, 87
