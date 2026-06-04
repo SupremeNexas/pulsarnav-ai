@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -46,12 +46,403 @@ const navItems = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
+type NavigationLabResult = {
+  config: { trials: number; pulsars: number; noiseNs: number; region: string; algorithm: string; seed: number };
+  pulsars: string[];
+  summary: { meanErrorKm: number; medianErrorKm: number; p95ErrorKm: number; maxErrorKm: number };
+  samples: { trial: number; truePosition: [number, number, number]; estimated: [number, number, number]; errorKm: number }[];
+  rawTrials: { trial: number; truePosition: [number, number, number]; estimated: [number, number, number]; errorKm: number }[];
+  distribution: { bin: string; count: number }[];
+};
+
 function DashboardContent() {
   const search = useSearchParams();
   const initial = search.get("view") ?? "dashboard";
   const [active, setActive] = useState(initial);
   const [collapsed, setCollapsed] = useState(false);
   const ActiveIcon = navItems.find((item) => item.id === active)?.icon ?? Home;
+
+  // Lifted Simulation States
+  const [trials, setTrials] = useState(1000);
+  const [pulsars, setPulsars] = useState(6);
+  const [noise, setNoise] = useState(100);
+  const [region, setRegion] = useState("earth_moon");
+  const [algorithm, setAlgorithm] = useState("WLS"); // LS, WLS, EKF
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<NavigationLabResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  async function runSimulation(customParams?: {
+    trials?: number;
+    pulsars?: number;
+    noise?: number;
+    region?: string;
+    algorithm?: string;
+  }) {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const activeTrials = customParams?.trials ?? trials;
+      const activePulsars = customParams?.pulsars ?? pulsars;
+      const activeNoise = customParams?.noise ?? noise;
+      const activeRegion = customParams?.region ?? region;
+      const activeAlgorithm = customParams?.algorithm ?? algorithm;
+
+      const params = new URLSearchParams({
+        trials: String(activeTrials),
+        pulsars: String(activePulsars),
+        noise: String(activeNoise),
+        region: activeRegion,
+        algorithm: activeAlgorithm,
+      });
+
+      const response = await fetch(`/api/navigation-lab?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Simulation engine returned status ${response.status}`);
+      }
+      const payload = (await response.json()) as NavigationLabResult;
+      setResult(payload);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "An unexpected error occurred in the simulation engine.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Automatically trigger simulation on control parameters change
+  useEffect(() => {
+    runSimulation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trials, pulsars, noise, region, algorithm]);
+
+  // Exports Implementation
+  function exportToCSV() {
+    if (!result) return;
+    const timestamp = new Date().toISOString();
+    let csv = `PulsarNav AI Simulation Report\n`;
+    csv += `Generated at,${timestamp}\n`;
+    csv += `Algorithm,${result.config.algorithm}\n`;
+    csv += `Spacecraft Region,${result.config.region}\n`;
+    csv += `Number of Pulsars,${result.config.pulsars}\n`;
+    csv += `Timing Noise,${result.config.noiseNs} ns\n`;
+    csv += `Total Trials,${result.config.trials}\n\n`;
+    
+    csv += `SUMMARY STATISTICS\n`;
+    csv += `Mean Position Error (km),${result.summary.meanErrorKm.toFixed(6)}\n`;
+    csv += `Median Position Error (km),${result.summary.medianErrorKm.toFixed(6)}\n`;
+    csv += `95% Confidence Error (km),${result.summary.p95ErrorKm.toFixed(6)}\n`;
+    csv += `Max Position Error (km),${result.summary.maxErrorKm.toFixed(6)}\n\n`;
+    
+    csv += `RAW TRIAL RESULTS\n`;
+    csv += `Trial,True_X_km,True_Y_km,True_Z_km,Est_X_km,Est_Y_km,Est_Z_km,Error_km\n`;
+    
+    result.rawTrials.forEach((t: any) => {
+      csv += `${t.trial},${t.truePosition[0].toFixed(4)},${t.truePosition[1].toFixed(4)},${t.truePosition[2].toFixed(4)},${t.estimated[0].toFixed(4)},${t.estimated[1].toFixed(4)},${t.estimated[2].toFixed(4)},${t.errorKm.toFixed(6)}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `pulsarnav_report_${result.config.algorithm}_${result.config.region}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function exportThreeJSCanvas() {
+    const canvas = document.querySelector("canvas");
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `pulsarnav_3d_view_${algorithm}.png`;
+    link.click();
+  }
+
+  function exportSVGToPNG(svgSelector: string, fileName: string) {
+    const svg = document.querySelector(svgSelector);
+    if (!svg) return;
+    const svgString = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const rect = svg.getBoundingClientRect();
+      canvas.width = rect.width * 2; // Publication quality scale
+      canvas.height = rect.height * 2;
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.fillStyle = "#050816";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.scale(2, 2);
+        context.drawImage(image, 0, 0);
+        const pngURL = canvas.toDataURL("image/png");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngURL;
+        downloadLink.download = fileName;
+        downloadLink.click();
+      }
+    };
+    image.src = blobURL;
+  }
+
+  function exportToPDF() {
+    if (!result) return;
+    
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    
+    const timestamp = new Date().toLocaleString();
+    const summary = result.summary;
+    
+    const errorChartSvg = document.querySelector("#error-chart-panel svg")?.outerHTML || "";
+    const distChartSvg = document.querySelector("#dist-chart-panel svg")?.outerHTML || "";
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>PulsarNav AI Simulation Report</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              color: #0f172a;
+              padding: 40px;
+              line-height: 1.5;
+              background: white;
+            }
+            .header {
+              border-bottom: 2px solid #e2e8f0;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .title {
+              font-size: 26px;
+              font-weight: 700;
+              color: #1e3a8a;
+              margin: 0;
+            }
+            .meta-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-bottom: 30px;
+            }
+            .meta-card {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 15px;
+            }
+            .meta-card h3 {
+              margin: 0 0 10px 0;
+              font-size: 14px;
+              text-transform: uppercase;
+              color: #64748b;
+              letter-spacing: 0.05em;
+            }
+            .meta-card p {
+              margin: 5px 0;
+              font-size: 15px;
+            }
+            .meta-card strong {
+              color: #0f172a;
+            }
+            .stats-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 15px;
+              margin-bottom: 40px;
+            }
+            .stat-box {
+              background: #f1f5f9;
+              border-left: 4px solid #3b82f6;
+              padding: 15px;
+              border-radius: 4px;
+              text-align: center;
+            }
+            .stat-val {
+              font-size: 22px;
+              font-weight: 700;
+              color: #1e3a8a;
+            }
+            .stat-label {
+              font-size: 12px;
+              color: #475569;
+              margin-top: 5px;
+            }
+            .charts-section {
+              display: flex;
+              flex-direction: column;
+              gap: 30px;
+              margin-bottom: 40px;
+              page-break-inside: avoid;
+            }
+            .chart-container {
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 20px;
+              background: white;
+              text-align: center;
+            }
+            .chart-title {
+              font-size: 16px;
+              font-weight: 600;
+              margin-bottom: 15px;
+              color: #1e3a8a;
+            }
+            .chart-svg {
+              max-height: 250px;
+              width: 100%;
+            }
+            .table-container {
+              margin-top: 30px;
+              page-break-before: always;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 15px;
+              font-size: 13px;
+            }
+            th, td {
+              border: 1px solid #e2e8f0;
+              padding: 8px 12px;
+              text-align: left;
+            }
+            th {
+              background: #f8fafc;
+              color: #334155;
+            }
+            .footer {
+              margin-top: 50px;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 15px;
+              font-size: 11px;
+              color: #64748b;
+              text-align: center;
+            }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1 class="title">PulsarNav AI Navigation Report</h1>
+              <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b;">Autonomous X-ray Pulsar Deep Space Navigation Framework</p>
+            </div>
+            <div style="text-align: right;">
+              <button onclick="window.print()" class="no-print" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Print Report</button>
+            </div>
+          </div>
+          
+          <div class="meta-grid">
+            <div class="meta-card">
+              <h3>Simulation Configuration</h3>
+              <p>Algorithm: <strong>${result.config.algorithm === "LS" ? "Gauss-Jordan Least Squares (4D)" : result.config.algorithm === "WLS" ? "Weighted Least Squares (4D)" : "Extended Kalman Filter (8-State)"}</strong></p>
+              <p>Spacecraft Region: <strong>${result.config.region === "earth_orbit" ? "Earth Orbit (LEO/GEO)" : result.config.region === "earth_moon" ? "Earth-Moon Space" : "Deep Space (Heliospheric)"}</strong></p>
+              <p>Monte Carlo Trials: <strong>${result.config.trials}</strong></p>
+              <p>Timing Noise level: <strong>${result.config.noiseNs} ns</strong></p>
+            </div>
+            <div class="meta-card">
+              <h3>Telemetry Details</h3>
+              <p>Active Pulsars: <strong>${result.pulsars.join(", ")}</strong></p>
+              <p>Simulation MJD Epoch: <strong>58000.0</strong></p>
+              <p>Report Timestamp: <strong>${timestamp}</strong></p>
+              <p>Status: <strong style="color: #15803d;">Nominal (Simulation complete)</strong></p>
+            </div>
+          </div>
+          
+          <h2 style="font-size: 18px; font-weight: 600; color: #1e3a8a; margin-bottom: 15px;">Summary Navigation Metrics</h2>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-val">${summary.meanErrorKm.toFixed(4)} km</div>
+              <div class="stat-label">Mean Position Error</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">${summary.medianErrorKm.toFixed(4)} km</div>
+              <div class="stat-label">Median Position Error</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">${summary.p95ErrorKm.toFixed(4)} km</div>
+              <div class="stat-label">95% Confidence Bound</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">${summary.maxErrorKm.toFixed(4)} km</div>
+              <div class="stat-label">Maximum Error</div>
+            </div>
+          </div>
+          
+          <div class="charts-section">
+            ${errorChartSvg ? `
+            <div class="chart-container">
+              <div class="chart-title">Position Error vs. Timing Noise</div>
+              <div class="chart-svg">${errorChartSvg}</div>
+            </div>` : ""}
+            
+            ${distChartSvg ? `
+            <div class="chart-container">
+              <div class="chart-title">Position Error Distribution</div>
+              <div class="chart-svg">${distChartSvg}</div>
+            </div>` : ""}
+          </div>
+          
+          <div class="table-container">
+            <h2 style="font-size: 18px; font-weight: 600; color: #1e3a8a; margin-bottom: 10px;">First 15 Simulation Trial Details</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Trial #</th>
+                  <th>True Position ECI [X, Y, Z] (km)</th>
+                  <th>Estimated Position ECI [X, Y, Z] (km)</th>
+                  <th>Position Error (km)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.rawTrials.slice(0, 15).map((t: any) => `
+                  <tr>
+                    <td>${t.trial}</td>
+                    <td>[${t.truePosition[0].toFixed(2)}, ${t.truePosition[1].toFixed(2)}, ${t.truePosition[2].toFixed(2)}]</td>
+                    <td>[${t.estimated[0].toFixed(2)}, ${t.estimated[1].toFixed(2)}, ${t.estimated[2].toFixed(2)}]</td>
+                    <td style="font-weight: 600; color: ${t.errorKm > 10.0 ? '#b91c1c' : '#1e3a8a'}">${t.errorKm.toFixed(4)} km</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="footer">
+            <p>PulsarNav AI • Developed in accordance with "Navigation in Space by X-ray Pulsars" (Emadzadeh & Speyer, Springer, 2011)</p>
+          </div>
+          <script>
+            window.onload = function() {
+              document.querySelectorAll("svg").forEach(svg => {
+                svg.style.backgroundColor = "transparent";
+                svg.style.color = "#0f172a";
+                svg.querySelectorAll("text").forEach(t => t.style.fill = "#0f172a");
+                svg.querySelectorAll("path, line").forEach(p => {
+                  if (p.getAttribute("stroke") === "rgba(148,163,184,0.14)") {
+                    p.setAttribute("stroke", "#e2e8f0");
+                  }
+                });
+              });
+              setTimeout(() => { window.print(); }, 500);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  }
 
   return (
     <main className="min-h-screen bg-radial-space text-text">
@@ -107,9 +498,14 @@ function DashboardContent() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="border-success/30 bg-success/10 text-green-200">Live Telemetry</Badge>
-                <Button>
-                  <Download className="h-4 w-4" />
-                  Export
+                <Button onClick={exportToCSV} className="h-9 px-3 text-xs bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20">
+                  <Download className="h-3.5 w-3.5" /> CSV
+                </Button>
+                <Button onClick={exportToPDF} className="h-9 px-3 text-xs bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20">
+                  <Download className="h-3.5 w-3.5" /> PDF
+                </Button>
+                <Button onClick={exportThreeJSCanvas} className="h-9 px-3 text-xs bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20">
+                  <Download className="h-3.5 w-3.5" /> PNG
                 </Button>
               </div>
             </div>
@@ -118,12 +514,58 @@ function DashboardContent() {
             {active === "dashboard" && <DashboardHome />}
             {active === "catalog" && <CatalogPage />}
             {active === "toa" && <ToaPage />}
-            {active === "simulator" && <SimulatorPage />}
-            {active === "lab" && <NavigationLabPage />}
+            {active === "simulator" && (
+              <SimulatorPage
+                trials={trials}
+                setTrials={setTrials}
+                pulsars={pulsars}
+                setPulsars={setPulsars}
+                noise={noise}
+                setNoise={setNoise}
+                region={region}
+                setRegion={setRegion}
+                algorithm={algorithm}
+                setAlgorithm={setAlgorithm}
+                loading={loading}
+                result={result}
+                runSimulation={runSimulation}
+              />
+            )}
+            {active === "lab" && (
+              <NavigationLabPage
+                trials={trials}
+                setTrials={setTrials}
+                pulsars={pulsars}
+                setPulsars={setPulsars}
+                noise={noise}
+                setNoise={setNoise}
+                region={region}
+                setRegion={setRegion}
+                algorithm={algorithm}
+                setAlgorithm={setAlgorithm}
+                loading={loading}
+                result={result}
+                errorMsg={errorMsg}
+                runSimulation={runSimulation}
+              />
+            )}
             {active === "selection" && <SelectionPage />}
-            {active === "errors" && <ErrorAnalysisPage />}
+            {active === "errors" && (
+              <ErrorAnalysisPage
+                result={result}
+                loading={loading}
+                exportCSV={exportToCSV}
+                exportPDF={exportToPDF}
+                exportPNG={exportThreeJSCanvas}
+              />
+            )}
             {active === "ai" && <AiInsightsPage />}
-            {active === "space" && <SpaceViewPage />}
+            {active === "space" && (
+              <SpaceViewPage
+                result={result}
+                loading={loading}
+              />
+            )}
             {active === "settings" && <SettingsPage />}
           </div>
         </section>
@@ -319,71 +761,199 @@ function ToaPage() {
   );
 }
 
-function SimulatorPage() {
+// -------------------------------------------------------------
+// Interactive Navigation Simulator View
+// -------------------------------------------------------------
+interface SimulatorPageProps {
+  trials: number;
+  setTrials: (t: number) => void;
+  pulsars: number;
+  setPulsars: (p: number) => void;
+  noise: number;
+  setNoise: (n: number) => void;
+  region: string;
+  setRegion: (r: string) => void;
+  algorithm: string;
+  setAlgorithm: (a: string) => void;
+  loading: boolean;
+  result: NavigationLabResult | null;
+  runSimulation: () => void;
+}
+
+function SimulatorPage({
+  trials,
+  setTrials,
+  pulsars,
+  setPulsars,
+  noise,
+  setNoise,
+  region,
+  setRegion,
+  algorithm,
+  setAlgorithm,
+  loading,
+  result,
+  runSimulation,
+}: SimulatorPageProps) {
   return (
     <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
       <Panel>
-        <SectionTitle title="Simulation Controls" />
-        <Control label="Number of Pulsars" value="6" />
-        <Control label="Noise Level" value="100 ns" />
-        <Control label="Navigation Algorithm" value="Weighted Least Squares" />
-        <Control label="Spacecraft Region" value="Earth-Moon Space" />
-        <Control label="Monte Carlo Runs" value="1000" />
+        <SectionTitle title="Simulation Controls" action="Interactive parameters" />
+        
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Navigation Algorithm</span>
+          <select
+            value={algorithm}
+            onChange={(e) => setAlgorithm(e.target.value)}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            <option value="LS">Gauss-Jordan Least Squares (4D)</option>
+            <option value="WLS">Weighted Least Squares (4D)</option>
+            <option value="EKF">Extended Kalman Filter (8-State)</option>
+          </select>
+        </label>
+
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Spacecraft Region</span>
+          <select
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            <option value="earth_orbit">Earth Orbit</option>
+            <option value="earth_moon">Earth-Moon space</option>
+            <option value="deep_space">Deep space</option>
+          </select>
+        </label>
+
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Number of Pulsars</span>
+          <input
+            type="range"
+            min={4}
+            max={8}
+            value={pulsars}
+            onChange={(e) => setPulsars(Number(e.target.value))}
+            className="mt-3 w-full"
+          />
+          <div className="mt-1 text-sm text-cyan-100">{pulsars} pulsars active</div>
+        </label>
+
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Timing Noise level</span>
+          <select
+            value={noise}
+            onChange={(e) => setNoise(Number(e.target.value))}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            <option value={10}>10 ns (Research grade)</option>
+            <option value={50}>50 ns (Highly stable)</option>
+            <option value={100}>100 ns (Standard XNAV)</option>
+            <option value={500}>500 ns (Coarse TOA)</option>
+            <option value={1000}>1000 ns (High noise)</option>
+          </select>
+        </label>
+
+        <label className="mb-5 block">
+          <span className="text-sm text-slate-400">Monte Carlo Runs / Steps</span>
+          <input
+            type="number"
+            min={10}
+            max={5000}
+            step={10}
+            value={trials}
+            onChange={(e) => setTrials(Number(e.target.value))}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          />
+        </label>
+
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <Button className="bg-success/20 text-green-100"><Play className="h-4 w-4" /> Start</Button>
-          <Button><Pause className="h-4 w-4" /> Pause</Button>
-          <Button><RefreshCcw className="h-4 w-4" /> Reset</Button>
-          <Button><FileDown className="h-4 w-4" /> Report</Button>
+          <Button onClick={runSimulation} disabled={loading} className="bg-success/20 text-green-100 hover:bg-success/30">
+            <Play className="h-4 w-4" /> {loading ? "Running..." : "Start"}
+          </Button>
+          <Button onClick={() => {
+            setTrials(1000);
+            setPulsars(6);
+            setNoise(100);
+            setRegion("earth_moon");
+            setAlgorithm("WLS");
+          }}>
+            <RefreshCcw className="h-4 w-4" /> Reset
+          </Button>
         </div>
       </Panel>
-      <Panel className="p-0">
-        <div className="border-b border-slate-800 p-5"><SectionTitle title="3D Space Visualization" action="Earth • Moon • Spacecraft • Pulsar vectors" /></div>
-        <SpaceScene />
+      
+      <Panel className="p-0 flex flex-col h-full min-h-[500px]">
+        <div className="border-b border-slate-800 p-5 flex justify-between items-center">
+          <SectionTitle title="3D Space Visualization" action="Active 3D scene (Rotate • Zoom • Pan)" />
+          <Badge className="border-primary/30 bg-primary/10 text-cyan-200">
+            {region === "earth_orbit" ? "Earth-Centered ECI" : region === "earth_moon" ? "Cislunar Frame" : "Heliospheric"}
+          </Badge>
+        </div>
+        <div className="flex-1 min-h-[400px] relative">
+          <SpaceScene result={result} loading={loading} />
+        </div>
       </Panel>
     </div>
   );
 }
 
-type NavigationLabResult = {
-  config: { trials: number; pulsars: number; noiseNs: number; region: string; seed: number };
-  pulsars: string[];
-  summary: { meanErrorKm: number; medianErrorKm: number; p95ErrorKm: number; maxErrorKm: number };
-  distribution: { bin: string; count: number }[];
-};
+// -------------------------------------------------------------
+// Interactive Navigation Lab Page
+// -------------------------------------------------------------
+interface NavigationLabPageProps {
+  trials: number;
+  setTrials: (t: number) => void;
+  pulsars: number;
+  setPulsars: (p: number) => void;
+  noise: number;
+  setNoise: (n: number) => void;
+  region: string;
+  setRegion: (r: string) => void;
+  algorithm: string;
+  setAlgorithm: (a: string) => void;
+  loading: boolean;
+  result: NavigationLabResult | null;
+  errorMsg: string | null;
+  runSimulation: () => void;
+}
 
-function NavigationLabPage() {
-  const [trials, setTrials] = useState(1000);
-  const [pulsars, setPulsars] = useState(6);
-  const [noise, setNoise] = useState(100);
-  const [region, setRegion] = useState("earth_moon");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<NavigationLabResult | null>(null);
-
-  async function runSimulation() {
-    setLoading(true);
-    const params = new URLSearchParams({
-      trials: String(trials),
-      pulsars: String(pulsars),
-      noise: String(noise),
-      region,
-    });
-    const response = await fetch(`/api/navigation-lab?${params.toString()}`);
-    const payload = (await response.json()) as NavigationLabResult;
-    setResult(payload);
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    runSimulation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+function NavigationLabPage({
+  trials,
+  setTrials,
+  pulsars,
+  setPulsars,
+  noise,
+  setNoise,
+  region,
+  setRegion,
+  algorithm,
+  setAlgorithm,
+  loading,
+  result,
+  errorMsg,
+  runSimulation,
+}: NavigationLabPageProps) {
   const maxBin = Math.max(...(result?.distribution.map((item) => item.count) ?? [1]));
 
   return (
     <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
       <Panel>
         <SectionTitle title="Navigation Lab Controls" action="Monte Carlo engine" />
+        
+        <label className="mb-4 block">
+          <span className="text-sm text-slate-400">Navigation Algorithm</span>
+          <select
+            value={algorithm}
+            onChange={(event) => setAlgorithm(event.target.value)}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
+          >
+            <option value="LS">Gauss-Jordan Least Squares (4D)</option>
+            <option value="WLS">Weighted Least Squares (4D)</option>
+            <option value="EKF">Extended Kalman Filter (8-State)</option>
+          </select>
+        </label>
+
         <label className="mb-4 block">
           <span className="text-sm text-slate-400">Monte Carlo Trials</span>
           <input
@@ -396,6 +966,7 @@ function NavigationLabPage() {
             className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm"
           />
         </label>
+
         <label className="mb-4 block">
           <span className="text-sm text-slate-400">Number of Pulsars</span>
           <input
@@ -408,6 +979,7 @@ function NavigationLabPage() {
           />
           <div className="mt-1 text-sm text-cyan-100">{pulsars} pulsars</div>
         </label>
+
         <label className="mb-4 block">
           <span className="text-sm text-slate-400">Timing Noise</span>
           <select
@@ -420,6 +992,7 @@ function NavigationLabPage() {
             ))}
           </select>
         </label>
+
         <label className="mb-5 block">
           <span className="text-sm text-slate-400">Spacecraft Region</span>
           <select
@@ -432,12 +1005,24 @@ function NavigationLabPage() {
             <option value="deep_space">Deep space</option>
           </select>
         </label>
+
         <Button onClick={runSimulation} disabled={loading} className="w-full bg-primary text-slate-950 hover:bg-secondary">
           <Play className="h-4 w-4" />
           {loading ? "Running..." : "Run Simulation"}
         </Button>
-        <div className="mt-5 rounded-md border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-100">
-          API: <span className="font-mono">/api/navigation-lab</span>
+
+        {errorMsg && (
+          <div className="mt-4 rounded-md border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Execution Error</p>
+              <p className="mt-0.5 text-xs text-rose-300">{errorMsg}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 rounded-md border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm text-cyan-100 font-mono">
+          API: /api/navigation-lab
         </div>
       </Panel>
 
@@ -459,30 +1044,37 @@ function NavigationLabPage() {
             </Panel>
           ))}
         </div>
-        <Panel>
+        
+        <Panel id="dist-chart-panel">
           <SectionTitle title="Position Error Distribution" action={`${result?.config.trials ?? trials} trials`} />
-          <div className="flex h-[320px] items-end gap-2 rounded-lg border border-slate-700/70 bg-slate-950/50 p-4">
-            {(result?.distribution ?? Array.from({ length: 16 }, (_, index) => ({ bin: String(index), count: 0 }))).map((bin) => (
-              <div key={bin.bin} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-t bg-gradient-to-t from-cyan-500 to-sky-200"
-                  style={{ height: `${Math.max(4, (bin.count / maxBin) * 260)}px` }}
-                  title={`${bin.bin}: ${bin.count}`}
-                />
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <Skeleton className="h-[320px] w-full" />
+          ) : (
+            <div className="flex h-[320px] items-end gap-2 rounded-lg border border-slate-700/70 bg-slate-950/50 p-4">
+              {(result?.distribution ?? Array.from({ length: 16 }, (_, index) => ({ bin: String(index), count: 0 }))).map((bin) => (
+                <div key={bin.bin} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                  <div
+                    className="w-full rounded-t bg-gradient-to-t from-cyan-500 to-sky-200 transition-all duration-500"
+                    style={{ height: `${Math.max(4, (bin.count / maxBin) * 260)}px` }}
+                    title={`${bin.bin} km: ${bin.count} trials`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </Panel>
+
         <Panel>
-          <SectionTitle title="Selected Pulsar Geometry" action="4-8 source least-squares solver" />
+          <SectionTitle title="Selected Pulsar Geometry" action={`${pulsars}-source navigation solution`} />
           <div className="flex flex-wrap gap-2">
             {(result?.pulsars ?? topPulsars.slice(0, pulsars).map((item) => item.name)).map((name) => (
               <Badge key={name} className="border-primary/30 bg-primary/10 text-cyan-100">{name}</Badge>
             ))}
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-400">
-            The lab estimates spacecraft position from synthetic pulsar delays generated with delta_t = r dot n / c,
-            then reports Euclidean position error between true and recovered position.
+            The lab generates synthetic pulsar arrival times at the true spacecraft position $r$, adds noise and clock parameters,
+            then reconstructs ECI positions using the chosen solver. Metric calculations are computed as Euclidean distances
+            between the true positions and recovered solutions.
           </p>
         </Panel>
       </div>
@@ -528,17 +1120,34 @@ function SelectionPage() {
   );
 }
 
-function ErrorAnalysisPage() {
+interface ErrorAnalysisPageProps {
+  result: NavigationLabResult | null;
+  loading: boolean;
+  exportCSV: () => void;
+  exportPDF: () => void;
+  exportPNG: () => void;
+}
+
+function ErrorAnalysisPage({ result, loading, exportCSV, exportPDF, exportPNG }: ErrorAnalysisPageProps) {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2">
-        {["PNG", "PDF", "CSV"].map((type) => <Button key={type}><Download className="h-4 w-4" /> Export {type}</Button>)}
+        <Button onClick={exportPNG} className="bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20"><Download className="h-4 w-4" /> Export PNG</Button>
+        <Button onClick={exportPDF} className="bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20"><Download className="h-4 w-4" /> Export PDF</Button>
+        <Button onClick={exportCSV} className="bg-slate-950/50 hover:bg-cyan-400/10 border-cyan-300/20"><Download className="h-4 w-4" /> Export CSV</Button>
       </div>
       <div className="grid gap-5 xl:grid-cols-2">
-        <Panel><SectionTitle title="Position Error vs Timing Error" /><ErrorLineChart /></Panel>
-        <Panel><SectionTitle title="Position Error vs Number of Pulsars" /><AccuracyAreaChart /></Panel>
-        <Panel><SectionTitle title="Monte Carlo Heatmap" /><HeatmapChart /></Panel>
-        <Panel><SectionTitle title="Confidence Ellipses" /><div className="relative h-[300px] rounded-lg border border-slate-700 bg-slate-950/50"><div className="absolute left-1/2 top-1/2 h-40 w-64 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-primary/70" /><div className="absolute left-1/2 top-1/2 h-24 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-success/70" /></div></Panel>
+        <Panel id="error-chart-panel"><SectionTitle title="Position Error vs Trial Step" /><ErrorLineChart result={result} /></Panel>
+        <Panel><SectionTitle title="Cumulative Probability (Accuracy Curve)" /><AccuracyAreaChart result={result} /></Panel>
+        <Panel><SectionTitle title="Monte Carlo Heatmap" /><HeatmapChart result={result} /></Panel>
+        <Panel>
+          <SectionTitle title="Confidence Ellipses" />
+          <div className="relative h-[300px] rounded-lg border border-slate-700 bg-slate-950/50 overflow-hidden">
+            <div className="absolute left-1/2 top-1/2 h-40 w-64 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-primary/70 animate-pulse" />
+            <div className="absolute left-1/2 top-1/2 h-24 w-40 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-success/70" />
+            <div className="absolute bottom-3 left-4 text-xs text-slate-400">1-Sigma (green) and 3-Sigma (cyan) position error covariance bounds</div>
+          </div>
+        </Panel>
       </div>
     </div>
   );
@@ -565,14 +1174,25 @@ function AiInsightsPage() {
   );
 }
 
-function SpaceViewPage() {
+interface SpaceViewPageProps {
+  result: NavigationLabResult | null;
+  loading: boolean;
+}
+
+function SpaceViewPage({ result, loading }: SpaceViewPageProps) {
   return (
     <Panel className="p-0">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 p-5">
         <SectionTitle title="Immersive 3D Space View" action="Rotate • Zoom • Pan • Follow Spacecraft" />
-        <div className="flex gap-2"><Button>Rotate</Button><Button>Zoom</Button><Button>Pan</Button><Button>Follow</Button></div>
+        <div className="flex gap-2">
+          <Badge className="border-primary/30 bg-primary/10 text-cyan-200">
+            ECI Frame (J2000) • Orbit Track Enabled
+          </Badge>
+        </div>
       </div>
-      <SpaceScene full />
+      <div className="h-[calc(100vh-220px)] min-h-[500px] relative w-full">
+        <SpaceScene full result={result} loading={loading} />
+      </div>
     </Panel>
   );
 }

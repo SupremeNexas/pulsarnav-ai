@@ -153,6 +153,7 @@ class XRayPulsarProfile:
             if abs(diff) < 1e-12:
                 break
             t_guess = t_guess - diff / deriv
+            t_guess = max(t_start, t_guess)
         return float(t_guess)
 
 
@@ -179,7 +180,11 @@ def generate_photon_toas(
         E = -np.log(rng.uniform(1e-15, 1.0))
         # Solve Lambda(L_next) = Lambda(L) + E
         y_target = profile.accumulated_rate(L, phi_0, f_obs) + E
-        L = profile.invert_accumulated_rate(y_target, phi_0, f_obs, t_start=L)
+        L_next = profile.invert_accumulated_rate(y_target, phi_0, f_obs, t_start=L)
+        if L_next <= L:
+            # Force a tiny forward step based on average rate to prevent infinite loops from float precision
+            L_next = L + max(1e-9, E / (profile.lambda_b + profile.lambda_s))
+        L = L_next
         if L <= t_f:
             toas.append(L)
     return np.array(toas)

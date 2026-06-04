@@ -194,7 +194,7 @@ def run_validation():
     plt.figure(figsize=(10, 5))
     plt.plot(df["time_s"], df["pos_error_km"], label="EKF Position Error", color="#00BFFF", linewidth=2)
     plt.plot(df["time_s"], df["cov_pos_km"], label="3-Sigma Covariance Envelope", color="#EF4444", linestyle="--")
-    plt.grid(True, color="rgba(255,255,255,0.1)")
+    plt.grid(True, color="grey", alpha=0.3)
     plt.title("Spacecraft EKF Position Tracking Convergence")
     plt.xlabel("Time (seconds)")
     plt.ylabel("Position Error (km)")
