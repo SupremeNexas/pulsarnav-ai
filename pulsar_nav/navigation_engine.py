@@ -1,3 +1,61 @@
+"""
+Navigation Engine — Monte Carlo Spacecraft Navigation Simulation
+===============================================================
+
+This module provides the full simulation pipeline for evaluating pulsar-based
+navigation performance across different mission regions, timing noise levels,
+and pulsar set sizes.
+
+Pipeline Overview:
+------------------
+1. Load ranked pulsar direction vectors from a CSV file.
+2. Generate synthetic spacecraft positions distributed across mission regions.
+3. For each trial:
+   a. Compute expected pulsar timing delays (geometry + SSB corrections).
+   b. Add realistic timing noise (Gaussian, sigma = noise_ns nanoseconds).
+   c. Add a random clock bias (simulates imperfect onboard clock).
+   d. Solve for spacecraft position using weighted least squares.
+   e. Compute the position error (km) against the true position.
+4. Aggregate results by noise level and pulsar count.
+5. Generate SVG visualizations (error vs noise, error distribution, error vs pulsar count).
+
+Mission Regions:
+----------------
+- earth_orbit:  6,700 – 42,200 km (LEO to GEO)
+- earth_moon: 42,200 – 384,400 km (GEO to lunar distance)
+- deep_space: 384,400 – 2,000,000 km (beyond Moon to ~ 1% of 1 AU)
+
+Navigation Method:
+------------------
+The position estimator uses LINEAR LEAST SQUARES (WLS/LS) applied to the
+pulsar timing delay measurements. For N pulsars with direction vectors n̂ᵢ:
+
+    Measured delay: z_i = (r · n̂_i) / c + clock_bias + noise
+
+Rewriting: z_i × c = r · n̂_i + c × b + noise
+
+Stacking N measurements: Aw = b, where:
+    A = [n̂₁ᵀ, 1; n̂₂ᵀ, 1; ...; n̂_Nᵀ, 1]  (N × 4 matrix)
+    w = [r_x, r_y, r_z, c×b]                  (4 unknowns: position + clock)
+    b = [z_1×c, z_2×c, ..., z_N×c]           (N observations)
+
+Solving: w = A⁺ b  (pseudoinverse / least squares)
+
+For N=4 pulsars, this is an exact solution (square system).
+For N>4 pulsars, it's overdetermined and least squares provides the
+best linear unbiased estimate (BLUE).
+
+SSB Corrections:
+----------------
+When ssb=True, the total delay model includes:
+  1. Geometric delay: r_sc · n̂ / c (Römer delay relative to Earth)
+  2. Earth barycentric delay: r_earth_ssb · n̂ / c
+  3. Dispersion delay: 4148.808 × DM / f²
+
+These corrections are needed for precise timing, especially for radio pulsars.
+For X-ray navigation (high frequency), the dispersion term is negligible.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -22,7 +80,23 @@ DEFAULT_PULSAR_COUNTS = (4, 5, 6, 7, 8)
 
 @dataclass(frozen=True)
 class NavigationSimulationConfig:
-    """Configuration for a pulsar navigation Monte Carlo run."""
+    """
+    Configuration for a pulsar navigation Monte Carlo simulation run.
+
+    Frozen (immutable) dataclass — once created, all fields are read-only.
+    This prevents accidental modification during long simulation runs.
+
+    Fields:
+        trials: Number of random spacecraft positions to simulate per (noise, pulsar_count) pair.
+            More trials → more statistically reliable error estimates.
+        noise_levels_ns: Tuple of timing noise standard deviations to test (nanoseconds).
+            Real pulsar X-ray detectors have ~100–1000 ns noise. Radio has ~10–100 ns.
+        pulsar_counts: Tuple of pulsar set sizes to test.
+            Must be in [4, 8]: minimum 4 for 3D navigation + clock bias.
+        seed: Master RNG seed. Ensures reproducibility across runs.
+        region_weights: Relative probability weights for each mission region.
+            {1.0, 1.0, 1.0} → equal weight across all three regions.
+    """
 
     trials: int = 1000
     noise_levels_ns: tuple[float, ...] = DEFAULT_NOISE_LEVELS_NS
@@ -113,7 +187,28 @@ def expected_delays_s(
     epoch_mjd: float = 51544.5,
     ssb: bool = False,
 ) -> np.ndarray:
-    """Compute expected pulsar timing delays."""
+    """
+    Compute the expected (noiseless) pulsar timing delays for a spacecraft position.
+
+    For each pulsar i with direction vector n̂ᵢ, the expected timing delay is:
+        Without SSB: z_i = (r_sc · n̂_i) / c   (simple geometric delay)
+        With SSB:    z_i = ((r_earth_ssb + r_sc) · n̂_i) / c + Δt_DM_i
+                          (includes Earth barycentric delay and dispersion)
+
+    The SSB=False mode computes pure relative geometric delays (r_sc only).
+    The SSB=True mode adds the full barycentric correction for absolute timing.
+
+    Args:
+        position_km: Spacecraft position vector (3,) in kilometers.
+        pulsar_vectors: DataFrame with columns ['x', 'y', 'z'] (unit vectors),
+            and optionally ['dm', 'median_freq_mhz'] for SSB corrections.
+        epoch_mjd: Observation epoch as MJD (default: J2000.0 = 51544.5).
+            Only matters for the Earth position in SSB mode.
+        ssb: If True, include Earth barycentric and dispersion delay corrections.
+
+    Returns:
+        Array of expected delays in seconds. Shape: (N,) where N = number of pulsars.
+    """
     dirs = pulsar_vectors[["x", "y", "z"]].to_numpy(float)
     if not ssb:
         return dirs @ np.asarray(position_km, dtype=float) / SPEED_OF_LIGHT_KM_S
@@ -135,9 +230,26 @@ def expected_delays_s(
 
 
 def add_timing_noise(delays_s: np.ndarray, noise_ns: float, rng: np.random.Generator) -> np.ndarray:
-    sigma_s = noise_ns * 1e-9
+    """
+    Add Gaussian timing noise to pulsar delay measurements.
+
+    Models the measurement noise η_i ~ N(0, σ²) where σ = noise_ns nanoseconds.
+    This noise arises from photon counting statistics and detector imperfections.
+
+    For XNAV (X-ray pulsar navigation), typical σ values are 100–1000 ns,
+    corresponding to position uncertainties of σ × c ≈ 30–300 km.
+
+    Args:
+        delays_s: True (noiseless) delays in seconds. Shape: (N,).
+        noise_ns: 1-sigma timing noise in nanoseconds. If 0, return exact delays.
+        rng: NumPy random Generator for reproducible noise.
+
+    Returns:
+        Noisy delay measurements in seconds. Shape: (N,).
+    """
+    sigma_s = noise_ns * 1e-9   # Convert nanoseconds to seconds
     if sigma_s == 0:
-        return delays_s.copy()
+        return delays_s.copy()   # No noise — return exact delays
     return delays_s + rng.normal(0.0, sigma_s, size=len(delays_s))
 
 
@@ -177,6 +289,18 @@ def estimate_position_least_squares(
 
 
 def navigation_error_km(true_position_km: np.ndarray, estimated_position_km: np.ndarray) -> float:
+    """
+    Compute 3D Euclidean navigation error between true and estimated positions.
+
+    Error = |r_estimated - r_true| = √(Δx² + Δy² + Δz²)
+
+    Args:
+        true_position_km: Ground truth spacecraft position (3,) in km.
+        estimated_position_km: Filter/LS estimated position (3,) in km.
+
+    Returns:
+        Scalar position error in kilometers.
+    """
     return float(np.linalg.norm(np.asarray(estimated_position_km) - np.asarray(true_position_km)))
 
 
@@ -207,7 +331,29 @@ def run_monte_carlo(
     pulsar_vectors: pd.DataFrame,
     config: NavigationSimulationConfig | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run Monte Carlo navigation simulations for 4-8 pulsars and timing noise levels."""
+    """
+    Run a full Monte Carlo navigation simulation across all (noise, pulsar_count) combinations.
+
+    For each combination of (pulsar_count, noise_level):
+      - Run `config.trials` independent position estimation trials
+      - Each trial: generate a random spacecraft position → simulate delays → add noise
+        → add random clock bias → solve for position → record error
+
+    The random clock bias models real-world clock imperfections:
+        b ~ Uniform(-10 μs, +10 μs)
+    A 10 μs clock error corresponds to c × 10μs ≈ 3 km position error.
+
+    Args:
+        pulsar_vectors: DataFrame with pulsar direction vectors and optional DM/freq columns.
+            Must have at least max(config.pulsar_counts) rows.
+        config: Simulation configuration. None → default NavigationSimulationConfig.
+
+    Returns:
+        A 2-tuple (results, positions):
+            results: DataFrame with one row per trial, columns include
+                     position_error_km, noise_ns, pulsar_count, region, etc.
+            positions: DataFrame with the randomly generated spacecraft positions.
+    """
 
     config = config or NavigationSimulationConfig()
     if len(pulsar_vectors) < max(config.pulsar_counts):
@@ -249,6 +395,25 @@ def run_monte_carlo(
 
 
 def summarize_results(results: pd.DataFrame) -> pd.DataFrame:
+    """
+    Aggregate Monte Carlo results into summary statistics by (noise_ns, pulsar_count).
+
+    For each unique combination of timing noise level and pulsar count, computes:
+      - mean_error_km: Average position error across all trials
+      - median_error_km: Median position error (robust to outliers)
+      - p95_error_km: 95th percentile error (worst-case performance)
+      - max_error_km: Maximum error across all trials
+      - trials: Number of trials in this group
+
+    The median is typically more informative than the mean for navigation errors,
+    since the error distribution is often right-skewed (a few large outliers).
+
+    Args:
+        results: DataFrame from run_monte_carlo() with position_error_km column.
+
+    Returns:
+        Summary DataFrame with one row per (noise_ns, pulsar_count) combination.
+    """
     grouped = results.groupby(["noise_ns", "pulsar_count"], as_index=False)["position_error_km"]
     return grouped.agg(
         mean_error_km="mean",

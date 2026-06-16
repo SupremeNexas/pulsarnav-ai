@@ -1,12 +1,57 @@
 """
 PulsarNav AI: X-ray Pulsar Navigation Engine
+============================================
 Reference:
     "Navigation in Space by X-ray Pulsars" (2011)
     by Amir Abbas Emadzadeh and Jason Lee Speyer (Springer, New York)
 
-This module implements the mathematical formulations described in the reference book,
-covering signal modeling, epoch folding, pulse delay estimators (CC, NLS, MLE),
-Cramer-Rao Lower Bounds (CRLB), and recursive Extended Kalman Filtering (EKF).
+This module is the MAIN high-fidelity navigation engine for the PulsarNav AI project.
+It re-implements the core algorithms from the reference book with full orbital dynamics,
+providing a more physically accurate (but slower) alternative to the lightweight modules
+in signal_model.py, epoch_folding.py, delay_estimation.py, etc.
+
+Key Differences from the Modular Pipeline:
+-------------------------------------------
+- **XRayPulsarProfile**: Internally precomputes and caches H_grid (cumulative profile
+  integral) using trapezoidal integration, for fast TOA generation.
+- **PulsarNavigationEKF**: Full 8-state EKF with Keplerian + J2 orbital dynamics,
+  propagated via RK4. Unlike the 10-state error-state KF in kalman_filter.py, this
+  operates on the ABSOLUTE state (position, velocity, clock bias).
+- **generate_photon_toas**: Implements Algorithm 3.1 with a safety fallback for
+  near-zero rate edge cases.
+
+Chapter-by-Chapter Alignment:
+------------------------------
+  1. Signal Modeling (Chapter 3):
+     - XRayPulsarProfile: lambda(t) = lambda_b + lambda_s * h(phi(t))  [Eq 3.18]
+     - generate_photon_toas: NHPP TOA simulation [Algorithm 3.1]
+     - epoch_folding: Fold TOAs into empirical rate function [Eq 3.39]
+
+  2. Cramer-Rao Lower Bounds (Chapter 4):
+     - crlb_phase_error: Phase CRLB [Eq 4.42]
+     - crlb_pulse_delay_s: Pulse delay CRLB [Eq 4.44]
+
+  3. Pulse Delay Estimators (Chapters 5 & 6):
+     - CrossCorrelationEstimator: CC phase estimator [Eq 5.7, 5.72, 5.76]
+     - NonlinearLeastSquaresEstimator: NLS phase estimator [Eq 5.47-5.49]
+     - MaximumLikelihoodEstimator: MLE via direct TOAs [Eq 6.5]
+
+  4. Extended Kalman Filter (Chapter 7):
+     - PulsarNavigationEKF: Absolute-state 8-state EKF
+       with Keplerian + J2 gravity and RK4 propagation [Eq 7.19-7.41]
+
+State Vector for PulsarNavigationEKF (8 states):
+    x = [r_x, r_y, r_z, v_x, v_y, v_z, b_clk, d_clk]^T
+    where:
+        r: position relative to Earth center (km)
+        v: velocity relative to Earth center (km/s)
+        b_clk: spacecraft clock bias (seconds)
+        d_clk: spacecraft clock drift rate (s/s)
+
+Key Physical Constants:
+    EARTH_MU: Earth gravitational parameter μ = GM_Earth = 398600.4418 km³/s²
+    EARTH_RE: Earth equatorial radius = 6378.137 km
+    EARTH_J2: J2 oblateness coefficient = 1.08263 × 10⁻³
 """
 
 from __future__ import annotations
@@ -18,9 +63,18 @@ from scipy.optimize import minimize_scalar
 from .config import SPEED_OF_LIGHT_KM_S
 
 # Physical Constants
-EARTH_MU = 398600.4418  # km^3/s^2
-EARTH_RE = 6378.137      # km
-EARTH_J2 = 1.08263e-3    # J2 perturbation parameter
+# EARTH_MU: Standard gravitational parameter of Earth (km³/s²).
+# Used in Keplerian and J2 gravity models.
+EARTH_MU = 398600.4418
+
+# EARTH_RE: Earth equatorial radius (km).
+# Used in the J2 perturbation formula (oblateness correction).
+EARTH_RE = 6378.137
+
+# EARTH_J2: Second zonal harmonic coefficient (dimensionless).
+# Accounts for Earth's equatorial bulge, which causes orbital plane precession.
+# Without J2, Keplerian orbits would be perfect ellipses forever.
+EARTH_J2 = 1.08263e-3
 
 
 # =====================================================================
@@ -63,9 +117,31 @@ def get_default_profile() -> tuple[list[dict], float]:
 
 class XRayPulsarProfile:
     """
-    Represents a periodic pulsar rate function model:
-    lambda(t) = lambda_b + lambda_s * h(phi(t))
-    where h(phi) is normalized so that its integral over [0, 1) is 1.0.
+    Represents the X-ray pulsar rate function and provides core signal model operations.
+
+    The complete rate model (Eq 3.18):
+        lambda(t) = lambda_b + lambda_s * h(phi(t))
+
+    where:
+        lambda_b: Background (constant) photon rate from non-pulsar X-ray sources (ph/s)
+        lambda_s: Source (pulsed) photon rate from the pulsar itself (ph/s)
+        h(phi):  Normalized pulse profile, satisfying \u222b₀¹ h(phi) dphi = 1.0
+
+    The phase phi(t) evolves as:
+        phi(t) = phi_0 + f_obs * t   (constant-frequency model, Eq 3.27)
+
+    where phi_0 is the initial phase (the unknown we estimate) and f_obs is the
+    Doppler-shifted observed frequency.
+
+    Internal Representation:
+    ------------------------
+    The profile is stored as a Gaussian sum (user-supplied peaks or default Crab-like
+    double-peak profile). The normalization factor norm_factor ensures:
+        (1/norm_factor) * integral of raw profile = 1
+
+    The cumulative integral H_grid = integral_0^theta h(theta') dtheta' is precomputed
+    on a fine grid using trapezoidal integration. This enables fast TOA generation
+    via Newton-Raphson inversion of the accumulated rate Lambda(t).
     """
     def __init__(self, lambda_b: float, lambda_s: float, peaks: list[dict] | None = None):
         self.lambda_b = lambda_b
@@ -90,7 +166,7 @@ class XRayPulsarProfile:
             self.H_grid[i] = self.H_grid[i-1] + 0.5 * (h_vals[i-1] + h_vals[i]) * dtheta
 
     def h(self, phi: float | np.ndarray) -> float | np.ndarray:
-        """Normalized profile h(phi) such that \int_0^1 h(phi) dphi = 1."""
+        """Normalized profile h(phi) such that integral_0^1 h(phi) dphi = 1."""
         return evaluate_gaussian_profile(phi, self.peaks) / self.norm_factor
 
     def h_derivative(self, phi: float | np.ndarray) -> float | np.ndarray:
@@ -110,7 +186,7 @@ class XRayPulsarProfile:
     def H_cum(self, theta: float | np.ndarray) -> float | np.ndarray:
         """
         Evaluate the continuous cumulative integral:
-        H_cum(theta) = \int_0^theta h(theta') dtheta' for any theta >= 0.
+        H_cum(theta) = integral_0^theta h(theta') dtheta' for any theta >= 0.
         By periodicity: H_cum(theta) = floor(theta) + H_grid(theta % 1)
         """
         t = np.asarray(theta, dtype=float)
@@ -130,7 +206,7 @@ class XRayPulsarProfile:
     def accumulated_rate(self, t: float | np.ndarray, phi_0: float, f_obs: float) -> float | np.ndarray:
         """
         Equation (3.8) & (6.4):
-        Lambda(t) = \int_0^t lambda(tau) dtau = lambda_b * t + (lambda_s / f_obs) * ( H_cum(phi_0 + f_obs * t) - H_cum(phi_0) )
+        Lambda(t) = integral_0^t lambda(tau) dtau = lambda_b * t + (lambda_s / f_obs) * ( H_cum(phi_0 + f_obs * t) - H_cum(phi_0) )
         """
         t_arr = np.asarray(t, dtype=float)
         return self.lambda_b * t_arr + (self.lambda_s / f_obs) * (self.H_cum(phi_0 + f_obs * t_arr) - self.H_cum(phi_0))
@@ -198,7 +274,7 @@ def epoch_folding(toas: np.ndarray, f_obs: float, n_bins: int = 128) -> np.ndarr
     """
     Section 3.6: Epoch Folding (Pages 35-37)
     Folds photon TOAs into a single cycle of period P = 1 / f_obs, dividing it into n_bins.
-    Returns the empirical rate function \bar{\lambda}_j (counts normalized to equivalent photon rate).
+    Returns the empirical rate function (counts normalized to equivalent photon rate).
     """
     if len(toas) == 0:
         return np.zeros(n_bins)
@@ -225,8 +301,8 @@ def epoch_folding(toas: np.ndarray, f_obs: float, n_bins: int = 128) -> np.ndarr
 
 def crlb_phase_error(profile: XRayPulsarProfile, T_obs: float) -> float:
     """
-    Equation (4.42): CRLB for initial phase estimation \phi_0:
-    CRLB(\phi_0) = 1 / [ T_obs * \int_0^1 \frac{[\lambda_s * h'(phi)]^2}{\lambda_b + \lambda_s * h(phi)} dphi ]
+    Equation (4.42): CRLB for initial phase estimation phi_0:
+    CRLB(phi_0) = 1 / [ T_obs * integral_0^1 [lambda_s * h'(phi)]^2 / [lambda_b + lambda_s * h(phi)] dphi ]
     """
     phi_grid = np.linspace(0, 1, 5000, endpoint=False)
     h_vals = profile.h(phi_grid)
@@ -242,8 +318,8 @@ def crlb_phase_error(profile: XRayPulsarProfile, T_obs: float) -> float:
 def crlb_pulse_delay_s(profile: XRayPulsarProfile, f_s: float, T_obs: float, relative: bool = False) -> float:
     """
     Equation (4.44): CRLB for pulse delay t_d:
-    For absolute navigation: CRLB(t_d) = CRLB(\phi_0) / f_s^2
-    For relative navigation (2 detectors): CRLB(t_d) = 2 * CRLB(\phi_0) / f_s^2
+    For absolute navigation: CRLB(t_d) = CRLB(phi_0) / f_s^2
+    For relative navigation (2 detectors): CRLB(t_d) = 2 * CRLB(phi_0) / f_s^2
     """
     factor = 2.0 if relative else 1.0
     return factor * crlb_phase_error(profile, T_obs) / (f_s ** 2)
@@ -288,7 +364,7 @@ class CrossCorrelationEstimator:
             subsample = -0.5 * (R_next - R_prev) / denom
             
         phi_est = (km + subsample) / n_bins
-        # Retain phase shift in [0, 1) and shift direction according to Eq (5.7): \hat{\phi}_j = -\psi
+        # Retain phase shift in [0, 1) and shift direction according to Eq (5.7): phi_hat = -psi
         return float((-phi_est) % 1.0)
 
 
@@ -383,14 +459,45 @@ class MaximumLikelihoodEstimator:
 
 class PulsarNavigationEKF:
     """
-    Section 7.2, 7.3 & 7.4: Extended Kalman Filter for absolute spacecraft navigation (Pages 100-106).
-    State vector (8 states):
-        x = [ r_x, r_y, r_z, v_x, v_y, v_z, b_clk, d_clk ]^T
-    where:
-        r: position relative to Earth center (km)
-        v: velocity relative to Earth center (km/s)
-        b_clk: spacecraft clock bias (seconds)
-        d_clk: spacecraft clock drift (seconds/second)
+    Extended Kalman Filter for ABSOLUTE 8-state spacecraft navigation (§7.2-7.4).
+
+    Unlike the 10-state error-state KF in kalman_filter.py, this EKF operates on the
+    ABSOLUTE state: [position, velocity, clock_bias, clock_drift].
+    It uses Keplerian + J2 orbital dynamics propagated with RK4, making it suitable
+    for Earth-orbiting spacecraft where J2 oblateness effects are significant.
+
+    State Vector (8 states):
+        x = [r_x, r_y, r_z, v_x, v_y, v_z, b_clk, d_clk]^T
+        r (km): position relative to Earth center in ECI J2000 frame
+        v (km/s): velocity in ECI frame
+        b_clk (s): spacecraft clock bias (how far ahead/behind the clock is)
+        d_clk (s/s): clock drift rate (how fast the bias is changing)
+
+    Orbital Dynamics (Non-linear):
+        dr/dt = v
+        dv/dt = a_gravity(r) = a_Kepler(r) + a_J2(r)
+        db_clk/dt = d_clk
+        dd_clk/dt = 0  (drift is modeled as a random walk driven by noise)
+
+    Linearization for Covariance Propagation:
+        The EKF linearizes the dynamics around the current estimate using the
+        Jacobian F = df/dx (the gravity gradient matrix G(r)).
+        The transition Jacobian Φ ≈ I + F*dt is applied to the covariance:
+            P(k+1) = Φ * P(k) * Φ^T + Q
+
+    Measurement Model (Eq 7.41):
+        For each pulsar i with direction vector n̂ᵢ:
+            z_i = c * t_d_i (measured timing delay scaled to distance)
+        Expected: z_i = r · n̂_i + c * b_clk
+        Measurement matrix: H_row_i = [n_x, n_y, n_z, 0, 0, 0, c, 0]
+
+    Differences from 10-State Error-State KF:
+    -------------------------------------------
+    - This EKF estimates absolute state (position, velocity) not error state (Δx, Δv)
+    - This EKF includes RK4 orbital propagation (more accurate for LEO/MEO)
+    - The 10-state KF uses a simpler linear model suitable for deep space (no J2)
+    - Both implement the standard Kalman measurement update (standard form here,
+      Joseph form in kalman_filter.py)
     """
     def __init__(self, x_init: np.ndarray, P_init: np.ndarray, Q_diagonal: np.ndarray):
         self.x = np.array(x_init, dtype=float).flatten()  # (8,)

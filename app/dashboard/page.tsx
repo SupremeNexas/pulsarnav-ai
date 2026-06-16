@@ -13,6 +13,7 @@ import {
   Download,
   FileDown,
   Gauge,
+  GitCompare,
   Home,
   Menu,
   Pause,
@@ -32,6 +33,7 @@ import { SpaceScene } from "@/components/space-scene";
 import { Badge, Button, Panel, Skeleton } from "@/components/ui";
 import { errorCurve, kpis, logs, simulations, toaRows, topPulsars } from "@/lib/mission-data";
 import { cn } from "@/lib/utils";
+import { NavigationComparison } from "@/components/navigation-comparison";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: Home },
@@ -39,6 +41,7 @@ const navItems = [
   { id: "toa", label: "TOA Database", icon: CircleDot },
   { id: "simulator", label: "Navigation Simulator", icon: Rocket },
   { id: "lab", label: "Navigation Lab", icon: Gauge },
+  { id: "comparison", label: "Comparison Lab", icon: GitCompare },
   { id: "selection", label: "Pulsar Selection", icon: Radar },
   { id: "errors", label: "Error Analysis", icon: BarChart3 },
   { id: "ai", label: "AI Insights", icon: BrainCircuit },
@@ -549,6 +552,7 @@ function DashboardContent() {
                 runSimulation={runSimulation}
               />
             )}
+            {active === "comparison" && <NavigationComparison />}
             {active === "selection" && <SelectionPage />}
             {active === "errors" && (
               <ErrorAnalysisPage
