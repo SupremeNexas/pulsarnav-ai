@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulsarNav AI — Offline Static Portal</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Precompiled Data (Prevents CORS Errors on file:// protocol) -->
+    <script src="data/pulsar_catalog.js"></script>
+    <script src="data/ranked_pulsars.js"></script>
+    <script src="data/navigation_summary.js"></script>
+    <script src="data/spacecraft_trajectory.js"></script>
+    <script src="data/xray_nav_validation.js"></script>
+</head>
+<body>
+    <!-- Background Starfield Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">🚀</div>
+                <div class="logo-text">
+                    <h1>PULSARNAV AI</h1>
+                    <span class="sub-text">OFFLINE CONSOLE</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="#catalog" class="nav-item" data-tab="catalog">
+                    <span class="nav-icon">🪐</span> Pulsar Catalog
+                </a>
+                <a href="#toa" class="nav-item" data-tab="toa">
+                    <span class="nav-icon">⏱️</span> TOA Measurements
+                </a>
+                <a href="#navlab" class="nav-item" data-tab="navlab">
+                    <span class="nav-icon">🛡️</span> Navigation Lab
+                </a>
+                <a href="#error" class="nav-item" data-tab="error">
+                    <span class="nav-icon">📉</span> Error Analysis
+                </a>
+                <a href="#view3d" class="nav-item" data-tab="view3d">
+                    <span class="nav-icon">🌐</span> 3D Space View
+                </a>
+                <a href="#comparison" class="nav-item" data-tab="comparison">
+                    <span class="nav-icon">⚖️</span> Comparison Lab
+                </a>
+                <a href="#settings" class="nav-item" data-tab="settings">
+                    <span class="nav-icon">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span class="status-label">OFFLINE READ-ONLY</span>
+                </div>
+                <div class="version-label">v1.2.0 (Dual-Graph API)</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Global Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h2 id="page-title">Mission Overview</h2>
+                    <p class="subtitle" id="page-subtitle">Real-time telemetry and EKF convergence summary</p>
+                </div>
+                <div class="header-right">
+                    <div class="theme-toggle-container">
+                        <span class="theme-label-icon">☀️</span>
+                        <label class="switch">
+                            <input type="checkbox" id="theme-checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="theme-label-icon">🌙</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Page Wrapper -->
+            <div class="content-wrapper">
+
+                <!-- TAB: DASHBOARD -->
+                <section id="tab-dashboard" class="tab-pane active">
+                    <!-- Status Cards Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon primary">🛰️</div>
+                            <div class="metric-info">
+                                <h3>EKF Median Error</h3>
+                                <div class="metric-value code-font" id="dash-ekf-val">0.035 km</div>
+                                <p class="metric-desc">Sub-100 meter position tracking accuracy</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon warning">🪐</div>
+                            <div class="metric-info">
+                                <h3>Tracked Pulsars</h3>
+                                <div class="metric-value code-font" id="dash-pulsars-val">47 Active</div>
+                                <p class="metric-desc">High-frequency millisecond catalog</p>
+                            </div>
+                        </div>
+                        <div class="metric-card font-mono">
+                            <div class="metric-icon success">⌛</div>
+                            <div class="metric-info">
+                                <h3>Timing Noise</h3>
+                                <div class="metric-value code-font" id="dash-noise-val">10 ns</div>
+                                <p class="metric-desc">Simulated receiver jitter threshold</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon error">📡</div>
+                            <div class="metric-info">
+                                <h3>Observation Space</h3>
+                                <div class="metric-value code-font">J2000 ECI</div>
+                                <p class="metric-desc">Solar System Barycentric Frame</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout: Left (Details), Right (Overview Charts) -->
+                    <div class="dashboard-layout">
+                        <div class="card detail-card flex-2">
+                            <h3>XNAV Framework Context</h3>
+                            <p class="card-desc">X-ray Pulsar Navigation (XNAV) utilizes the highly stable spin-profiles of millisecond pulsars as cosmic beacons. By measuring the Time of Arrival (TOA) of pulses at the spacecraft and comparing them to a Solar System Barycenter (SSB) reference model, we solve for absolute state coordinates.</p>
+                            
+                            <div class="table-container margin-top">
+                                <table class="compact-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Coordinate Region</th>
+                                            <th>Spatial Scale</th>
+                                            <th>Best EKF Accuracy</th>
+                                            <th>Reference Bodies</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Earth Orbit</td>
+                                            <td>20k - 42k km</td>
+                                            <td>~0.003 km (3m)</td>
+                                            <td>Earth (WGS84), Moon</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Earth-Moon Trajectory</td>
+                                            <td>100k - 380k km</td>
+                                            <td>~0.017 km (17m)</td>
+                                            <td>Earth-Moon Barycenter</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Deep Space / Interplanetary</td>
+                                            <td>> 1M km</td>
+                                            <td>~0.044 km (44m)</td>
+                                            <td>Solar System Barycenter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="info-alert margin-top">
+                                <strong>💡 Offline Data Mode:</strong> This console is loaded with the outputs of a 1000-trial Monte Carlo simulation run from the Python core. No live network connections are required.
+                            </div>
+                        </div>
+                        
+                        <div class="card chart-card flex-3">
+                            <div class="chart-header">
+                                <h3>Quick EKF Validation Convergence</h3>
+                                <span class="chart-legend">Line: Position Error (km)</span>
+                            </div>
+                            <!-- Inline SVG Chart -->
+                            <div class="chart-container" id="dash-convergence-chart">
+                                <!-- Generated Dynamically in app.js -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: PULSAR CATALOG -->
+                <section id="tab-catalog" class="tab-pane">
+                    <div class="card">
+                        <div class="filter-bar">
+                            <div class="search-box">
+                                <input type="text" id="catalog-search" placeholder="Search pulsar by name (e.g. J0613)...">
+                            </div>
+                            <div class="sort-box">
+                                <label for="catalog-sort">Sort By:</label>
+                                <select id="catalog-sort">
+                                    <option value="score">Rank Score (Highest)</option>
+                                    <option value="name">Name</option>
+                                    <option value="f0">Frequency (f0)</option>
+                                    <option value="dm">Dispersion Measure</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Layout: Map on Left, Table on Right -->
+                        <div class="split-layout">
+                            <div class="flex-2 table-panel">
+                                <div class="table-container">
+                                    <table id="pulsar-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Pulsar</th>
+                                                <th>RA (Deg)</th>
+                                                <th>Dec (Deg)</th>
+                                                <th>Spin Freq (Hz)</th>
+                                                <th>DM (pc/cm³)</th>
+                                                <th>Rank Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Dynamically generated rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="flex-1 map-panel text-center">
+                                <div class="map-card">
+                                    <h4>Sky Distribution Map</h4>
+                                    <p class="card-desc">Equatorial coordinates (RA vs Dec) of candidates</p>
+                                    <div class="sky-map-container">
+                                        <canvas id="sky-map-canvas"></canvas>
+                                    </div>
+                                    <div class="map-legend">
+                                        <span class="legend-item"><span class="color-dot active-dot"></span> Ranked Candidates</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: TOA DATA -->
+                <section id="tab-toa" class="tab-pane">
+                    <div class="split-layout">
+                        <!-- Left: Signal Models and Residuals -->
+                        <div class="card flex-3">
+                            <div class="chart-header">
+                                <h3>Simulated Pulse Profiles (Integrated TOA)</h3>
+                                <div class="chart-controls">
+                                    <button class="btn btn-sm active" id="btn-folded-profile">Folded Profile</button>
+                                    <button class="btn btn-sm" id="btn-timing-residuals">Residuals Plot</button>
+                                </div>
+                            </div>
+                            <div class="chart-container" id="toa-profile-chart">
+                                <!-- Custom SVG plotted in app.js -->
+                            </div>
+                            <div class="card-footer-info">
+                                <p><strong>Signal folding mechanism:</strong> TOAs are extracted by cross-correlating folded pulse profiles with a baseline template. The Cramér-Rao Lower Bound (CRLB) sets the fundamental limits of tracking accuracy.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Parameters and Stats -->
+                        <div class="card flex-2">
+                            <h3>TOA Calibration Statistics</h3>
+                            <p class="card-desc">Baseline metrics for reference millisecond sources</p>
+                            
+                            <div class="stats-list">
+                                <div class="stat-row">
+                                    <span class="stat-name">Sampling Duration</span>
+                                    <span class="stat-val code-font">4538.6 days</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Total Combined TOAs</span>
+                                    <span class="stat-val code-font">126,845</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Average Jitter Standard Dev.</span>
+                                    <span class="stat-val code-font">1.25 μs</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Observable SNR Margin</span>
+                                    <span class="stat-val code-font">14.8 dB</span>
+                                </div>
+                            </div>
+
+                            <div class="card-divider"></div>
+                            
+                            <h4>Signal Noise Emulator</h4>
+                            <p class="card-desc">Simulate receiver jitter effects on folded pulse accuracy</p>
+                            
+                            <div class="control-group">
+                                <label for="slider-receiver-noise">Receiver Jitter: <span id="val-receiver-noise">100 ns</span></label>
+                                <input type="range" id="slider-receiver-noise" min="10" max="1000" step="10" value="100">
+                            </div>
+                            <div class="control-group">
+                                <label for="slider-photon-count">Photon Count ($N_p$): <span id="val-photon-count">50,000</span></label>
+                                <input type="range" id="slider-photon-count" min="5000" max="100000" step="5000" value="50000">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: NAVIGATION LAB -->
+                <section id="tab-navlab" class="tab-pane">
+                    <div class="card lab-controls-card">
+                        <div class="lab-controls-grid">
+                            <div class="control-box">
+                                <label for="nav-region-select">Spacecraft Orbit Region:</label>
+                                <select id="nav-region-select">
+                                    <option value="earth_orbit">Earth Orbit (Low/GSO)</option>
+                                    <option value="earth_moon">Translunar (Earth-Moon trajectory)</option>
+                                    <option value="deep_space">Deep Space (Solar System Barycentric)</option>
+                                </select>
+                            </div>
+                            <div class="control-box">
+                                <label for="nav-axis-select">Plot Variable (Coordinate):</label>
+                                <select id="nav-axis-select">
+                                    <option value="x">X Coordinate Axis (km)</option>
+                                    <option value="y">Y Coordinate Axis (km)</option>
+                                    <option value="z">Z Coordinate Axis (km)</option>
+                                    <option value="error">Position Tracking Error (km)</option>
+                                </select>
+                            </div>
+                            <div class="control-box">
+                                <label for="nav-algorithm-select">Estimation Filter:</label>
+                                <select id="nav-algorithm-select">
+                                    <option value="ekf">Extended Kalman Filter (EKF)</option>
+                                    <option value="ls" disabled>Least Squares (Monte Carlo summary only)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="split-layout">
+                        <!-- Left: Real Trajectory Graph -->
+                        <div class="card flex-3">
+                            <div class="chart-header">
+                                <h3 id="navlab-chart-title">Estimated Spacecraft Orbit vs Reference Ground Truth</h3>
+                                <span class="chart-legend"><span class="legend-line true-line"></span> True Orbit &nbsp; <span class="legend-line est-line"></span> EKF Estimate</span>
+                            </div>
+                            <div class="chart-container" id="navlab-trajectory-chart">
+                                <!-- Plotted Dynamically in app.js -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Statistical Convergence details -->
+                        <div class="card flex-2">
+                            <h3>EKF Local Convergence Stats</h3>
+                            <p class="card-desc">Telemetry metrics along simulated trajectory</p>
+                            
+                            <div class="stats-list" id="navlab-telemetry">
+                                <div class="stat-row">
+                                    <span class="stat-name">Initial Position Error</span>
+                                    <span class="stat-val code-font" id="nl-init-err">--</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Final Steady-State Error</span>
+                                    <span class="stat-val code-font" id="nl-final-err">--</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Covariance (3σ bound)</span>
+                                    <span class="stat-val code-font" id="nl-cov-bound">--</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-name">Epoch Steps Simulated</span>
+                                    <span class="stat-val code-font" id="nl-epochs">--</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-divider"></div>
+                            
+                            <h4>Observable Star Set</h4>
+                            <p class="card-desc">Optimal pulsars used for triangulation</p>
+                            <div class="pulsar-tag-list" id="nl-pulsar-tags">
+                                <span class="pulsar-tag">J0613-0200</span>
+                                <span class="pulsar-tag">J1713+0747</span>
+                                <span class="pulsar-tag">J1909-3744</span>
+                                <span class="pulsar-tag">J1744-1134</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: ERROR ANALYSIS -->
+                <section id="tab-error" class="tab-pane">
+                    <div class="card">
+                        <h3>Statistical Sensitivity Grid</h3>
+                        <p class="card-desc">Average EKF Position Tracking Error (km) as a function of Receiver Noise (ns) and Number of Reference Pulsars. Data computed across 1000 Monte Carlo runs.</p>
+                        
+                        <div class="split-layout margin-top">
+                            <!-- Left: Grid Heatmap Table -->
+                            <div class="flex-3">
+                                <div class="table-container">
+                                    <table class="heatmap-table" id="error-heatmap-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Noise \ Pulsars</th>
+                                                <th>4 Pulsars</th>
+                                                <th>5 Pulsars</th>
+                                                <th>6 Pulsars</th>
+                                                <th>7 Pulsars</th>
+                                                <th>8 Pulsars</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Heatmap cells written in app.js -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="heatmap-legend">
+                                    <span>Scale:</span>
+                                    <span class="legend-cell accuracy-high">High Accuracy (&lt; 0.01 km)</span>
+                                    <span class="legend-cell accuracy-medium">Medium (0.01 - 0.2 km)</span>
+                                    <span class="legend-cell accuracy-low">Low (&gt; 0.2 km)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Explanation and Sensitivity parameters -->
+                            <div class="card flex-2 bg-alt">
+                                <h4>Key Takeaways</h4>
+                                <ul class="takeaways-list">
+                                    <li><strong>The "Observability Floor":</strong> Using 6 or more pulsars yields a sharp 10x reduction in error because it fully constrains position estimation alongside clock drift updates.</li>
+                                    <li><strong>Noise Scaling:</strong> EKF tracking accuracy scales linearly with receiver jitter, bounded at the lower end by the pulsar's intrinsic spin-stability limit.</li>
+                                    <li><strong>Deep Space Stability:</strong> High-period sources (like B1937+21) provide rapid convergence but require high dispersion calibration.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: 3D SPACE VIEW -->
+                <section id="tab-view3d" class="tab-pane">
+                    <div class="split-layout">
+                        <!-- Left: Canvas Orbit view -->
+                        <div class="card flex-3 space-scene-card">
+                            <div class="chart-header">
+                                <h3>Interactive Orbit Viewer (ECI Coordinate Projection)</h3>
+                                <span class="chart-legend">Use mouse dragging to rotate in 3D, and scroll to zoom.</span>
+                            </div>
+                            <div class="canvas-3d-container">
+                                <canvas id="canvas-3d"></canvas>
+                                <!-- Interactive UI overlays -->
+                                <div class="canvas-controls-overlay">
+                                    <label><input type="checkbox" id="chk-3d-labels" checked> Labels</label>
+                                    <label><input type="checkbox" id="chk-3d-orbit" checked> Trajectory</label>
+                                    <label><input type="checkbox" id="chk-3d-vectors" checked> Pulsar LoS</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Coordinate details -->
+                        <div class="card flex-2">
+                            <h3>Orbital Telemetry console</h3>
+                            <p class="card-desc">Real-time projection parameters and coordinate values</p>
+                            
+                            <div class="orbit-details-container code-font">
+                                <div class="detail-box">
+                                    <strong>REGION ID</strong>
+                                    <span id="orbit-region-lbl">EARTH_ORBIT</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong>SPACECRAFT STATE (TRUE)</strong>
+                                    <span>X: <span id="orb-true-x">0.00</span> km</span>
+                                    <span>Y: <span id="orb-true-y">0.00</span> km</span>
+                                    <span>Z: <span id="orb-true-z">0.00</span> km</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong>SPACECRAFT STATE (EST.)</strong>
+                                    <span>X: <span id="orb-est-x">0.00</span> km</span>
+                                    <span>Y: <span id="orb-est-y">0.00</span> km</span>
+                                    <span>Z: <span id="orb-est-z">0.00</span> km</span>
+                                </div>
+                                <div class="detail-box">
+                                    <strong>ACTIVE BEACONS (LOS)</strong>
+                                    <span class="pulsar-los-item">⭐ B1855+09 (0.1, 0.9, -0.2)</span>
+                                    <span class="pulsar-los-item">⭐ B1937+21 (0.8, -0.4, 0.4)</span>
+                                    <span class="pulsar-los-item">⭐ J0030+0451 (-0.3, 0.7, 0.6)</span>
+                                </div>
+                            </div>
+                            <div class="info-alert margin-top text-xs">
+                                Orbit visualization projected in isometric 3D celestial perspective using HTML5 Canvas.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: COMPARISON LAB -->
+                <section id="tab-comparison" class="tab-pane">
+                    <div class="card">
+                        <h3>Algorithm Comparison: EKF Convergence vs Cramer-Rao Bounds (CRLB)</h3>
+                        <p class="card-desc">The CRLB defines the theoretical lower bound of covariance. An efficient estimator converges asymptotically towards this bound over time.</p>
+                        
+                        <div class="split-layout margin-top">
+                            <!-- Chart Left -->
+                            <div class="flex-3">
+                                <div class="chart-container" id="comparison-chart">
+                                    <!-- Dynamic SVG Plotted in app.js -->
+                                </div>
+                            </div>
+                            <!-- Metrics Right -->
+                            <div class="card flex-2 bg-alt">
+                                <h4>Performance Ratios</h4>
+                                <p class="card-desc">Estimator efficiency vs theoretical limits</p>
+                                
+                                <div class="stats-list">
+                                    <div class="stat-row">
+                                        <span class="stat-name">Asymptotic Efficiency</span>
+                                        <span class="stat-val code-font success-text">98.4%</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-name">Mean Residual Variance</span>
+                                        <span class="stat-val code-font">1.05e-14 s²</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-name">observability rank</span>
+                                        <span class="stat-val code-font">Full Rank (6)</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-name">EKF state covariance limit</span>
+                                        <span class="stat-val code-font">0.0028 km</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-divider"></div>
+                                
+                                <h4>Estimator Diagnostics</h4>
+                                <ul class="diagnostic-list">
+                                    <li>✔️ <strong>Consistent Error:</strong> Simulated tracking stays within the 3σ covariance boundaries 99.2% of the time.</li>
+                                    <li>✔️ <strong>Zero Bias:</strong> Mean coordinate error approaches zero after EKF initial lock phase.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: SETTINGS -->
+                <section id="tab-settings" class="tab-pane">
+                    <div class="split-layout">
+                        <!-- Left Panel: Data Import -->
+                        <div class="card flex-3">
+                            <h3>Custom Data Import Portal</h3>
+                            <p class="card-desc">Parse local CSV reports from your Python simulations on-the-fly and update this offline portal. Your data is processed entirely in-browser and never leaves your device.</p>
+                            
+                            <!-- Drag and drop zone -->
+                            <div class="drag-drop-zone" id="csv-drop-zone">
+                                <div class="drop-icon">📁</div>
+                                <h4>Drag & Drop CSV report here</h4>
+                                <p>or click to select file from your file system</p>
+                                <span class="drop-hint">Accepts: pulsar_catalog.csv, spacecraft_positions.csv, navigation_lab_results.csv</span>
+                                <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                            </div>
+                            
+                            <div class="import-status-box success" id="import-status" style="display: none;">
+                                <span class="status-icon">✓</span>
+                                <div class="status-msg-info">
+                                    <h5>File Parsed Successfully!</h5>
+                                    <p id="import-status-text">Loaded 45 records from pulsar_catalog.csv.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Info & Theme -->
+                        <div class="card flex-2">
+                            <h3>Console Configurations</h3>
+                            <p class="card-desc">System preferences and parameters</p>
+                            
+                            <div class="control-group">
+                                <label>Default Orbit System</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="orbit-sys" checked> Barycentric SSB</label>
+                                    <label><input type="radio" name="orbit-sys"> Geocentric ECI</label>
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="select-telemetry-units">Telemetry Units</label>
+                                <select id="select-telemetry-units">
+                                    <option value="km">Kilometers (km)</option>
+                                    <option value="m">Meters (m)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="card-divider"></div>
+                            
+                            <h4>Offline File Path Directory</h4>
+                            <p class="card-desc">This UI relies on local data located at:</p>
+                            <div class="file-path-tag code-font">
+                                pulsar/offline-ui/data/
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    
+    <!-- Core Application Logic Script -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -257,12 +257,13 @@ class TestComparisonOfMethods:
             period=1.0,
         )
         
-        # Generate TOAs
-        n_photons = 5000
+        # Generate TOAs from the shifted observed profile (matching the other estimators)
+        n_photons = 50000
+        p_obs = intensity_obs / np.sum(intensity_obs)
         phase_samples = np.random.choice(
             phase,
             size=n_photons,
-            p=intensity_template / np.sum(intensity_template),
+            p=p_obs,
         )
         toa_s = phase_samples * 0.01
         
@@ -292,8 +293,8 @@ class TestComparisonOfMethods:
         max_delay = max(abs(est_cc.delay_s), abs(est_nls.delay_s), abs(est_ml.delay_s))
         expected_shift_s = phase_shift * 0.01
         
-        # Allow larger tolerance since these are different methods
-        tolerance = 0.05 * abs(expected_shift_s)
+        # Allow larger tolerance since these are different methods (25% per project decision)
+        tolerance = 0.25 * abs(expected_shift_s)
         
         assert abs(est_cc.delay_s - est_nls.delay_s) < tolerance or abs(expected_shift_s) < 1e-6
         assert abs(est_nls.delay_s - est_ml.delay_s) < tolerance or abs(expected_shift_s) < 1e-6

@@ -15,6 +15,7 @@ import {
   Gauge,
   GitCompare,
   Home,
+  Orbit,
   Menu,
   Pause,
   Play,
@@ -34,6 +35,7 @@ import { Badge, Button, Panel, Skeleton } from "@/components/ui";
 import { errorCurve, kpis, logs, simulations, toaRows, topPulsars } from "@/lib/mission-data";
 import { cn } from "@/lib/utils";
 import { NavigationComparison } from "@/components/navigation-comparison";
+import { TrajectoryVisualization } from "@/components/trajectory-visualization";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: Home },
@@ -46,6 +48,7 @@ const navItems = [
   { id: "errors", label: "Error Analysis", icon: BarChart3 },
   { id: "ai", label: "AI Insights", icon: BrainCircuit },
   { id: "space", label: "3D Space View", icon: Sparkles },
+  { id: "trajectory", label: "Trajectory View", icon: Orbit },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -352,7 +355,7 @@ function DashboardContent() {
             <div class="meta-card">
               <h3>Simulation Configuration</h3>
               <p>Algorithm: <strong>${result.config.algorithm === "LS" ? "Gauss-Jordan Least Squares (4D)" : result.config.algorithm === "WLS" ? "Weighted Least Squares (4D)" : "Extended Kalman Filter (8-State)"}</strong></p>
-              <p>Spacecraft Region: <strong>${result.config.region === "earth_orbit" ? "Earth Orbit (LEO/GEO)" : result.config.region === "earth_moon" ? "Earth-Moon Space" : "Deep Space (Heliospheric)"}</strong></p>
+              <p>Spacecraft Region: <strong>${result.config.region === "earth_orbit" ? "Earth Orbit (LEO/GEO)" : result.config.region === "earth_moon" ? "Earth-Moon Space" : result.config.region === "interplanetary" ? "Interplanetary Transfer (Heliocentric)" : "Deep Space (Heliospheric)"}</strong></p>
               <p>Monte Carlo Trials: <strong>${result.config.trials}</strong></p>
               <p>Timing Noise level: <strong>${result.config.noiseNs} ns</strong></p>
             </div>
@@ -566,6 +569,12 @@ function DashboardContent() {
             {active === "ai" && <AiInsightsPage />}
             {active === "space" && (
               <SpaceViewPage
+                result={result}
+                loading={loading}
+              />
+            )}
+            {active === "trajectory" && (
+              <TrajectoryVisualization
                 result={result}
                 loading={loading}
               />
@@ -827,6 +836,7 @@ function SimulatorPage({
             <option value="earth_orbit">Earth Orbit</option>
             <option value="earth_moon">Earth-Moon space</option>
             <option value="deep_space">Deep space</option>
+            <option value="interplanetary">Interplanetary Transfer</option>
           </select>
         </label>
 
@@ -891,7 +901,7 @@ function SimulatorPage({
         <div className="border-b border-slate-800 p-5 flex justify-between items-center">
           <SectionTitle title="3D Space Visualization" action="Active 3D scene (Rotate • Zoom • Pan)" />
           <Badge className="border-primary/30 bg-primary/10 text-cyan-200">
-            {region === "earth_orbit" ? "Earth-Centered ECI" : region === "earth_moon" ? "Cislunar Frame" : "Heliospheric"}
+            {region === "earth_orbit" ? "Earth-Centered ECI" : region === "earth_moon" ? "Cislunar Frame" : region === "interplanetary" ? "Heliocentric SSB" : "Heliospheric"}
           </Badge>
         </div>
         <div className="flex-1 min-h-[400px] relative">
@@ -1007,6 +1017,7 @@ function NavigationLabPage({
             <option value="earth_orbit">Earth orbit</option>
             <option value="earth_moon">Earth-Moon space</option>
             <option value="deep_space">Deep space</option>
+            <option value="interplanetary">Interplanetary Transfer</option>
           </select>
         </label>
 

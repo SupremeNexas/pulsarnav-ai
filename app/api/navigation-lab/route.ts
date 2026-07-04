@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { PULSAR_CATALOGUE } from "@/lib/pulsar-catalogue";
+import { C_KM_S, makeSeedRng, gaussianSample, dispersionDelay, earthPositionSsb } from "@/lib/physics-engine";
 
 export const runtime = "nodejs";
 
-const C_KM_S = 299_792.458;
 const REGIONS: Record<string, [number, number]> = {
   earth_orbit: [6_700, 42_200],
   earth_moon: [42_200, 384_400],
@@ -13,17 +14,12 @@ const REGIONS: Record<string, [number, number]> = {
 
 type PulsarVector = { name: string; x: number; y: number; z: number; dm?: number; freq?: number };
 
+/**
+ * Returns fallback pulsar vectors from the shared catalogue module.
+ * Previously this was a hard-coded duplicate — now it's the canonical source.
+ */
 function fallbackVectors(): PulsarVector[] {
-  return [
-    { name: "J0613-0200", x: -0.0598484068, y: 0.9975891828, z: -0.0351282031, dm: 38.7, freq: 326.6 },
-    { name: "J1713+0747", x: -0.1982651999, y: -0.9707222, z: 0.1356072304, dm: 15.9, freq: 218.8 },
-    { name: "J1909-3744", x: 0.2371160541, y: -0.7544395193, z: -0.6120432898, dm: 10.3, freq: 339.3 },
-    { name: "J1744-1134", x: -0.0662459249, y: -0.9773963748, z: -0.2007680354, dm: 3.1, freq: 245.4 },
-    { name: "J1012+5307", x: -0.5354242301, y: 0.2711741406, z: 0.7998659134, dm: 9.0, freq: 190.3 },
-    { name: "J0030+0451", x: 0.9876174198, y: 0.1320268437, z: 0.0847392747, dm: 4.3, freq: 205.5 },
-    { name: "J2317+1439", x: 0.9505931103, y: -0.1798143518, z: 0.2530603437, dm: 21.9, freq: 290.3 },
-    { name: "J1640+2224", x: -0.3151496178, y: -0.8691582648, z: 0.3811097337, dm: 18.4, freq: 316.1 },
-  ];
+  return PULSAR_CATALOGUE.map(p => ({ name: p.name, x: p.x, y: p.y, z: p.z, dm: p.dm, freq: p.freq }));
 }
 
 function loadVectors(): PulsarVector[] {
@@ -53,65 +49,26 @@ function loadVectors(): PulsarVector[] {
   }).filter((row) => Number.isFinite(row.x) && Number.isFinite(row.y) && Number.isFinite(row.z));
 }
 
-function rng(seed: number) {
-  let state = seed >>> 0;
-  return () => {
-    state = (1664525 * state + 1013904223) >>> 0;
-    return state / 2 ** 32;
-  };
-}
+// ─── Route-local helpers ──────────────────────────────────────────────────────
+// rng, gaussian, dispersionDelay, earthPositionSsb are now imported from
+// @/lib/physics-engine (single source of truth).
+// Convenience aliases for backward compat with this file's call sites:
+const rng = (seed: number) => makeSeedRng(seed);
+const gaussian = (random: () => number) => gaussianSample(random);
 
-function gaussian(random: () => number) {
-  const u1 = Math.max(random(), 1e-12);
-  const u2 = random();
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-}
-
+/**
+ * Generates a random spacecraft position isotropically distributed within a
+ * navigation region radius band. Local to this file: specific to Monte Carlo
+ * position generation for the Navigation Lab API.
+ */
 function randomPosition(random: () => number, region: string): [number, number, number] {
   const [low, high] = REGIONS[region] ?? REGIONS.earth_moon;
   const u = gaussian(random);
   const v = gaussian(random);
   const w = gaussian(random);
-  const norm = Math.hypot(u, v, w) || 1;
+  const len = Math.hypot(u, v, w) || 1;
   const radius = low + random() * (high - low);
-  return [(u / norm) * radius, (v / norm) * radius, (w / norm) * radius];
-}
-
-function dispersionDelay(dm: number, freqMhz: number): number {
-  const coeff = 4.148808e3;
-  const freq = Math.max(freqMhz, 1.0);
-  return coeff * dm * (freq ** -2) * 1e-6; // convert us to seconds
-}
-
-function earthPositionSsb(epochMjd: number): [number, number, number] {
-  const T = (epochMjd - 51544.5) / 36525.0;
-  const a_au = 1.00000011 - 0.00000005 * T;
-  const e = 0.01671022 - 0.00003804 * T;
-  const varpi_rad = (102.94719 + 0.32327 * T) * Math.PI / 180;
-  const M_rad = (357.52911 + 35999.05029 * T - 0.0001559 * T * T) * Math.PI / 180;
-  
-  let E = M_rad;
-  for (let i = 0; i < 5; i++) {
-    E = E - (E - e * Math.sin(E) - M_rad) / (1 - e * Math.cos(E));
-  }
-  
-  const cos_v = (Math.cos(E) - e) / (1 - e * Math.cos(E));
-  const sin_v = (Math.sqrt(1 - e * e) * Math.sin(E)) / (1 - e * Math.cos(E));
-  const v = Math.atan2(sin_v, cos_v);
-  
-  const r_au = a_au * (1 - e * Math.cos(E));
-  const lambda_rad = varpi_rad + v;
-  
-  const x_ecl = r_au * Math.cos(lambda_rad);
-  const y_ecl = r_au * Math.sin(lambda_rad);
-  
-  const eps = 23.43929111 * Math.PI / 180;
-  const x_eq = x_ecl;
-  const y_eq = y_ecl * Math.cos(eps);
-  const z_eq = y_ecl * Math.sin(eps);
-  
-  const AU_TO_KM = 149597870.7;
-  return [x_eq * AU_TO_KM, y_eq * AU_TO_KM, z_eq * AU_TO_KM];
+  return [(u / len) * radius, (v / len) * radius, (w / len) * radius];
 }
 
 function totalDelay(pos: [number, number, number], vector: PulsarVector, epochMjd: number): number {
@@ -178,7 +135,8 @@ function estimatePosition(
   delays: number[],
   epochMjd: number,
   algorithm: string,
-  noiseNs: number
+  noiseNs: number,
+  region: string
 ): [number, number, number] {
   const nCols = 4;
   const normal = Array.from({ length: nCols }, () => Array(nCols).fill(0));
@@ -188,10 +146,16 @@ function estimatePosition(
   
   vectors.forEach((vector, index) => {
     const disp = dispersionDelay(vector.dm ?? 15.0, vector.freq ?? 1400.0);
-    // Corrected delay must subtract Earth's SSB delay so estimate is Earth-relative
-    const earthDelay = earthDelayForVector(earth, vector);
-    const correctedDelay = delays[index] - disp - earthDelay;
-    const observed = correctedDelay * C_KM_S;
+    let observed: number;
+    if (region === "interplanetary") {
+      // Heliocentric delays are relative to SSB (Sun) directly
+      observed = (delays[index] - disp) * C_KM_S;
+    } else {
+      // Earth-relative delays must correct for Earth SSB delay
+      const earthDelay = earthDelayForVector(earth, vector);
+      const correctedDelay = delays[index] - disp - earthDelay;
+      observed = correctedDelay * C_KM_S;
+    }
     
     const row = [vector.x, vector.y, vector.z, 1.0];
     
@@ -244,8 +208,17 @@ function matMul(A: number[][], B: number[][]): number[][] {
   return C;
 }
 
-function gravityAcceleration(r: [number, number, number]): [number, number, number] {
-  const MU = 398600.4418; // km^3/s^2
+function gravityAcceleration(r: [number, number, number], region: string): [number, number, number] {
+  if (region === "interplanetary") {
+    const MU_SUN = 1.32712440018e11; // km^3/s^2 Sun gravitational parameter
+    const rMag = Math.hypot(r[0], r[1], r[2]);
+    return [
+      -MU_SUN * r[0] / (rMag ** 3),
+      -MU_SUN * r[1] / (rMag ** 3),
+      -MU_SUN * r[2] / (rMag ** 3)
+    ];
+  }
+  const MU = 398600.4418; // km^3/s^2 Earth's MU
   const RE = 6378.137;     // km
   const J2 = 1.08263e-3;   // J2
   const rMag = Math.hypot(r[0], r[1], r[2]);
@@ -267,8 +240,8 @@ function gravityAcceleration(r: [number, number, number]): [number, number, numb
   return [accK[0] + accJ2[0], accK[1] + accJ2[1], accK[2] + accJ2[2]];
 }
 
-function gravityGradient(r: [number, number, number]): number[][] {
-  const MU = 398600.4418;
+function gravityGradient(r: [number, number, number], region: string): number[][] {
+  const MU = region === "interplanetary" ? 1.32712440018e11 : 398600.4418;
   const rMag = Math.hypot(r[0], r[1], r[2]);
   const rMag3 = rMag ** 3;
   const rMag5 = rMag ** 5;
@@ -283,24 +256,24 @@ function gravityGradient(r: [number, number, number]): number[][] {
   return G;
 }
 
-function propagateRK4(r: [number, number, number], v: [number, number, number], dt: number): { r: [number, number, number], v: [number, number, number] } {
+function propagateRK4(r: [number, number, number], v: [number, number, number], dt: number, region: string): { r: [number, number, number], v: [number, number, number] } {
   const k1_v = v;
-  const k1_a = gravityAcceleration(r);
+  const k1_a = gravityAcceleration(r, region);
   
   const r2 = [r[0] + 0.5 * dt * k1_v[0], r[1] + 0.5 * dt * k1_v[1], r[2] + 0.5 * dt * k1_v[2]] as [number, number, number];
   const v2 = [v[0] + 0.5 * dt * k1_a[0], v[1] + 0.5 * dt * k1_a[1], v[2] + 0.5 * dt * k1_a[2]] as [number, number, number];
   const k2_v = v2;
-  const k2_a = gravityAcceleration(r2);
+  const k2_a = gravityAcceleration(r2, region);
   
   const r3 = [r[0] + 0.5 * dt * k2_v[0], r[1] + 0.5 * dt * k2_v[1], r[2] + 0.5 * dt * k2_v[2]] as [number, number, number];
   const v3 = [v[0] + 0.5 * dt * k2_a[0], v[1] + 0.5 * dt * k2_a[1], v[2] + 0.5 * dt * k2_a[2]] as [number, number, number];
   const k3_v = v3;
-  const k3_a = gravityAcceleration(r3);
+  const k3_a = gravityAcceleration(r3, region);
   
   const r4 = [r[0] + dt * k3_v[0], r[1] + dt * k3_v[1], r[2] + dt * k3_v[2]] as [number, number, number];
   const v4 = [v[0] + dt * k3_a[0], v[1] + dt * k3_a[1], v[2] + dt * k3_a[2]] as [number, number, number];
   const k4_v = v4;
-  const k4_a = gravityAcceleration(r4);
+  const k4_a = gravityAcceleration(r4, region);
   
   const rNext = [
     r[0] + (dt / 6.0) * (k1_v[0] + 2.0 * k2_v[0] + 2.0 * k3_v[0] + k4_v[0]),
@@ -344,21 +317,29 @@ export async function GET(request: NextRequest) {
     // -------------------------------------------------------------
     // Extended Kalman Filter trajectory simulation (Chapter 7)
     // -------------------------------------------------------------
-    const dt = 10.0; // 10 seconds step size
+    let dt = 10.0; // 10 seconds step size
     
     // Initial Orbit setups based on region
-    let r_true: [number, number, number] = [7000.0, 0.0, 0.0];
-    let v_true: [number, number, number] = [0.0, 7.54, 0.1];
+    let r_true: [number, number, number] = [7000.0, 0.0, 200.0];
+    let v_true: [number, number, number] = [0.0, 7.546, 0.08];
     let pos_err_init = 15.0; // km initial perturbation
     
     if (region === "earth_moon") {
-      r_true = [200000.0, 0.0, 0.0];
-      v_true = [0.0, 1.41, 0.05];
+      r_true = [200000.0, 0.0, 5000.0];
+      v_true = [0.0, 1.412, 0.05];
       pos_err_init = 500.0;
+      dt = 120.0;
     } else if (region === "deep_space") {
-      r_true = [1500000.0, 0.0, 0.0];
-      v_true = [0.0, 0.51, 0.02];
+      r_true = [1500000.0, 0.0, 20000.0];
+      v_true = [0.0, 0.515, 0.01];
       pos_err_init = 5000.0;
+      dt = 600.0;
+    } else if (region === "interplanetary") {
+      // Heliocentric starting position
+      r_true = [1.496e8, 0.0, 0.0];
+      v_true = [0.0, 29.78, 2.5];
+      pos_err_init = 5000.0;
+      dt = 14400.0; // 4 hours step
     }
     
     let b_true = 10e-6; // True clock bias (10 microseconds)
@@ -391,18 +372,23 @@ export async function GET(request: NextRequest) {
       const epochMjdNow = flightMjd + t_epoch / 86400.0;
       
       // 1. Propagate true state via RK4 and clock drift
-      const trueProp = propagateRK4(r_true, v_true, dt);
+      const trueProp = propagateRK4(r_true, v_true, dt, region);
       r_true = trueProp.r;
       v_true = trueProp.v;
       b_true += d_true * dt;
       
       // ECI -> SSB transition for measurements
       const earth = earthPositionSsb(epochMjdNow);
-      const ssb_pos: [number, number, number] = [
-        earth[0] + r_true[0],
-        earth[1] + r_true[1],
-        earth[2] + r_true[2]
-      ];
+      let ssb_pos: [number, number, number];
+      if (region === "interplanetary") {
+        ssb_pos = [r_true[0], r_true[1], r_true[2]];
+      } else {
+        ssb_pos = [
+          earth[0] + r_true[0],
+          earth[1] + r_true[1],
+          earth[2] + r_true[2]
+        ];
+      }
       
       // 2. Generate simulated measurements
       const measurements = selected.map((vector, index) => {
@@ -425,7 +411,7 @@ export async function GET(request: NextRequest) {
       const b_old = x_ekf[6];
       const d_old = x_ekf[7];
       
-      const predProp = propagateRK4(r_old, v_old, dt);
+      const predProp = propagateRK4(r_old, v_old, dt, region);
       x_ekf[0] = predProp.r[0];
       x_ekf[1] = predProp.r[1];
       x_ekf[2] = predProp.r[2];
@@ -436,7 +422,7 @@ export async function GET(request: NextRequest) {
       // d_ekf remains constant in prediction
       
       // Transition matrix F (8x8)
-      const G = gravityGradient(r_old);
+      const G = gravityGradient(r_old, region);
       const F = Array.from({ length: 8 }, () => Array(8).fill(0));
       for (let i = 0; i < 3; i++) {
         F[i][i] = 1.0;
@@ -477,7 +463,11 @@ export async function GET(request: NextRequest) {
         R[i][i] = Math.pow(m.noise_s * C_KM_S, 2);
         
         const disp = dispersionDelay(v.dm ?? 15.0, v.freq ?? 1400.0);
-        expected_Z[i] = (x_ekf[0]*v.x + x_ekf[1]*v.y + x_ekf[2]*v.z) + (C_KM_S * earthDelayForVector(earth, v)) + C_KM_S * x_ekf[6] + disp * C_KM_S;
+        if (region === "interplanetary") {
+          expected_Z[i] = (x_ekf[0]*v.x + x_ekf[1]*v.y + x_ekf[2]*v.z) + C_KM_S * x_ekf[6] + disp * C_KM_S;
+        } else {
+          expected_Z[i] = (x_ekf[0]*v.x + x_ekf[1]*v.y + x_ekf[2]*v.z) + (C_KM_S * earthDelayForVector(earth, v)) + C_KM_S * x_ekf[6] + disp * C_KM_S;
+        }
         y[i] = Z[i] - expected_Z[i];
       });
       
@@ -492,7 +482,6 @@ export async function GET(request: NextRequest) {
       }
       
       // Solve S * K^T = H * P for Kalman gain
-      // K^T is N x 8
       const K_T = Array.from({ length: 8 }, () => Array(N).fill(0));
       for (let col = 0; col < 8; col++) {
         const rhs_col = HP.map(row => row[col]);
@@ -522,7 +511,7 @@ export async function GET(request: NextRequest) {
       errors.push(error);
       
       samples.push({
-        trial,
+        trial: trial,
         truePosition: [r_true[0], r_true[1], r_true[2]] as [number, number, number],
         estimated: [x_ekf[0], x_ekf[1], x_ekf[2]] as [number, number, number],
         errorKm: error,
@@ -530,26 +519,66 @@ export async function GET(request: NextRequest) {
     }
   } else {
     // -------------------------------------------------------------
-    // Static Monte Carlo simulations for LS/WLS
+    // Sequential Trajectory simulations for LS/WLS
     // -------------------------------------------------------------
-    for (let trial = 0; trial < trials; trial += 1) {
-      const truePosition = randomPosition(random, region);
-      const clockBiasS = (random() * 20 - 10) * 1e-6; // -10 to +10 us
+    let dt = 30.0;
+    let r_true: [number, number, number] = [7000.0, 0.0, 200.0];
+    let v_true: [number, number, number] = [0.0, 7.546, 0.08];
+    
+    if (region === "earth_moon") {
+      r_true = [200000.0, 0.0, 5000.0];
+      v_true = [0.0, 1.412, 0.05];
+      dt = 120.0;
+    } else if (region === "deep_space") {
+      r_true = [1500000.0, 0.0, 20000.0];
+      v_true = [0.0, 0.515, 0.01];
+      dt = 600.0;
+    } else if (region === "interplanetary") {
+      r_true = [1.496e8, 0.0, 0.0];
+      v_true = [0.0, 29.78, 2.5];
+      dt = 14400.0; // 4 hours
+    }
+    
+    for (let step = 0; step < trials; step++) {
+      const t_epoch = step * dt;
+      const epochMjdNow = flightMjd + t_epoch / 86400.0;
       
+      // 1. Propagate true state via RK4
+      const trueProp = propagateRK4(r_true, v_true, dt, region);
+      r_true = trueProp.r;
+      v_true = trueProp.v;
+      
+      // 2. Generate simulated measurements
+      const earth = earthPositionSsb(epochMjdNow);
+      let ssb_pos: [number, number, number];
+      if (region === "interplanetary") {
+        ssb_pos = [r_true[0], r_true[1], r_true[2]];
+      } else {
+        ssb_pos = [
+          earth[0] + r_true[0],
+          earth[1] + r_true[1],
+          earth[2] + r_true[2]
+        ];
+      }
+      
+      const clockBiasS = (random() * 20 - 10) * 1e-6; // -10 to +10 us
       const delays = selected.map((vector, index) => {
-        const ideal = totalDelay(truePosition, vector, flightMjd);
+        const roemer = (ssb_pos[0] * vector.x + ssb_pos[1] * vector.y + ssb_pos[2] * vector.z) / C_KM_S;
+        const disp = dispersionDelay(vector.dm ?? 15.0, vector.freq ?? 1400.0);
+        const ideal = roemer + disp;
         const pulsarNoiseS = noiseNs * 1e-9 * (1.0 + index * 0.15);
         return ideal + clockBiasS + gaussian(random) * pulsarNoiseS;
       });
       
-      const estimated = estimatePosition(selected, delays, flightMjd, algorithm, noiseNs);
-      const error = Math.hypot(estimated[0] - truePosition[0], estimated[1] - truePosition[1], estimated[2] - truePosition[2]);
+      // 3. Solve position using LS/WLS
+      const estimated = estimatePosition(selected, delays, epochMjdNow, algorithm, noiseNs, region);
+      const error = Math.hypot(estimated[0] - r_true[0], estimated[1] - r_true[1], estimated[2] - r_true[2]);
       
       errors.push(error);
       
       samples.push({
-        trial,
-        truePosition,
+        trial: step,
+        truePosition: [r_true[0], r_true[1], r_true[2]] as [number, number, number],
         estimated,
         errorKm: error,
       });

@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash \"/Users/supryo/Desktop/pulsar/.dual-graph/prime.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash \"/Users/supryo/Desktop/pulsar/.dual-graph/prime.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash \"/Users/supryo/Desktop/pulsar/.dual-graph/stop.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DG_DATA_DIR=\"/Users/supryo/Desktop/pulsar/.dual-graph\" /Users/supryo/.dual-graph/venv/bin/python3 -c \"from graperoot.undo_shield import main; main()\""
+          }
+        ]
+      }
+    ]
+  }
+}
