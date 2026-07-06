@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PulsarNav AI | Navigation Geometry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#730dc2",
+                        "tertiary": "#edd4ff",
+                        "surface-bright": "#36393f",
+                        "surface-tint": "#47d6ff",
+                        "inverse-on-surface": "#2e3036",
+                        "on-secondary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#e1e2e9",
+                        "primary-container": "#00d2ff",
+                        "outline-variant": "#3c494e",
+                        "on-tertiary": "#490080",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface": "#111318",
+                        "primary-fixed-dim": "#47d6ff",
+                        "primary-fixed": "#b6ebff",
+                        "on-secondary": "#002e6a",
+                        "surface-container-highest": "#32353a",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003543",
+                        "tertiary-container": "#dab1ff",
+                        "on-primary-container": "#00566a",
+                        "outline": "#859399",
+                        "error-container": "#93000a",
+                        "background": "#111318",
+                        "surface-variant": "#32353a",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-container-low": "#191c21",
+                        "on-error": "#690005",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004e60",
+                        "on-background": "#e1e2e9",
+                        "on-surface": "#e1e2e9",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-primary": "#00677f",
+                        "primary": "#a5e7ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-high": "#272a2f",
+                        "surface-container-lowest": "#0b0e13",
+                        "secondary-container": "#0566d9",
+                        "surface-container": "#1d2025",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-dim": "#111318",
+                        "on-surface-variant": "#bbc9cf",
+                        "secondary-fixed": "#d8e2ff",
+                        "graphite-veil": "#495764",
+                        "ash-border": "#403f3f",
+                        "fog-blue": "#6f879c",
+                        "pure-white": "#fffdf9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "panel-gap": "24px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "stat-lg": ["JetBrains Mono"],
+                        "body-bold": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md-mobile": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Geist"],
+                        "neue-montreal": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "stat-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "300" }],
+                        "body-bold": ["15px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600" }],
+                        "body-base": ["15px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-md-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.01em", "fontWeight": "300" }],
+                        "display-sm": ["105px", { "lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                        "section-heading": ["22px", { "lineHeight": "28px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.12em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #111318;
+            color: #fffdf9;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .panel-technical {
+            background-color: #495764;
+            border: 1px solid #403f3f;
+        }
+
+        .codex-sidebar {
+            background-color: #101010;
+            color: #fffdf9;
+        }
+
+        .neue-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 12px;
+        }
+
+        .ghost-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fffdf9;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: all 0.3s cubic-bezier(0.52, 0.01, 0, 1);
+        }
+
+        .ghost-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #a5e7ff;
+            color: #a5e7ff;
+        }
+
+        .pulsing-beacon {
+            width: 6px;
+            height: 6px;
+            background-color: #47d6ff;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+        }
+
+        .pulsing-beacon::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #47d6ff;
+            border-radius: 50%;
+            animation: pulse 3s infinite cubic-bezier(0.52, 0.01, 0, 1);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .matrix-grid {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        #threejs-container-ANIMATION_NEW {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col font-neue-montreal font-normal">
+<!-- TopNavBar: Consistency with COMPONENTS_24 -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-ash-border flex justify-center h-20 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]">
+<div class="flex justify-between items-center px-margin-desktop w-full max-w-[1440px]">
+<div class="flex items-center gap-12">
+<h1 class="font-neue-montreal text-display-lg tracking-tighter text-pure-white">PulsarNav AI</h1>
+<nav class="hidden lg:flex gap-8 items-center">
+<a class="text-pure-white hover:text-pure-white transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] font-neue-montreal text-headline-md" href="#">Home</a>
+<a class="text-pure-white border-b-2 border-pure-white pb-1 font-neue-montreal text-headline-md" href="#">Geometry</a>
+<a class="text-pure-white hover:text-pure-white transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] font-neue-montreal text-headline-md" href="#">Dashboard</a>
+<a class="text-pure-white hover:text-pure-white transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] font-neue-montreal text-headline-md" href="#">Comparison</a>
+<a class="text-pure-white hover:text-pure-white transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] font-neue-montreal text-headline-md" href="#">Documentation</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center bg-white/5 rounded px-4 py-2 border border-ash-border gap-6">
+<button class="text-pure-white hover:text-primary transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]"><span class="material-symbols-outlined">skip_next</span></button>
+<button class="text-pure-white hover:text-primary transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]"><span class="material-symbols-outlined">pause</span></button>
+<button class="text-pure-white transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span></button>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-pure-white hover:text-pure-white cursor-pointer">settings</span>
+<span class="material-symbols-outlined text-pure-white hover:text-pure-white cursor-pointer">account_circle</span>
+<button class="px-6 py-2.5 bg-transparent border border-ash-border text-pure-white font-neue-montreal rounded uppercase tracking-wider text-sm hover:brightness-110 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]">Mission Control</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Navigation Codex Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 codex-sidebar border-r border-ash-border flex flex-col p-8 pt-32 gap-10">
+<div class="space-y-1">
+<p class="neue-label text-pure-white">Navigation Codex</p>
+<p class="text-[10px] text-pure-white font-mono">v.2.4 Active Intel</p>
+</div>
+<nav class="flex flex-col gap-2">
+<div class="flex items-center gap-4 px-4 py-3 bg-white/5 text-pure-white border border-ash-border cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-pure-white">menu_book</span>
+<span class="neue-label text-[11px]">Astro-Constants</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-pure-white hover:bg-white/5 hover:text-pure-white transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-pure-white">architecture</span>
+<span class="neue-label text-[11px]">Orbital Mechanics</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-pure-white hover:bg-white/5 hover:text-pure-white transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-pure-white">psychology</span>
+<span class="neue-label text-[11px]">Quantum Rel</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-pure-white hover:bg-white/5 hover:text-pure-white transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-pure-white">calculate</span>
+<span class="neue-label text-[11px]">Navigation Laws</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-pure-white hover:bg-white/5 hover:text-pure-white transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-pure-white">list_alt</span>
+<span class="neue-label text-[11px]">Glossary</span>
+</div>
+</nav>
+<div class="mt-auto space-y-6">
+<div class="flex items-center gap-3 text-pure-white hover:text-primary transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-sm text-pure-white">terminal</span>
+<span class="neue-label text-[10px]">Diagnostics</span>
+</div>
+<div class="flex items-center gap-3 text-pure-white hover:text-primary transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-pointer">
+<span class="material-symbols-outlined text-sm text-pure-white">help_center</span>
+<span class="neue-label text-[10px]">Support</span>
+</div>
+<button class="w-full py-3 border border-ash-border text-pure-white neue-label text-[10px] hover:bg-white/5 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] mt-4">Sync Telemetry</button>
+</div>
+</aside>
+<!-- Main Content Grid -->
+<main class="flex-1 ml-64 pt-24 p-[108px] flex justify-center overflow-hidden">
+<div class="grid grid-cols-2 grid-rows-2 gap-[108px] w-full max-w-[1440px] h-full">
+<!-- Panel 1: Solar System Frame -->
+<section class="panel-technical overflow-hidden flex flex-col bg-graphite-veil">
+<div class="px-6 py-4 flex justify-between items-center border-b border-ash-border">
+<div class="flex items-center gap-3">
+<span class="pulsing-beacon"></span>
+<h2 class="font-neue-montreal text-[33px] tracking-tighter text-pure-white uppercase">Solar System Frame</h2>
+</div>
+<span class="material-symbols-outlined text-pure-white text-sm cursor-pointer hover:text-primary transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]">open_in_full</span>
+</div>
+<div class="flex-1 relative bg-[#3c494e]">
+<div id="threejs-container-ANIMATION_NEW"></div>
+<!-- Telemetry Overlay -->
+<div class="absolute bottom-6 left-6 p-6 bg-[#272a2f]/80 border border-ash-border">
+<div class="grid grid-cols-2 gap-x-12 gap-y-3">
+<span class="neue-label text-pure-white text-[10px]">True Pos</span>
+<span class="font-mono text-[13px] text-primary text-right tabular-nums">0.000, -1.45e8, 0.00</span>
+<span class="neue-label text-pure-white text-[10px]">Est Pos</span>
+<span class="font-mono text-[13px] text-secondary text-right tabular-nums">0.002, -1.45e8, 0.04</span>
+<span class="neue-label text-pure-white text-[10px]">Velocity</span>
+<span class="font-mono text-[13px] text-pure-white text-right tabular-nums">29.78 km/s</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Panel 2: Celestial Reference -->
+<section class="panel-technical overflow-hidden flex flex-col bg-graphite-veil">
+<div class="px-6 py-4 flex justify-between items-center border-b border-ash-border">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-pure-white text-lg">radar</span>
+<h2 class="font-neue-montreal text-[33px] tracking-tighter text-pure-white uppercase">Celestial Reference</h2>
+</div>
+<div class="flex items-center gap-2">
+<span class="neue-label text-pure-white text-[10px]">Status:</span>
+<span class="neue-label text-primary font-bold text-[10px]">Locked</span>
+</div>
+</div>
+<div class="flex-1 matrix-grid relative p-8 overflow-y-auto scroll-hide bg-[#3c494e]">
+<div class="space-y-4">
+<div class="p-5 bg-[#272a2f] border border-ash-border hover:border-primary/40 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-crosshair group flex justify-between">
+<div>
+<p class="neue-label text-primary text-[12px]">PSR J1713+0747</p>
+<p class="text-[10px] text-pure-white neue-label mt-1 lowercase">RA: 17h 13m 49.5s | Dec: +07° 47′ 37″</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="text-[9px] neue-label text-pure-white">Stability</span>
+<div class="flex gap-1">
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-white/10"></div>
+</div>
+</div>
+</div>
+<div class="p-5 bg-[#272a2f] border border-ash-border hover:border-primary/40 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-crosshair group flex justify-between">
+<div>
+<p class="neue-label text-primary text-[12px]">PSR J1909-3744</p>
+<p class="text-[10px] text-pure-white neue-label mt-1 lowercase">RA: 19h 09m 47.4s | Dec: -37° 44′ 14″</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="text-[9px] neue-label text-pure-white">Stability</span>
+<div class="flex gap-1">
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-primary"></div>
+</div>
+</div>
+</div>
+<div class="p-5 bg-[#272a2f] border border-ash-border hover:border-primary/40 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)] cursor-crosshair group flex justify-between">
+<div>
+<p class="neue-label text-primary text-[12px]">PSR J0437-4715</p>
+<p class="text-[10px] text-pure-white neue-label mt-1 lowercase">RA: 04h 37m 15.9s | Dec: -47° 15′ 09″</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="text-[9px] neue-label text-pure-white">Stability</span>
+<div class="flex gap-1">
+<div class="h-3.5 w-1 bg-primary"></div>
+<div class="h-3.5 w-1 bg-white/10"></div>
+<div class="h-3.5 w-1 bg-white/10"></div>
+<div class="h-3.5 w-1 bg-white/10"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-6 right-6">
+<button class="w-10 h-10 rounded-full border border-ash-border flex items-center justify-center text-pure-white hover:text-primary hover:border-primary/40 transition-all duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]" onclick="toggleDrawer()">
+<span class="material-symbols-outlined text-pure-white">info</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Panel 3: Mathematical Solver -->
+<section class="panel-technical overflow-hidden flex flex-col bg-graphite-veil">
+<div class="px-6 py-4 flex justify-between items-center border-b border-ash-border">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-pure-white text-lg">functions</span>
+<h2 class="font-neue-montreal text-[33px] tracking-tighter text-pure-white uppercase">Mathematical Solver</h2>
+</div>
+<div class="neue-label text-pure-white text-[10px]">Solver: EKF v4.2</div>
+</div>
+<div class="flex-1 p-8 flex flex-col gap-8 bg-[#3c494e]">
+<div class="py-12 bg-[#111318] border border-ash-border flex items-center justify-center">
+<p class="font-mono text-[40px] text-pure-white tracking-widest">Δt = (r · n) / c</p>
+</div>
+<div class="grid grid-cols-2 gap-8 flex-1">
+<div class="space-y-3">
+<p class="neue-label text-pure-white text-[10px]">Jacobian Matrix [J]</p>
+<div class="p-5 bg-[#272a2f] border border-ash-border font-mono text-[11px] text-secondary/80 leading-loose">
+<div>[1.000, 0.002, 0.005]</div>
+<div class="opacity-70">[0.002, 1.004, -0.010]</div>
+<div class="opacity-40">[0.005, -0.010, 0.998]</div>
+</div>
+</div>
+<div class="space-y-3">
+<p class="neue-label text-pure-white text-[10px]">Residual Convergence</p>
+<div class="relative h-full bg-[#272a2f] border border-ash-border flex items-end justify-between p-5 gap-2 overflow-hidden">
+<div class="w-full bg-primary/20 h-[30%] border-t border-primary/60"></div>
+<div class="w-full bg-primary/20 h-[55%] border-t border-primary/60"></div>
+<div class="w-full bg-primary/20 h-[40%] border-t border-primary/60"></div>
+<div class="w-full bg-primary/20 h-[85%] border-t border-primary/60"></div>
+<div class="w-full bg-primary/20 h-[60%] border-t border-primary/60"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Panel 4: Position Solution -->
+<section class="panel-technical overflow-hidden flex flex-col bg-graphite-veil">
+<div class="px-6 py-4 flex justify-between items-center border-b border-ash-border">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-pure-white text-lg">my_location</span>
+<h2 class="font-neue-montreal text-[33px] tracking-tighter text-pure-white uppercase">Position Solution</h2>
+</div>
+</div>
+<div class="flex-1 p-12 flex flex-col justify-center items-center text-center gap-12 bg-[#3c494e]">
+<div class="space-y-3">
+<p class="neue-label text-pure-white text-[12px]">Est. Coordinate ID</p>
+<p class="font-neue-montreal text-[56px] text-pure-white tracking-tighter">X-442.98.01.ALPHA</p>
+</div>
+<div class="grid grid-cols-2 w-full max-w-sm gap-12 border-t border-ash-border pt-12">
+<div class="space-y-2">
+<p class="neue-label text-pure-white text-[10px]">Error Margin</p>
+<div class="flex items-baseline justify-center gap-2">
+<span class="font-mono text-2xl text-secondary">&lt; 24.5</span>
+<span class="neue-label text-pure-white text-[10px]">M</span>
+</div>
+</div>
+<div class="space-y-2">
+<p class="neue-label text-pure-white text-[10px]">Confidence</p>
+<div class="flex items-baseline justify-center gap-2">
+<span class="font-mono text-2xl text-primary">99.8</span>
+<span class="neue-label text-pure-white text-[10px]">%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Scientific Explainer Sidebar (Mobile/Actionable) -->
+<div class="fixed right-0 top-0 h-full w-80 codex-sidebar z-[60] translate-x-full transition-transform duration-700 ease-[cubic-bezier(0.52,0.01,0,1)] border-l border-ash-border flex flex-col" id="info-sidebar">
+<div class="p-10 space-y-12 h-full overflow-y-auto scroll-hide pt-32">
+<div class="flex items-center justify-between">
+<h3 class="font-neue-montreal text-pure-white text-xl uppercase tracking-tighter">Mission Intel</h3>
+<button class="text-pure-white hover:text-primary transition-colors duration-300 ease-[cubic-bezier(0.52,0.01,0,1)]" onclick="toggleDrawer()">
+<span class="material-symbols-outlined text-pure-white">close</span>
+</button>
+</div>
+<div class="space-y-6">
+<p class="neue-label text-primary">Least Squares Solver</p>
+<p class="text-pure-white leading-relaxed font-neue-montreal text-[14px]">
+                    Minimizes the sum of squared deviations between timing residuals and the geometric model. Essential for nanosecond precision in deep space navigation.
+                </p>
+</div>
+<div class="space-y-6">
+<p class="neue-label text-primary">Pulsar Periodicity</p>
+<p class="text-pure-white leading-relaxed font-neue-montreal text-[14px]">
+                    Using ultra-stable millisecond pulsars (MSPs) as galactic GPS satellites. Signal stability is verified via NANOGrav array data.
+                </p>
+</div>
+</div>
+</div>
+<script>
+        function toggleDrawer() {
+            const sidebar = document.getElementById('info-sidebar');
+            sidebar.classList.toggle('translate-x-full');
+        }
+
+        // Solar System Animation Refined
+        (function () {
+            const container = document.getElementById('threejs-container-ANIMATION_NEW');
+            if (!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 50000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            const solarSystem = new THREE.Group();
+            scene.add(solarSystem);
+
+            // Simple Sun
+            const sun = new THREE.Mesh(
+                new THREE.SphereGeometry(60, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0xffcc33 })
+            );
+            solarSystem.add(sun);
+
+            // Lighting
+            scene.add(new THREE.AmbientLight(0x404040));
+            const pointLight = new THREE.PointLight(0xffffff, 2, 5000);
+            scene.add(pointLight);
+
+            // Simple Earth
+            const earthGroup = new THREE.Group();
+            const earth = new THREE.Mesh(
+                new THREE.SphereGeometry(15, 32, 32),
+                new THREE.MeshStandardMaterial({ color: 0x2233ff })
+            );
+            earthGroup.add(earth);
+            earthGroup.position.x = 400;
+            solarSystem.add(earthGroup);
+
+            // Craft
+            const craft = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 4, 20),
+                new THREE.MeshStandardMaterial({ color: 0xaaaaaa })
+            );
+            craft.position.set(450, 20, 50);
+            solarSystem.add(craft);
+
+            camera.position.set(600, 400, 600);
+            camera.lookAt(0, 0, 0);
+
+            let time = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                time += 0.005;
+                earthGroup.position.x = Math.cos(time * 0.2) * 400;
+                earthGroup.position.z = Math.sin(time * 0.2) * 400;
+                craft.position.x = Math.cos(time * 0.25) * 480;
+                craft.position.z = Math.sin(time * 0.25) * 480;
+                craft.rotation.y = time;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+            });
+        })();
+    </script>
+</body></html>

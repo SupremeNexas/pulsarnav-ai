@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PulsarNav AI | Mission Control Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              obsidian: "#101010",
+              carbon: "#1c1c1c",
+              paper: "#ffffff",
+              periwinkle: "#7089ba",
+              "fog-blue": "#6f879c"
+            },
+            fontFamily: {
+              neue: ['"Neue Montreal"', 'sans-serif'],
+              geist: ['"Geist Mono"', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        @font-face {
+            font-family: 'Neue Montreal';
+            src: url('https://db.onlinewebfonts.com/t/2c0d80c3e79bd91dfa6c76e107567789.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            background-color: #101010;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            font-family: 'Neue Montreal', sans-serif;
+        }
+
+        .border-dashed-carbon {
+            border: 1px dashed #1c1c1c;
+        }
+
+        .border-dashed-black {
+            border: 1px dashed #000000;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.01) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes subtle-pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .animate-status-pulse {
+            animation: subtle-pulse 2s infinite ease-in-out;
+        }
+
+        #threejs-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .nav-link {
+            font-family: 'Neue Montreal', sans-serif;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: #6f879c;
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #ffffff;
+        }
+        .nav-link.active {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="text-paper bg-obsidian">
+<div class="scanline"></div>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-obsidian/90 backdrop-blur-sm border-b border-dashed-carbon h-16 flex items-center">
+<div class="flex justify-between items-center px-6 w-full max-w-[1800px] mx-auto">
+<div class="flex items-center gap-12">
+<span class="font-neue text-lg tracking-tight text-paper">PulsarNav <span class="text-fog-blue">AI</span></span>
+<div class="hidden lg:flex items-center gap-8">
+<a class="nav-link" href="#">Home</a>
+<a class="nav-link" href="#">Geometry</a>
+<a class="nav-link active" href="#">Dashboard</a>
+<a class="nav-link" href="#">Comparison</a>
+<a class="nav-link" href="#">Documentation</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-fog-blue hover:text-paper cursor-pointer text-sm">settings</span>
+<span class="material-symbols-outlined text-fog-blue hover:text-paper cursor-pointer text-sm">account_circle</span>
+</div>
+<button class="bg-transparent hover:bg-carbon text-paper border border-paper px-4 py-1.5 rounded-[5px] font-neue text-[10px] uppercase tracking-widest transition-colors">
+                Mission Control
+            </button>
+</div>
+</div>
+</nav>
+<!-- Main Dashboard Layout -->
+<main class="relative z-10 pt-24 px-6 pb-6 min-h-screen grid grid-cols-12 gap-4 max-w-[1800px] mx-auto">
+<!-- Left Column -->
+<div class="col-span-3 flex flex-col gap-4">
+<!-- Mission Status -->
+<div class="bg-carbon border border-dashed-black p-5 h-[300px] flex flex-col">
+<h3 class="font-neue text-[11px] text-fog-blue uppercase tracking-widest mb-6 flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-paper animate-status-pulse"></span>
+                Mission Status
+            </h3>
+<div class="space-y-6 flex-grow">
+<div>
+<div class="text-fog-blue font-neue text-[10px] uppercase tracking-wider mb-1">Current Phase</div>
+<div class="text-paper font-neue text-sm uppercase">Cislunar Injection</div>
+</div>
+<div>
+<div class="text-fog-blue font-neue text-[10px] uppercase tracking-wider mb-1">Navigation Mode</div>
+<div class="text-paper font-neue text-sm uppercase">XNAV Monte Carlo</div>
+</div>
+<div>
+<div class="text-fog-blue font-neue text-[10px] uppercase tracking-wider mb-1">Mission Time</div>
+<div class="text-paper font-geist text-xs" id="mission-time">142:11:45:02</div>
+</div>
+<div>
+<div class="text-fog-blue font-neue text-[10px] uppercase tracking-wider mb-1">System Health</div>
+<div class="text-periwinkle font-neue text-sm uppercase">Nominal</div>
+</div>
+</div>
+</div>
+<!-- Navigation Solver -->
+<div class="bg-carbon border border-dashed-black p-5 flex-grow">
+<h3 class="font-neue text-[11px] text-fog-blue uppercase tracking-widest mb-6">
+                Navigation Solver
+            </h3>
+<div class="space-y-4">
+<div class="border border-dashed-black p-3 bg-obsidian">
+<div class="text-fog-blue font-neue text-[9px] uppercase tracking-wider mb-2">State Vector Update</div>
+<div class="text-paper font-geist text-[10px] leading-relaxed">
+                        x_{k} = Φ_{k,k-1}x_{k-1} + w_{k-1}<br/>
+                        z_{k} = h(x_{k}) + v_{k}
+                    </div>
+</div>
+<div class="border border-dashed-black p-3 bg-obsidian">
+<div class="text-fog-blue font-neue text-[9px] uppercase tracking-wider mb-2">Least-Squares Iteration</div>
+<div class="flex justify-between items-center">
+<span class="text-paper font-geist text-[10px]">Iter: 42</span>
+<span class="text-paper font-geist text-[10px]">Δx: 1.2e-4</span>
+</div>
+<div class="w-full bg-black h-1 mt-2">
+<div class="bg-periwinkle h-1 w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Center Column (Visualization + Live Telemetry) -->
+<div class="col-span-6 flex flex-col gap-4">
+<!-- 3D Visualization Container (Centerpiece) -->
+<div class="bg-obsidian border border-dashed-carbon relative flex-grow min-h-[400px] overflow-hidden">
+<div class="absolute top-4 left-4 z-20">
+<span class="font-neue text-[10px] text-fog-blue tracking-[0.2em] uppercase">Visual Telemetry</span>
+</div>
+<div class="absolute bottom-4 left-4 z-20">
+<span class="font-geist text-[9px] text-periwinkle tracking-widest uppercase">Cam: NAV-A</span>
+</div>
+<div id="threejs-container"></div>
+<!-- Crosshairs -->
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-carbon z-10 pointer-events-none"></div>
+<div class="absolute top-0 left-1/2 w-[1px] h-full bg-carbon z-10 pointer-events-none"></div>
+</div>
+<!-- Live Telemetry -->
+<div class="bg-carbon border border-dashed-black p-6 h-[250px]">
+<header class="flex justify-between items-start mb-4">
+<span class="font-neue text-[11px] text-fog-blue tracking-[0.2em] uppercase">Live Telemetry</span>
+<span class="font-geist text-[9px] text-paper border border-dashed-black px-2 py-1 bg-obsidian">SYNC: OPTIMAL</span>
+</header>
+<h2 class="font-neue text-[105px] leading-[1.0] tracking-[-0.02em] text-paper mb-6 uppercase">Vikram</h2>
+<div class="grid grid-cols-3 gap-8 border-t border-dashed-black pt-4">
+<div>
+<span class="font-neue text-[10px] text-fog-blue tracking-widest block mb-1 uppercase">Velocity (km/s)</span>
+<span class="font-geist text-[12px] text-paper" id="telemetry-velocity">8.1805</span>
+</div>
+<div>
+<span class="font-neue text-[10px] text-fog-blue tracking-widest block mb-1 uppercase">Pos Error (m)</span>
+<span class="font-geist text-[12px] text-paper">42.84</span>
+</div>
+<div>
+<span class="font-neue text-[10px] text-fog-blue tracking-widest block mb-1 uppercase">Attitude (q)</span>
+<span class="font-geist text-[10px] text-paper block">[0.707, 0.0, 0.707, 0.0]</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (Pulsar Tracking) -->
+<div class="col-span-3 flex flex-col gap-4">
+<div class="bg-carbon border border-dashed-black p-5 h-full flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-neue text-[11px] text-fog-blue uppercase tracking-widest">
+                    Pulsar Tracking
+                </h3>
+<span class="material-symbols-outlined text-fog-blue text-[14px]">sensors</span>
+</div>
+<div class="space-y-3 flex-grow overflow-y-auto pr-2">
+<!-- Tracker Item -->
+<div class="border border-dashed-black p-3 bg-obsidian hover:bg-black transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-paper font-geist text-[11px]">PSR J0437-4715</span>
+<span class="w-2 h-2 rounded-full bg-periwinkle"></span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">RA</span>
+<span class="text-paper font-geist text-[9px]">04h 37m 15s</span>
+</div>
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">DEC</span>
+<span class="text-paper font-geist text-[9px]">-47° 15′ 08″</span>
+</div>
+<div class="col-span-2 mt-1">
+<span class="text-fog-blue font-neue text-[9px] uppercase inline-block w-12">SNR</span>
+<span class="text-paper font-geist text-[9px]">24.5 dB</span>
+</div>
+</div>
+</div>
+<!-- Tracker Item -->
+<div class="border border-dashed-black p-3 bg-obsidian hover:bg-black transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-paper font-geist text-[11px]">PSR B1937+21</span>
+<span class="w-2 h-2 rounded-full bg-periwinkle opacity-50"></span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">RA</span>
+<span class="text-paper font-geist text-[9px]">19h 39m 38s</span>
+</div>
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">DEC</span>
+<span class="text-paper font-geist text-[9px]">+21° 34′ 59″</span>
+</div>
+<div class="col-span-2 mt-1">
+<span class="text-fog-blue font-neue text-[9px] uppercase inline-block w-12">SNR</span>
+<span class="text-paper font-geist text-[9px]">18.2 dB</span>
+</div>
+</div>
+</div>
+<!-- Tracker Item -->
+<div class="border border-dashed-black p-3 bg-obsidian hover:bg-black transition-colors cursor-pointer opacity-60">
+<div class="flex justify-between items-start mb-2">
+<span class="text-paper font-geist text-[11px]">PSR J1713+0747</span>
+<span class="w-2 h-2 rounded-full border border-periwinkle bg-transparent"></span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">RA</span>
+<span class="text-paper font-geist text-[9px]">17h 13m 49s</span>
+</div>
+<div>
+<span class="text-fog-blue font-neue text-[9px] uppercase block">DEC</span>
+<span class="text-paper font-geist text-[9px]">+07° 47′ 37″</span>
+</div>
+<div class="col-span-2 mt-1">
+<span class="text-fog-blue font-neue text-[9px] uppercase inline-block w-12">ACQ</span>
+<span class="text-paper font-geist text-[9px]">Pending</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-dashed-black">
+<div class="flex justify-between">
+<span class="text-fog-blue font-neue text-[10px] uppercase">Active Targets</span>
+<span class="text-paper font-geist text-[10px]">2 / 4</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+    // Real-time telemetry simulation
+    setInterval(() => {
+        const vel = document.getElementById('telemetry-velocity');
+        let current = parseFloat(vel.innerText);
+        const variance = (Math.random() * 0.001) - 0.0005;
+        vel.innerText = (current + variance).toFixed(4);
+        
+        // Mission time simulation
+        const mTime = document.getElementById('mission-time');
+        const parts = mTime.innerText.split(':');
+        let secs = parseInt(parts[3]);
+        secs++;
+        if (secs > 59) {
+            secs = 0;
+            let mins = parseInt(parts[2]);
+            mins++;
+            if(mins > 59) { mins = 0; parts[1] = (parseInt(parts[1])+1).toString().padStart(2, '0'); }
+            parts[2] = mins.toString().padStart(2, '0');
+        }
+        parts[3] = secs.toString().padStart(2, '0');
+        mTime.innerText = parts.join(':');
+    }, 1000);
+
+    // Three.js Background Initialization
+    const container = document.getElementById('threejs-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    // Wireframe Sphere (Spacecraft proxy)
+    const geometry = new THREE.IcosahedronGeometry(2, 2);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0x7089ba, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.3
+    });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
+    
+    // Navigation rays
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x6f879c, transparent: true, opacity: 0.5 });
+    for(let i=0; i<3; i++) {
+        const points = [];
+        points.push(new THREE.Vector3(0, 0, 0));
+        points.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10
+        ));
+        const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(lineGeom, lineMaterial);
+        scene.add(line);
+    }
+
+    camera.position.z = 8;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        sphere.rotation.y += 0.005;
+        sphere.rotation.x += 0.002;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+</script>
+</body></html>

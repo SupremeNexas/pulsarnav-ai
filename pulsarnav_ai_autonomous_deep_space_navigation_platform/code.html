@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PulsarNav AI | Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Assuming Neue Montreal is available or gracefully falls back. Using a system sans-serif placeholder that looks clean if font not found -->
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "obsidian": "#101010",
+              "cream": "#fffdf9",
+              "fog-blue": "#6f879c",
+              "surface-border": "rgba(255, 253, 249, 0.1)",
+            },
+            "fontFamily": {
+              "neue": ["'Satoshi'", "sans-serif"], // Placeholder for Neue Montreal 400
+            },
+            "transitionTimingFunction": {
+              "vivid": "cubic-bezier(0.52, 0.01, 0, 1)",
+            },
+            "transitionDuration": {
+              "500": "500ms",
+            },
+            "spacing": {
+              "section-gap": "108px",
+              "card-pad": "20px",
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #101010;
+            color: #fffdf9;
+            -webkit-font-smoothing: antialiased;
+            font-family: 'Satoshi', sans-serif; /* Neue Montreal fallback */
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        /* Enforce custom transition */
+        * {
+            transition-timing-function: cubic-bezier(0.52, 0.01, 0, 1);
+            transition-duration: 0.5s;
+        }
+
+        #animation-container {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .border-cream {
+            border-color: #fffdf9;
+        }
+
+        .text-cream {
+            color: #fffdf9;
+        }
+
+        .text-fog {
+            color: #6f879c;
+        }
+        
+        .no-shadow {
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body class="bg-obsidian text-cream">
+<!-- Header -->
+<header class="fixed top-0 w-full z-50 bg-obsidian/80 backdrop-blur-xl border-b border-surface-border no-shadow">
+<nav class="flex justify-between items-center px-8 h-20 w-full max-w-[1600px] mx-auto">
+<div class="flex items-center gap-2">
+<span class="font-neue text-2xl tracking-tight text-cream">PulsarNav <span class="opacity-50">AI</span></span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-cream opacity-100 border-b border-cream pb-1 font-neue text-sm transition-opacity hover:opacity-70" href="#">Home</a>
+<a class="text-cream opacity-60 hover:opacity-100 font-neue text-sm transition-opacity" href="#">Geometry</a>
+<a class="text-cream opacity-60 hover:opacity-100 font-neue text-sm transition-opacity" href="#">Dashboard</a>
+<a class="text-cream opacity-60 hover:opacity-100 font-neue text-sm transition-opacity" href="#">Comparison</a>
+<a class="text-cream opacity-60 hover:opacity-100 font-neue text-sm transition-opacity" href="#">Documentation</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-cream opacity-60 hover:opacity-100 transition-opacity">settings</button>
+<button class="material-symbols-outlined text-cream opacity-60 hover:opacity-100 transition-opacity">account_circle</button>
+</div>
+<button class="border border-cream rounded-[5px] text-cream px-6 py-2 font-neue text-sm tracking-wide hover:bg-cream hover:text-obsidian transition-colors">
+                Contact
+            </button>
+</div>
+</nav>
+</header>
+<main class="relative">
+<!-- Hero Section -->
+<section class="relative min-h-screen flex flex-col items-center justify-center pt-20 px-8 pb-section-gap">
+<div id="animation-container">
+            {{DATA:ANIMATION:ANIMATION_22}}
+        </div>
+<div class="text-center z-10 max-w-5xl">
+<h1 class="font-neue text-[136px] leading-[136px] tracking-[-2.72px] text-cream mb-12 flex flex-col uppercase">
+<span>PULSAR</span>
+<span>NAVIGATION</span>
+</h1>
+<p class="max-w-2xl mx-auto font-neue text-[22px] leading-[1.2] tracking-[-0.22px] text-fog mb-16">
+                Autonomous deep-space navigation powered by millisecond pulsar triangulation and the NANOGrav 12.5y dataset.
+            </p>
+<div class="flex gap-4 justify-center">
+<button class="border border-cream text-cream px-10 py-4 font-neue tracking-wider hover:bg-cream hover:text-obsidian transition-colors rounded-none">INITIALIZE XNAV</button>
+<button class="px-10 py-4 font-neue tracking-wider text-fog hover:text-cream transition-colors rounded-none">VIEW TELEMETRY</button>
+</div>
+</div>
+</section>
+<!-- Mission Overview -->
+<section class="py-section-gap px-8 border-t border-surface-border">
+<div class="max-w-[1600px] mx-auto text-center">
+<span class="font-neue text-xs text-fog tracking-[0.2em] mb-6 block uppercase">ACTIVE MISSION PROFILE</span>
+<h2 class="font-neue text-[56px] leading-[1.1] mb-16 uppercase tracking-tight text-cream">PSN-V2 VIKRAM</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+<div class="p-card-pad border border-surface-border rounded-[15px]">
+<span class="font-neue text-xs text-fog block mb-4 uppercase tracking-wider">TRAJECTORY</span>
+<h3 class="font-neue text-xl mb-2 text-cream">Trans-Mars Injection</h3>
+<p class="text-base text-fog">Precise orbital maneuvers using galactic clock synchronization.</p>
+</div>
+<div class="p-card-pad border border-surface-border rounded-[15px]">
+<span class="font-neue text-xs text-fog block mb-4 uppercase tracking-wider">SYNC STATUS</span>
+<h3 class="font-neue text-xl mb-2 text-cream">99.98% Accuracy</h3>
+<p class="text-base text-fog">Real-time triangulation across four locked millisecond pulsars.</p>
+</div>
+<div class="p-card-pad border border-surface-border rounded-[15px]">
+<span class="font-neue text-xs text-fog block mb-4 uppercase tracking-wider">DEPENDENCY</span>
+<h3 class="font-neue text-xl mb-2 text-cream">Zero-Earth State</h3>
+<p class="text-base text-fog">Full autonomy enabled through local pulsar timing analysis.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 border-t border-surface-border bg-obsidian">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-[1600px] mx-auto gap-8">
+<div class="flex flex-col gap-2 text-center md:text-left">
+<span class="font-neue text-xl text-cream tracking-tight">PulsarNav <span class="opacity-50">AI</span></span>
+<p class="font-neue text-xs text-fog tracking-wider uppercase">© 2024 PULSARNAV AI. AEROSPACE GRADE PRECISION.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-neue text-sm text-fog hover:text-cream transition-colors" href="#">Privacy Protocol</a>
+<a class="font-neue text-sm text-fog hover:text-cream transition-colors" href="#">Terms of Service</a>
+<a class="font-neue text-sm text-fog hover:text-cream transition-colors" href="#">Security</a>
+<a class="font-neue text-sm text-fog hover:text-cream transition-colors" href="#">System Status</a>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-fog hover:text-cream cursor-pointer transition-colors">terminal</span>
+<span class="material-symbols-outlined text-fog hover:text-cream cursor-pointer transition-colors">language</span>
+</div>
+</div>
+</footer>
+</body></html>

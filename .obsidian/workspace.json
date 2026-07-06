@@ -173,11 +173,15 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "karpathywiki:Ingest current file": false,
+      "karpathywiki:Query wiki": false
     }
   },
   "active": "ec6e95e0ed7c63c9",
   "lastOpenFiles": [
+    "wiki/Welcome to Karpathy LLM Wiki.md",
+    "wiki",
     "docs/rules/default-props-match-prop-types.md",
     "claude-obsidian/wiki/index.md",
     "claude-obsidian/wiki/overview.md",

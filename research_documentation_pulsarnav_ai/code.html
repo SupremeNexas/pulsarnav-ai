@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Documentation | PulsarNav AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@300;700&amp;family=Geist:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Custom Style for specific typography requirements not in default Tailwind -->
+<style>
+        @font-face {
+            font-family: 'Neue Montreal';
+            src: local('Helvetica Neue'), local('Arial'); /* Fallback for prototype */
+            font-weight: 400;
+        }
+        .font-neue { font-family: 'Neue Montreal', 'Inter', sans-serif; }
+        .text-hero-headline { font-size: 136px; line-height: 1.1; letter-spacing: -0.04em; }
+        
+        .ash-divider {
+            border-color: #403f3f; /* Ash Border */
+        }
+        
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #101010; }
+        ::-webkit-scrollbar-thumb { background: #403f3f; }
+
+        body {
+            background-color: #101010;
+            color: #fffdf9;
+        }
+
+        .text-body {
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .text-subheading {
+            font-size: 36px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#730dc2",
+                        "tertiary": "#edd4ff",
+                        "surface-bright": "#36393f",
+                        "surface-tint": "#47d6ff",
+                        "inverse-on-surface": "#2e3036",
+                        "on-secondary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#e1e2e9",
+                        "primary-container": "#00d2ff",
+                        "outline-variant": "#3c494e",
+                        "on-tertiary": "#490080",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface": "#111318",
+                        "primary-fixed-dim": "#47d6ff",
+                        "primary-fixed": "#b6ebff",
+                        "on-secondary": "#002e6a",
+                        "surface-container-highest": "#32353a",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003543",
+                        "tertiary-container": "#dab1ff",
+                        "on-primary-container": "#00566a",
+                        "outline": "#859399",
+                        "error-container": "#93000a",
+                        "background": "#101010",
+                        "surface-variant": "#32353a",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-container-low": "#191c21",
+                        "on-error": "#690005",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004e60",
+                        "on-background": "#e1e2e9",
+                        "on-surface": "#fffdf9",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-primary": "#00677f",
+                        "primary": "#fffdf9",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-high": "#272a2f",
+                        "surface-container-lowest": "#0b0e13",
+                        "secondary-container": "#0566d9",
+                        "surface-container": "#1d2025",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-dim": "#111318",
+                        "on-surface-variant": "#bbc9cf",
+                        "secondary-fixed": "#d8e2ff"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "panel-gap": "24px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "stat-lg": ["JetBrains Mono"],
+                        "body-bold": ["Inter"],
+                        "body-base": ["Inter"],
+                        "display-lg": ["Geist"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Geist"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#101010] text-[#fffdf9] font-neue antialiased overflow-x-hidden">
+<!-- Top Navigation (Shell Component) -->
+<header class="fixed top-0 w-full z-50 bg-[#101010]/80 backdrop-blur-xl border-b border-[#403f3f] h-20 transition-all duration-300 ease-in-out">
+<div class="flex justify-between items-center px-margin-desktop h-full w-full max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<span class="font-neue text-display-lg tracking-tighter text-[#fffdf9]">PulsarNav AI</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Home</a>
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Geometry</a>
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Dashboard</a>
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Comparison</a>
+<a class="font-neue text-label-caps text-[#fffdf9] border-b-2 border-[#fffdf9] pb-1" href="#">Documentation</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#fffdf9]/70 hover:bg-[#403f3f]/50 p-2 rounded-full transition-all">settings</button>
+<button class="material-symbols-outlined text-[#fffdf9]/70 hover:bg-[#403f3f]/50 p-2 rounded-full transition-all">account_circle</button>
+<button class="bg-[#fffdf9] text-[#101010] px-6 py-2 rounded-full font-neue text-label-caps hover:scale-105 transition-all">
+                    Mission Control
+                </button>
+</div>
+</div>
+</header>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="min-h-[819px] flex flex-col justify-center px-margin-desktop max-w-[1440px] mx-auto relative overflow-hidden">
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+</div>
+<div class="relative z-10">
+<div class="inline-flex items-center gap-2 mb-8 bg-[#101010] px-4 py-1 rounded-[9999px] border border-[#403f3f]">
+<span class="w-2 h-2 rounded-full bg-[#fffdf9] animate-pulse"></span>
+<span class="font-neue text-label-caps tracking-widest text-[#fffdf9]">PROJECT ALPHA-402</span>
+</div>
+<h1 class="font-neue text-hero-headline text-[#fffdf9] font-[400] max-w-[1200px]">
+                    RESEARCH &amp; DOCUMENTATION
+                </h1>
+</div>
+</section>
+<!-- Obsidian Theme Content Blocks -->
+<section class="pb-32 px-margin-desktop max-w-[1440px] mx-auto flex justify-center">
+<!-- Main Documentation Body -->
+<div class="space-y-24 w-full max-w-[880px] flex flex-col items-center">
+<!-- 1. Executive Summary -->
+<div class="space-y-12 w-full max-w-[440px]" id="exec-summary">
+<div class="flex items-baseline gap-4">
+<h2 class="font-neue text-subheading text-[#fffdf9]">Executive Summary</h2>
+</div>
+<div class="">
+<p class="font-neue text-body text-[#fffdf9]">
+                            PulsarNav AI addresses the critical dependency of deep space exploration on Earth-based Deep Space Networks (DSN). By leveraging the rhythmic stability of millisecond pulsars, we establish a celestial GPS that operates independently of planetary infrastructure. This autonomous capability is paramount for missions beyond the heliopause.
+                        </p>
+</div>
+</div>
+<!-- 2. NANOGrav Dataset -->
+<div class="space-y-12 w-full max-w-[440px]" id="nanograv">
+<div class="flex items-baseline gap-4">
+<h2 class="font-neue text-subheading text-[#fffdf9]">The NANOGrav Dataset</h2>
+</div>
+<div class="space-y-8">
+<div class="">
+<p class="font-neue text-body text-[#fffdf9]">
+                                Our platform integrates the 15-year dataset from the North American Nanohertz Observatory for Gravitational Waves. This dataset provides a rigorous timing model for 68 millisecond pulsars, accounting for interstellar medium dispersion and solar system ephemeris corrections.
+                            </p>
+</div>
+<div class="bg-[#495764] border border-[#403f3f] flex items-center justify-center p-8">
+<img class="w-full h-auto opacity-80" data-alt="A high-precision technical visualization of a pulsar star emitting intense beams of radiation, rendered in a scientific mission control aesthetic. The background is deep space-dark with subtle nebula glass blurs. The color palette is dominated by Pulsar Cyan and Graphite Veil, emphasizing data-driven clarity and futuristic aerospace engineering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKKC2Yutr-CmFhrH12ZZVfefSBRdhAD5zBekVOkmPw7nSrwr9eyi1DIJkggokKM3y4qWTkiVXTWAUOboI955sVyW4DqMwv9iaK4XDQ0EWTzsyN_h0uRYnx9euW-tR6fzHpcJYgTSdkGynzBQLmZWlHKbDLEVGPoDzMFmBoXeeGSFKG5aRSHnYXANknI2ssk7LOSybbhT-Sr4udwi0Gwcvq3aJk4M5NOp0BQXakyhZ18XMPiwBWSmEstw"/>
+</div>
+</div>
+</div>
+<!-- 3. Technical Specs -->
+<div class="space-y-12 w-full max-w-[440px]" id="specs">
+<div class="flex items-baseline gap-4">
+<h2 class="font-neue text-subheading text-[#fffdf9]">Technical Specifications</h2>
+</div>
+<div class="space-y-8">
+<div class="space-y-4">
+<h3 class="font-neue text-label-caps text-[#fffdf9]/70">ALGORITHM</h3>
+<p class="font-neue text-body text-[#fffdf9]">Iterative Least-Squares Solver for 4D position estimation.</p>
+</div>
+<div class="space-y-4">
+<h3 class="font-neue text-label-caps text-[#fffdf9]/70">INTEGRATION</h3>
+<p class="font-neue text-body text-[#fffdf9]">Extended Kalman Filter (EKF) for real-time trajectory refinement.</p>
+</div>
+<div class="space-y-4">
+<h3 class="font-neue text-label-caps text-[#fffdf9]/70">PRECISION</h3>
+<p class="font-neue text-body text-[#fffdf9]">Sub-kilometer accuracy at 10 AU distance from Helios.</p>
+</div>
+</div>
+</div>
+<!-- 4. Scientific References -->
+<div class="space-y-12 w-full max-w-[440px]" id="references">
+<div class="flex items-baseline gap-4">
+<h2 class="font-neue text-subheading text-[#fffdf9]">Scientific References</h2>
+</div>
+<div class="ash-divider border-t pt-8">
+<ul class="space-y-8">
+<li class="flex flex-col gap-2 items-start">
+<div class="max-w-[440px]">
+<a class="font-neue text-[33px] leading-[1.2] text-[#fffdf9] no-underline hover:text-white/80 transition-colors block" href="#">Deep Space Atomic Clock: Precision timing for autonomous navigation systems.</a>
+<span class="font-neue text-label-caps text-[#fffdf9]/70 mt-4 block">JOURNAL OF ASTROPHYSICS</span>
+</div>
+</li>
+<div class="ash-divider border-t w-full"></div>
+<li class="flex flex-col gap-2 items-start">
+<div class="max-w-[440px]">
+<a class="font-neue text-[33px] leading-[1.2] text-[#fffdf9] no-underline hover:text-white/80 transition-colors block" href="#">SEXTANT: Station Explorer for X-ray Timing and Navigation Technology results.</a>
+<span class="font-neue text-label-caps text-[#fffdf9]/70 mt-4 block">NASA TECHNICAL REPORT</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<!-- 5. Project Credits -->
+<div class="space-y-12 w-full max-w-[440px]" id="credits">
+<div class="flex items-baseline gap-4">
+<h2 class="font-neue text-subheading text-[#fffdf9]">Project Credits</h2>
+</div>
+<div class="flex flex-col gap-8">
+<div>
+<span class="font-neue text-label-caps text-[#fffdf9]/70 block mb-2">PARTNER AGENCY</span>
+<p class="font-neue text-[24px] text-[#fffdf9]">ISRO Space Applications Centre</p>
+</div>
+<div>
+<span class="font-neue text-label-caps text-[#fffdf9]/70 block mb-2">DEVELOPMENT TEAM</span>
+<p class="font-neue text-[24px] text-[#fffdf9]">PulsarNav Engineering Group</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#101010] border-t border-[#403f3f] w-full py-12 px-margin-desktop">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="space-y-2">
+<span class="font-neue text-[24px] text-[#fffdf9] block">PulsarNav AI</span>
+<p class="font-neue text-label-caps text-[#fffdf9]/70">© 2024 PULSARNAV AI. AEROSPACE GRADE PRECISION.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Privacy Protocol</a>
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">Terms of Service</a>
+<a class="font-neue text-label-caps text-[#fffdf9]/70 hover:text-[#fffdf9] transition-colors" href="#">System Status</a>
+</div>
+</div>
+</footer>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.querySelector('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('h-16', 'bg-[#101010]/95');
+                    header.classList.remove('h-20', 'bg-[#101010]/80');
+                } else {
+                    header.classList.add('h-20', 'bg-[#101010]/80');
+                    header.classList.remove('h-16', 'bg-[#101010]/95');
+                }
+            });
+
+            // Smooth scroll for anchors
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PulsarNav AI | Navigation Comparison</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#730dc2",
+                        "tertiary": "#edd4ff",
+                        "surface-bright": "#36393f",
+                        "surface-tint": "#47d6ff",
+                        "inverse-on-surface": "#2e3036",
+                        "on-secondary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2c0051",
+                        "inverse-surface": "#e1e2e9",
+                        "primary-container": "#00d2ff",
+                        "outline-variant": "#3c494e",
+                        "on-tertiary": "#490080",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#f0dbff",
+                        "surface": "#111318",
+                        "primary-fixed-dim": "#47d6ff",
+                        "primary-fixed": "#b6ebff",
+                        "on-secondary": "#002e6a",
+                        "surface-container-highest": "#32353a",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003543",
+                        "tertiary-container": "#dab1ff",
+                        "on-primary-container": "#00566a",
+                        "outline": "#859399",
+                        "error-container": "#93000a",
+                        "background": "#111318",
+                        "surface-variant": "#32353a",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-container-low": "#191c21",
+                        "on-error": "#690005",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#004e60",
+                        "on-background": "#e1e2e9",
+                        "on-surface": "#e1e2e9",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-primary": "#00677f",
+                        "primary": "#a5e7ff",
+                        "tertiary-fixed-dim": "#ddb7ff",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-high": "#272a2f",
+                        "surface-container-lowest": "#0b0e13",
+                        "secondary-container": "#0566d9",
+                        "surface-container": "#1d2025",
+                        "on-tertiary-fixed-variant": "#6900b3",
+                        "surface-dim": "#111318",
+                        "on-surface-variant": "#bbc9cf",
+                        "secondary-fixed": "#d8e2ff",
+                        "graphite-veil": "#495764",
+                        "ash-border": "#403f3f",
+                        "metadata": "#6f879c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "panel-gap": "24px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "section-gap": "108px"
+                    },
+                    "fontFamily": {
+                        "sans": ["Neue Montreal", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "stat-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                        "body-bold": ["15px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-base": ["15px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-md-mobile": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "display-lg": ["44px", {"lineHeight": "52px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.12em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "giant-header": ["136px", {"lineHeight": "0.9", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                        "table-header": ["17px", {"lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        @font-face {
+            font-family: 'Neue Montreal';
+            src: local('Helvetica Neue'), local('Arial');
+            font-weight: 400;
+        }
+        body {
+            background-color: #101010;
+            color: #fffdf9;
+            font-family: 'Neue Montreal', sans-serif;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101010;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #403f3f;
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body class="selection:bg-white/20 selection:text-white">
+<!-- Navigation Shell (TopNavBar) -->
+<header class="fixed top-0 w-full bg-[#101010] border-b border-ash-border z-40 transition-all duration-300 ease-in-out">
+<div class="flex justify-between items-center px-margin-desktop h-20 w-full max-w-[1600px] mx-auto">
+<div class="text-[24px] tracking-tight text-white">PulsarNav AI</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[15px] text-white/60 hover:text-white transition-colors py-2" href="#">Home</a>
+<a class="text-[15px] text-white/60 hover:text-white transition-colors py-2" href="#">Geometry</a>
+<a class="text-[15px] text-white/60 hover:text-white transition-colors py-2" href="#">Dashboard</a>
+<a class="text-[15px] text-white border-b border-white pb-1 py-2" href="#">Comparison</a>
+<a class="text-[15px] text-white/60 hover:text-white transition-colors py-2" href="#">Documentation</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-white/60 hover:text-white cursor-pointer">settings</span>
+<span class="material-symbols-outlined text-white/60 hover:text-white cursor-pointer">account_circle</span>
+<button class="border border-ash-border text-white px-6 py-2 hover:border-white transition-colors text-[15px]">Mission Control</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only Anchor) -->
+<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 bg-[#101010] border-r border-ash-border flex-col py-8 z-30 pt-28">
+<div class="px-6 mb-12">
+<p class="text-[11px] uppercase tracking-widest text-metadata mt-1">Terminal v4.0.2</p>
+</div>
+<nav class="flex-1 space-y-2">
+<div class="text-white/60 pl-6 hover:text-white flex items-center gap-4 py-3 text-[13px] uppercase tracking-wider cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span> Home
+            </div>
+<div class="text-white/60 pl-6 hover:text-white flex items-center gap-4 py-3 text-[13px] uppercase tracking-wider cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">polyline</span> Geometry
+            </div>
+<div class="text-white/60 pl-6 hover:text-white flex items-center gap-4 py-3 text-[13px] uppercase tracking-wider cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">monitoring</span> Dashboard
+            </div>
+<div class="text-white border-l border-white pl-[23px] flex items-center gap-4 py-3 text-[13px] uppercase tracking-wider cursor-pointer">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">compare_arrows</span> Comparison
+            </div>
+<div class="text-white/60 pl-6 hover:text-white flex items-center gap-4 py-3 text-[13px] uppercase tracking-wider cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">description</span> Docs
+            </div>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full border border-ash-border text-white py-3 flex items-center justify-center gap-2 text-[11px] uppercase tracking-widest hover:border-white transition-colors">
+<span class="material-symbols-outlined text-[16px]">sync</span> Sync Telemetry
+            </button>
+</div>
+</aside>
+<main class="lg:ml-64 pt-40 pb-24 px-margin-mobile md:px-margin-desktop max-w-[1600px] mx-auto">
+<!-- Giant Display Header -->
+<section class="mb-section-gap">
+<h1 class="text-giant-header tracking-tight text-[#fffdf9]">
+                NAVIGATION<br/>COMPARISON
+            </h1>
+<div class="h-px w-32 bg-[#fffdf9] mt-12"></div>
+</section>
+<!-- Comparative Metrics Table -->
+<section class="mb-section-gap">
+<div class="flex items-center gap-4 mb-12">
+<h2 class="text-table-header uppercase text-metadata">Comparative Metrics Table</h2>
+</div>
+<div class="border border-ash-border bg-graphite-veil/10">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-table-header uppercase text-metadata border-b border-ash-border">
+<th class="p-8 font-normal w-1/4">Metric Row</th>
+<th class="p-8 font-normal w-1/4 text-[#fffdf9]">XNAV (Pulsar)</th>
+<th class="p-8 font-normal w-1/4">DSN (Radio)</th>
+<th class="p-8 font-normal w-1/4">HYBRID (Combined)</th>
+</tr>
+</thead>
+<tbody class="text-[15px]">
+<tr class="border-b border-ash-border hover:bg-white/5 transition-colors">
+<td class="p-8 text-[#fffdf9]">Accuracy (m)</td>
+<td class="p-8 text-[#fffdf9] text-[24px]">±50m - 1km</td>
+<td class="p-8 text-[#fffdf9]/60">±1m - 10m</td>
+<td class="p-8 text-[#fffdf9]">±1m - 50m</td>
+</tr>
+<tr class="border-b border-ash-border hover:bg-white/5 transition-colors">
+<td class="p-8 text-[#fffdf9]">Ground Dependency</td>
+<td class="p-8"><span class="text-[#fffdf9] border border-ash-border px-3 py-1 text-[11px] uppercase tracking-widest">ZERO</span></td>
+<td class="p-8 text-[#fffdf9]/60">Critical / Continuous</td>
+<td class="p-8 text-[#fffdf9]/60">Minimal (Calibration Only)</td>
+</tr>
+<tr class="border-b border-ash-border hover:bg-white/5 transition-colors">
+<td class="p-8 text-[#fffdf9]">Operational Cost</td>
+<td class="p-8 text-[24px] text-[#fffdf9]">Low</td>
+<td class="p-8 text-[#fffdf9]/60 text-[24px]">Extreme</td>
+<td class="p-8 text-[#fffdf9]/60 text-[24px]">Nominal</td>
+</tr>
+<tr class="border-b border-ash-border hover:bg-white/5 transition-colors">
+<td class="p-8 text-[#fffdf9]">Autonomy Level</td>
+<td class="p-8 flex items-center gap-3 text-[#fffdf9]">
+<span class="material-symbols-outlined text-[#fffdf9]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                Full-Spectrum
+                            </td>
+<td class="p-8 text-[#fffdf9]/60">Centralized Control</td>
+<td class="p-8 text-[#fffdf9]">Augmented Autonomy</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="p-8 text-[#fffdf9]">Signal Availability</td>
+<td class="p-8 text-[#fffdf9]">100% Omnidirectional</td>
+<td class="p-8 text-[#fffdf9]/60">Line of Sight (Earth)</td>
+<td class="p-8 text-[#fffdf9]">Universal Redundancy</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Error Propagation Graph -->
+<section class="mb-section-gap">
+<div class="flex items-center gap-4 mb-12">
+<h2 class="text-table-header uppercase text-metadata">Error Propagation Analysis</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-0 border border-ash-border">
+<div class="lg:col-span-3 h-[500px] p-12 border-r border-ash-border relative">
+<!-- Chart Simulation -->
+<div class="relative w-full h-full flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<div class="text-table-header uppercase text-metadata mb-2">Position Error (km)</div>
+<div class="text-[44px] tracking-tight text-[#fffdf9]">ΔE Tracking</div>
+</div>
+<div class="flex gap-8 text-[13px] uppercase tracking-widest text-metadata">
+<div class="flex items-center gap-3"><div class="w-4 h-px bg-[#fffdf9]"></div> XNAV</div>
+<div class="flex items-center gap-3"><div class="w-4 h-px bg-[#fffdf9]/40 border-dashed border-t border-[#fffdf9]/40"></div> DSN</div>
+</div>
+</div>
+<div class="relative flex-1 mt-12 border-l border-b border-ash-border">
+<!-- XNAV Line (Stable) -->
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveaspectratio="none">
+<path class="opacity-100" d="M 0 250 Q 150 240 300 255 T 600 248 T 900 252" fill="none" stroke="#fffdf9" stroke-width="1"></path>
+<!-- DSN Line (Growing Error) -->
+<path d="M 0 250 L 100 200 L 110 250 L 250 180 L 260 250 L 450 120 L 460 250 L 700 40 L 710 250" fill="none" stroke="rgba(255,253,249,0.4)" stroke-dasharray="4 4" stroke-width="1"></path>
+<!-- Beacons at XNAV nodes -->
+<circle cx="300" cy="255" fill="#fffdf9" r="2"></circle>
+<circle cx="600" cy="248" fill="#fffdf9" r="2"></circle>
+</svg>
+</div>
+<div class="flex justify-between text-[11px] uppercase tracking-widest text-metadata mt-6">
+<span>T-0 Launch</span>
+<span>T+24h</span>
+<span>T+48h</span>
+<span>T+72h</span>
+<span>T+96h Deep Space</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex flex-col">
+<div class="p-12 border-b border-ash-border flex flex-col justify-center h-1/2">
+<span class="text-table-header uppercase text-metadata mb-6">Stability Delta</span>
+<div class="text-[64px] tracking-tight text-[#fffdf9] mb-4">+88.4%</div>
+<p class="text-[15px] text-[#fffdf9]/60 leading-relaxed">XNAV provides bounded error rates regardless of distance from Earth origins.</p>
+</div>
+<div class="p-12 flex flex-col justify-center h-1/2">
+<span class="text-table-header uppercase text-metadata mb-6">Contact Loss Margin</span>
+<div class="text-[64px] tracking-tight text-[#fffdf9] mb-4 leading-none">Zero-Risk</div>
+<p class="text-[15px] text-[#fffdf9]/60 leading-relaxed mt-4">System remains operational during solar flares or ground station downtime.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Breakdown -->
+<section class="mb-section-gap">
+<div class="flex items-center gap-4 mb-12">
+<h2 class="text-table-header uppercase text-metadata">Core Systems Feature Breakdown</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-0 border border-ash-border">
+<!-- Card 1: Pulsar -->
+<div class="p-12 flex flex-col h-full border-r border-ash-border relative">
+<div class="mb-12">
+<div class="mb-8">
+<span class="material-symbols-outlined text-[32px] text-[#fffdf9]">rocket_launch</span>
+</div>
+<h3 class="text-[32px] tracking-tight text-[#fffdf9] mb-6">Pulsar Navigation</h3>
+<p class="text-[#fffdf9]/60 text-[15px] leading-relaxed">
+                            High autonomy system leveraging millisecond pulsars as cosmic beacons. Fully independent of terrestrial infrastructure.
+                        </p>
+</div>
+<ul class="space-y-6 mt-auto text-[11px] uppercase tracking-widest text-[#fffdf9]/80">
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> 100% AUTO-PILOT READY</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> SCALE-INVARIANT PRECISION</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> GALACTIC FRAME REFERENCE</li>
+</ul>
+</div>
+<!-- Card 2: DSN -->
+<div class="p-12 flex flex-col h-full border-r border-ash-border relative">
+<div class="mb-12">
+<div class="mb-8">
+<span class="material-symbols-outlined text-[32px] text-[#fffdf9]/60">cell_tower</span>
+</div>
+<h3 class="text-[32px] tracking-tight text-[#fffdf9] mb-6">DSN Navigation</h3>
+<p class="text-[#fffdf9]/60 text-[15px] leading-relaxed">
+                            Radio-based navigation using the Deep Space Network. Unparalleled precision near Earth, but relies on limited ground resources.
+                        </p>
+</div>
+<ul class="space-y-6 mt-auto text-[11px] uppercase tracking-widest text-[#fffdf9]/60">
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]/40"></span> CENTIMETER DOPPLER DATA</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]/40"></span> ESTABLISHED INFRASTRUCTURE</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]/40"></span> HUB-AND-SPOKE RELIANCE</li>
+</ul>
+</div>
+<!-- Card 3: Hybrid -->
+<div class="p-12 flex flex-col h-full relative">
+<div class="mb-12">
+<div class="mb-8">
+<span class="material-symbols-outlined text-[32px] text-[#fffdf9]">merge</span>
+</div>
+<h3 class="text-[32px] tracking-tight text-[#fffdf9] mb-6">Hybrid Navigation</h3>
+<p class="text-[#fffdf9]/60 text-[15px] leading-relaxed">
+                            The future of mission architecture: combining DSN precision with XNAV's deep-space reliability. 
+                        </p>
+</div>
+<ul class="space-y-6 mt-auto text-[11px] uppercase tracking-widest text-[#fffdf9]/80">
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> DYNAMIC RESOURCE SWITCHING</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> ZERO-FAIL REDUNDANCY</li>
+<li class="flex items-center gap-4"><span class="w-1 h-1 bg-[#fffdf9]"></span> MULTI-SYSTEM HARMONY</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="w-full py-16 bg-[#101010] border-t border-ash-border mt-32">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center px-margin-desktop max-w-[1600px] mx-auto">
+<div class="mb-12 md:mb-0">
+<div class="text-[24px] tracking-tight text-white mb-4">PulsarNav AI</div>
+<div class="text-[11px] uppercase tracking-widest text-white/60">
+                    © 2024 PULSARNAV AI. AEROSPACE GRADE PRECISION.
+                </div>
+</div>
+<div class="flex flex-col md:flex-row gap-8 text-[11px] uppercase tracking-widest">
+<a class="text-white/60 hover:text-white transition-colors" href="#">Privacy Protocol</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">Terms of Service</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">Security</a>
+<a class="text-white/60 hover:text-white transition-colors flex items-center gap-3" href="#">
+<span class="w-1.5 h-1.5 bg-white"></span>
+                    System Status
+                </a>
+</div>
+</div>
+</footer>
+<script>
+        // Dynamic Header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.remove('h-20');
+                header.classList.add('h-16');
+            } else {
+                header.classList.remove('h-16');
+                header.classList.add('h-20');
+            }
+        });
+    </script>
+</body></html>

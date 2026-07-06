@@ -1,0 +1,621 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   DESIGN SYSTEM — PULSARNAV AI
+   Single source of truth. Derived from design_analytics.md.
+   Do not add tokens that are not in the design spec.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* -------------------------------------------------------
+     Colors — Achromatic surface stack + periwinkle accent
+     ------------------------------------------------------- */
+  --color-void:                  #000000;  /* Page background */
+  --color-carbon:                #1c1c1c;  /* Elevated cards & hero */
+  --color-graphite:              #4d4d4d;  /* Tertiary borders, dividers */
+  --color-steel:                 #808080;  /* Secondary text, muted labels */
+  --color-ash:                   #ababab;  /* Tertiary text, captions */
+  --color-paper:                 #ffffff;  /* Primary text, logo, active states */
+  --color-periwinkle:            #7089ba;  /* Single chromatic accent — annotations only */
+
+  /* Surfaces */
+  --surface-canvas:              var(--color-void);
+  --surface-elevated:            var(--color-carbon);
+  --surface-accent-wash:         rgba(112, 137, 186, 0.05); /* periwinkle/5 */
+
+  /* -------------------------------------------------------
+     Typography — JetBrains Mono for mono, Inter for sans
+     Raveo unavailable → use Inter at weight 900 for display
+     ------------------------------------------------------- */
+  --font-display:   'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans:      'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:      'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Type Scale — exact from design_analytics.md */
+  --text-caption:       12px;  --leading-caption:    1.2;
+  --text-body-sm:       14px;  --leading-body-sm:    1.6;  --tracking-body-sm:  -0.14px;
+  --text-body:          16px;  --leading-body:       1.6;  --tracking-body:     -0.16px;
+  --text-subheading:    24px;  --leading-subheading: 1.4;  --tracking-subheading: -0.24px;
+  --text-heading:       32px;  --leading-heading:    1.2;  --tracking-heading:  -0.32px;
+  --text-display:       70px;  --leading-display:    1.1;  --tracking-display:  -2.8px;
+
+  /* Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-display: 900; /* Bold display weight — max available */
+
+  /* -------------------------------------------------------
+     Spacing — from design_analytics.md exact scale
+     ------------------------------------------------------- */
+  --spacing-4:   4px;
+  --spacing-5:   5px;
+  --spacing-6:   6px;
+  --spacing-8:   8px;
+  --spacing-9:   9px;
+  --spacing-10:  10px;
+  --spacing-12:  12px;
+  --spacing-16:  16px;
+  --spacing-18:  18px;
+  --spacing-20:  20px;
+  --spacing-24:  24px;
+  --spacing-28:  28px;
+  --spacing-34:  34px;
+  --spacing-44:  44px;
+  --spacing-50:  50px;
+  --spacing-100: 100px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap:    80px;
+  --card-padding:   24px;
+  --element-gap:    10px;
+
+  /* -------------------------------------------------------
+     Border Radius — from design_analytics.md
+     ------------------------------------------------------- */
+  --radius-nav:           6px;
+  --radius-tags:          100px;
+  --radius-buttons:       100px;
+  --radius-feature-tiles: 20px;
+  --radius-icon-containers: 50px;
+
+  /* -------------------------------------------------------
+     Borders — Dashed border system (blueprint aesthetic)
+     3 rules per design_analytics.md:
+     1. On Carbon surfaces: 1px dashed #000000
+     2. On light surfaces:  1px dashed #1c1c1c
+     3. Never solid for section containment
+     ------------------------------------------------------- */
+  --border-ink:      1px dashed #000000;  /* On carbon surfaces */
+  --border-surface:  1px dashed #1c1c1c; /* On light/elevated surfaces */
+  --border-graphite: 1px dashed #4d4d4d;
+  --border-paper:    1px dashed #ffffff;  /* Button borders */
+}
+
+/* =========================================================
+   BASE LAYER
+   ========================================================= */
+@layer base {
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Typography base */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    color: var(--color-paper);
+    font-weight: var(--font-weight-display);
+  }
+
+  code, pre, .font-mono, [class*="mono"] {
+    font-family: var(--font-mono);
+  }
+
+  /* Scrollbar — blueprint style */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--color-void); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-graphite);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-steel); }
+
+  /* Input resets */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--color-graphite);
+    border: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background: var(--color-periwinkle);
+    border: none;
+    margin-top: -4.5px;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 1px;
+    background: var(--color-graphite);
+    border: none;
+  }
+  input[type="range"]::-moz-range-thumb {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background: var(--color-periwinkle);
+    border: none;
+  }
+
+  select {
+    background-color: var(--color-void);
+    color: var(--color-paper);
+    border: 1px dashed var(--color-graphite);
+    border-radius: 0;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+  select:focus { border-color: var(--color-steel); }
+}
+
+/* =========================================================
+   COMPONENT LAYER
+   ========================================================= */
+@layer components {
+
+  /* ----- Dashed Section Container (PRIMARY layout primitive) ----- */
+  /* On Carbon surfaces (--color-carbon bg): use border-ink (#000) */
+  /* On void canvas: use border-graphite */
+  .section-container {
+    border: var(--border-graphite);
+    padding: var(--section-gap) var(--card-padding);
+  }
+
+  /* ----- Type utility classes (design-scale only) ----- */
+  .text-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    font-weight: var(--font-weight-display);
+    font-family: var(--font-display);
+  }
+
+  .text-heading {
+    font-size: var(--text-heading);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    font-weight: var(--font-weight-display);
+  }
+
+  .text-subheading {
+    font-size: var(--text-subheading);
+    line-height: var(--leading-subheading);
+    letter-spacing: var(--tracking-subheading);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-body-lg {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-body);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body-sm);
+    letter-spacing: var(--tracking-body-sm);
+  }
+
+  .text-caption-mono {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-steel);
+  }
+
+  /* ----- Eyebrow chip — 9px geist mono, dashed border, 100px radius ----- */
+  .eyebrow-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border: var(--border-paper);
+    border-radius: var(--radius-tags);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-paper);
+  }
+
+  /* ----- Outlined Pill Button — ONLY bordered action element ----- */
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: 1px solid var(--color-paper);
+    border-radius: var(--radius-buttons);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-paper);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .btn-pill:hover {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+  .btn-pill:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Ghost link — no border, just color */
+  .btn-ghost {
+    background: transparent;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-steel);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: color 0.2s ease;
+  }
+  .btn-ghost:hover { color: var(--color-paper); }
+  .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ----- Panel card — Carbon surface, dashed border, no radius (blueprint) ----- */
+  .panel {
+    background: var(--color-carbon);
+    border: var(--border-graphite);
+    padding: var(--card-padding);
+  }
+
+  /* ----- Panel heading — section label inside a panel ----- */
+  .panel-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-steel);
+    margin-bottom: 16px;
+  }
+
+  .panel-label-accent {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-periwinkle);
+    margin-bottom: 16px;
+  }
+
+  /* ----- Periwinkle check item ----- */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+    color: var(--color-paper);
+    line-height: var(--leading-body-sm);
+  }
+  .check-item__icon {
+    color: var(--color-periwinkle);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ----- Data row (key:value in panels) ----- */
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-steel);
+  }
+  .data-row__value {
+    color: var(--color-paper);
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* ----- Telemetry readout (instrumentation style) ----- */
+  .telemetry-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-heading);
+    font-weight: var(--font-weight-display);
+    color: var(--color-paper);
+    letter-spacing: var(--tracking-heading);
+    line-height: 1;
+  }
+  .telemetry-unit {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-steel);
+    font-weight: var(--font-weight-regular);
+  }
+
+  /* ----- Status badge (periwinkle annotation only) ----- */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px dashed var(--color-periwinkle);
+    border-radius: var(--radius-tags);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-periwinkle);
+    background: var(--surface-accent-wash);
+  }
+
+  /* Status for dead/error — steel only, never red */
+  .status-badge--inactive {
+    border-color: var(--color-graphite);
+    color: var(--color-steel);
+    background: transparent;
+  }
+
+  /* ----- Divider ----- */
+  .divider {
+    height: 1px;
+    border: none;
+    border-top: var(--border-graphite);
+    margin: var(--spacing-16) 0;
+  }
+
+  /* ----- Pulsar toggle button ----- */
+  .pulsar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px dashed var(--color-graphite);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-steel);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    border-radius: 0;
+  }
+  .pulsar-toggle:hover {
+    color: var(--color-paper);
+    border-color: var(--color-steel);
+  }
+  .pulsar-toggle.active {
+    border-color: var(--color-periwinkle);
+    color: var(--color-paper);
+    background: var(--surface-accent-wash);
+  }
+
+  /* ----- Select input (mission type, algorithm) ----- */
+  .input-select {
+    width: 100%;
+    background: var(--color-void);
+    border: 1px dashed var(--color-graphite);
+    border-radius: 0;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-paper);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .input-select:focus { border-color: var(--color-steel); }
+  .input-select option { background: var(--color-carbon); }
+
+  /* ----- Math block (formulae display) ----- */
+  .math-block {
+    background: var(--color-void);
+    border: 1px dashed var(--color-graphite);
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-paper);
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  /* ----- Navigation active link ----- */
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-steel);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover { color: var(--color-paper); }
+  .nav-link.active { color: var(--color-paper); }
+
+  /* ----- Blueprint grid background (very subtle) ----- */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(to right, rgba(112, 137, 186, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(112, 137, 186, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ----- Radial hero lamp background ----- */
+  .hero-lamp {
+    background: radial-gradient(ellipse at center, var(--color-carbon) 0%, var(--color-void) 100%);
+  }
+
+  /* ----- Scanline overlay (subtle, 1 layer only) ----- */
+  .scanline {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(255, 255, 255, 0.003) 3px,
+      rgba(255, 255, 255, 0.003) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ----- Doc nav sidebar active ----- */
+  .doc-nav-item {
+    display: block;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-steel);
+    background: transparent;
+    border: 1px dashed transparent;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    border-radius: 0;
+  }
+  .doc-nav-item:hover { color: var(--color-paper); }
+  .doc-nav-item.active {
+    color: var(--color-paper);
+    border-color: var(--color-periwinkle);
+    background: var(--surface-accent-wash);
+  }
+
+  /* ----- Page header (shared across all pages) ----- */
+  .page-header {
+    border-bottom: 1px dashed var(--color-graphite);
+    padding-bottom: 24px;
+    margin-bottom: var(--section-gap);
+  }
+
+  /* ----- Speed button (playback) ----- */
+  .speed-btn {
+    padding: 4px 10px;
+    border: 1px dashed var(--color-graphite);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-steel);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .speed-btn:hover { color: var(--color-paper); border-color: var(--color-steel); }
+  .speed-btn.active {
+    border-color: var(--color-periwinkle);
+    color: var(--color-paper);
+    background: var(--surface-accent-wash);
+  }
+
+  /* ----- Control button (circle) ----- */
+  .ctrl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px dashed var(--color-graphite);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-paper);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .ctrl-btn:hover { border-color: var(--color-steel); background: var(--color-carbon); }
+}
+
+/* =========================================================
+   UTILITIES LAYER
+   ========================================================= */
+@layer utilities {
+  /* Border shorthand utilities */
+  .border-dashed-graphite { border: 1px dashed var(--color-graphite); }
+  .border-dashed-paper    { border: 1px dashed var(--color-paper); }
+  .border-dashed-carbon   { border: 1px dashed var(--color-carbon); }
+  .border-dashed-periwinkle { border: 1px dashed var(--color-periwinkle); }
+
+  .border-t-dashed-graphite { border-top: 1px dashed var(--color-graphite); }
+  .border-b-dashed-graphite { border-bottom: 1px dashed var(--color-graphite); }
+
+  /* Text color utilities */
+  .text-void       { color: var(--color-void); }
+  .text-carbon     { color: var(--color-carbon); }
+  .text-graphite   { color: var(--color-graphite); }
+  .text-steel      { color: var(--color-steel); }
+  .text-ash        { color: var(--color-ash); }
+  .text-paper      { color: var(--color-paper); }
+  .text-periwinkle { color: var(--color-periwinkle); }
+
+  /* Background utilities */
+  .bg-void       { background-color: var(--color-void); }
+  .bg-carbon     { background-color: var(--color-carbon); }
+  .bg-periwinkle-wash { background-color: var(--surface-accent-wash); }
+
+  /* Mono utilities */
+  .font-mono-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
